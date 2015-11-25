@@ -66,7 +66,7 @@ public class Graph extends JComponent {
 					if (Double.isFinite(currentValue) && Double.isFinite(previousValue)) {
 						gg.drawLine((int) x, (int) previousValue,(int) x, (int) currentValue);
 					} else if (Double.isFinite(currentValue) ^ Double.isFinite(previousValue)) {
-						double currentGuess = 0;
+						double currentGuess = 0, lastFiniteGuess = 0;
 						boolean finiteOnRight = Double.isFinite(currentValue);
 						double min = (x / width) * (xMax - xMin) + xMin;       // TODO: Check if these two values work when xMin > xMax and make them if not
 						double max = ((x + 1) / width) * (xMax - xMin) + xMin;
@@ -77,6 +77,7 @@ public class Graph extends JComponent {
 							System.out.println(currentGuessX);
 							
 							if (Double.isFinite(currentGuess)) {
+								lastFiniteGuess = currentGuess;
 								if (finiteOnRight)
 									max = currentGuessX;
 								else
@@ -90,7 +91,7 @@ public class Graph extends JComponent {
 						}
 						
 						
-						gg.drawLine((int) x, (int) (finiteOnRight ? currentGuess : previousValue), (int) x, (int) (finiteOnRight ? currentValue : currentGuess));
+						gg.drawLine((int) x, (int) (finiteOnRight ? lastFiniteGuess : previousValue), (int) x, (int) (finiteOnRight ? currentValue : lastFiniteGuess));
 					}
 					previousValue = currentValue;
 				}
