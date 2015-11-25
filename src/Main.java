@@ -76,7 +76,7 @@ public class Main {
 	public static void main(String[] a) {	
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setMinimumSize(new Dimension(300, 450));
-		window.setSize(650, 500);
+		window.setSize(677, 500);
 		window.setTitle("Advanced Graphing Calculator");
 		
 		xMin.setValue(-5); xMin.setColumns(4);
