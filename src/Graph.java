@@ -56,15 +56,42 @@ public class Graph extends JComponent {
 			if (functions.get(i).string != null && !functions.get(i).string.isEmpty()) {
 				gg.setColor(functions.get(i).color);
 				gg.setStroke(new BasicStroke(functions.get(i).thickness));
-				double previousValue = height - ((functions.get(i).evaluate((0 / width) * (xMax - xMin) + xMin) - yMin) / (yMax - yMin) * height);
+				double previousValue = height - ((functions.get(i).evaluate(xMin) - yMin) / (yMax - yMin) * height);
 				for (double x = 0; x < width; x++) {
 					// height - ((n - yMin) / (yMax - yMin) * height) (absolute to relative)
 					// (n / width) * (xMax - xMin) + xMin             (relative to absolute)
 					
 					double currentValue = height - ((functions.get(i).evaluate(((x + 1) / width) * (xMax - xMin) + xMin) - yMin) / (yMax - yMin) * height);
-					// TODO: Make it so that it checks if one value if finite and the other isn't, and if that happens perform a binary search to get a infinite/NaN value replacement
-					if (Double.isFinite(currentValue) && Double.isFinite(previousValue))
+					// TODO: Make it so that it only graphs functions when absolutely needed, and improve binary search
+					if (Double.isFinite(currentValue) && Double.isFinite(previousValue)) {
 						gg.drawLine((int) x, (int) previousValue,(int) x, (int) currentValue);
+					} else if (Double.isFinite(currentValue) ^ Double.isFinite(previousValue)) {
+						double currentGuess = 0;
+						boolean finiteOnRight = Double.isFinite(currentValue);
+						double min = (x / width) * (xMax - xMin) + xMin;       // TODO: Check if these two values work when xMin > xMax and make them if not
+						double max = ((x + 1) / width) * (xMax - xMin) + xMin;
+						
+						for (int ii = 0; ii < 10; ii++) {
+							double currentGuessX = (max - min) / 2 + min;
+							currentGuess = height - ((functions.get(i).evaluate(currentGuessX) - yMin) / (yMax - yMin) * height);
+							System.out.println(currentGuessX);
+							
+							if (Double.isFinite(currentGuess)) {
+								if (finiteOnRight)
+									max = currentGuessX;
+								else
+									min = currentGuessX;
+							} else {
+								if (finiteOnRight)
+									min = currentGuessX;
+								else
+									max = currentGuessX;
+							}
+						}
+						
+						
+						gg.drawLine((int) x, (int) (finiteOnRight ? currentGuess : previousValue), (int) x, (int) (finiteOnRight ? currentValue : currentGuess));
+					}
 					previousValue = currentValue;
 				}
 			}
