@@ -62,6 +62,7 @@ public class Graph extends JComponent {
 					// (n / width) * (xMax - xMin) + xMin             (relative to absolute)
 					
 					double currentValue = height - ((functions.get(i).evaluate(((x + 1) / width) * (xMax - xMin) + xMin) - yMin) / (yMax - yMin) * height);
+					// TODO: Make it so that it checks if one value if finite and the other isn't, and if that happens perform a binary search to get a infinite/NaN value replacement
 					if (Double.isFinite(currentValue) && Double.isFinite(previousValue))
 						gg.drawLine((int) x, (int) previousValue,(int) x, (int) currentValue);
 					previousValue = currentValue;

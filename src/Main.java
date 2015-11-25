@@ -21,7 +21,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -33,7 +32,6 @@ public class Main {
 	
 	private static NumberFormat numbers = NumberFormat.getNumberInstance();
 	
-	private static boolean isBeingProgramChanged = false;
 	private static JPanel functionPanel = new JPanel(new GridBagLayout());
 	private static JList<Function> functionList;
 	private static JButton functionUp = new JButton("/\\");
@@ -89,21 +87,37 @@ public class Main {
 		functionList = new JList<>(graph.functions);
 		functionList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				if (!isBeingProgramChanged && functionList.getSelectedIndex() != -1) {
-					functionTextField.setText(graph.functions.get(functionList.getSelectedIndex()).string);
-					selectedColor = graph.functions.get(functionList.getSelectedIndex()).color;
-					colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
-					thicknessSlider.setValue(graph.functions.get(functionList.getSelectedIndex()).thickness);
-					
-					if (functionList.getSelectedIndex() == 0)
+				if (!functionList.getValueIsAdjusting()) {
+					if (functionList.getSelectedIndex() != -1) {
+						functionTextField.setText(graph.functions.get(functionList.getSelectedIndex()).string);
+						selectedColor = graph.functions.get(functionList.getSelectedIndex()).color;
+						colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
+						thicknessSlider.setValue(graph.functions.get(functionList.getSelectedIndex()).thickness);
+						
+						if (functionList.getSelectedIndex() == 0)
+							functionUp.setEnabled(false);
+						else
+							functionUp.setEnabled(true);
+						
+						if (functionList.getSelectedIndex() == graph.functions.size() - 1)
+							functionDown.setEnabled(false);
+						else
+							functionDown.setEnabled(true);
+						
+						for(Component component : functionPropertiesPanel.getComponents()) {
+						    component.setEnabled(true);
+						}
+					} else {
+						functionTextField.setText(null);
+						colorChooserButton.setBackground(null);
+						thicknessSlider.setValue(2);
+						
 						functionUp.setEnabled(false);
-					else
-						functionUp.setEnabled(true);
-					if (functionList.getSelectedIndex() == graph.functions.size() - 1)
 						functionDown.setEnabled(false);
-					else
-						functionDown.setEnabled(true);
-					System.out.print("Q");
+						for(Component component : functionPropertiesPanel.getComponents()) {
+						    component.setEnabled(false);
+						}
+					}
 				}
 			}
 		});
@@ -119,14 +133,16 @@ public class Main {
 			public void actionPerformed(ActionEvent e) {
 				int i = functionList.getSelectedIndex();
 				if (i > 0) {
-					isBeingProgramChanged = true;
+					functionList.setValueIsAdjusting(true);
 					graph.functions.add(i - 1, graph.functions.get(i));
 					graph.functions.remove(i + 1);
 					functionList.setListData(graph.functions);
 					functionList.setSelectedIndex(i - 1);
-					isBeingProgramChanged = false;
-					functionDown.setEnabled(true);
-					if (functionList.getSelectedIndex() == 0)
+					functionList.setValueIsAdjusting(false);
+					
+					if (functionList.getSelectedIndex() != 0)
+						functionDown.setEnabled(true);
+					else
 						functionUp.setEnabled(false);
 				}
 			}
@@ -138,14 +154,16 @@ public class Main {
 			public void actionPerformed(ActionEvent e) {
 				int i = functionList.getSelectedIndex();
 				if (i < graph.functions.size() - 1) {
-					isBeingProgramChanged = true;
+					functionList.setValueIsAdjusting(true);
 					graph.functions.add(i + 2, graph.functions.get(i));
 					graph.functions.remove(i);
 					functionList.setListData(graph.functions);
 					functionList.setSelectedIndex(i + 1);
-					isBeingProgramChanged = false;
-					functionUp.setEnabled(true);
-					if (functionList.getSelectedIndex() == graph.functions.size() - 1)
+					functionList.setValueIsAdjusting(false);
+					
+					if (functionList.getSelectedIndex() != graph.functions.size() - 1)
+						functionUp.setEnabled(true);
+					else
 						functionDown.setEnabled(false);
 				}
 			}
@@ -158,14 +176,12 @@ public class Main {
 			public void actionPerformed(ActionEvent e) {
 				String newFunctionName = JOptionPane.showInputDialog(window, "Please input the new function's name:", "New Function", JOptionPane.PLAIN_MESSAGE);
 				if (newFunctionName != null && !newFunctionName.isEmpty()) {
-					isBeingProgramChanged = true;
+					functionList.setValueIsAdjusting(true);
 					graph.functions.add(new Function(newFunctionName));
 					functionList.setListData(graph.functions);
 					functionList.setSelectedIndex(graph.functions.size() - 1);
-					for(Component component : functionPropertiesPanel.getComponents()) {
-					    component.setEnabled(true);
-					}
-					isBeingProgramChanged = false;
+					functionList.setValueIsAdjusting(false);
+					
 					functionList.getListSelectionListeners()[0].valueChanged(null);
 				}
 			}
@@ -175,17 +191,15 @@ public class Main {
 		functionDelete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete this function?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-					isBeingProgramChanged = true;
+					functionList.setValueIsAdjusting(true);
 					int i = functionList.getSelectedIndex();
 					graph.functions.remove(i);
 					functionList.setListData(graph.functions);
 					functionList.setSelectedIndex(graph.functions.size() > 0 ? Math.max(i - 1, 0) : -1);
-					if (functionList.getSelectedIndex() == -1) {
-						for(Component component : functionPropertiesPanel.getComponents()) {
-						    component.setEnabled(false);
-						}
-					}
-					isBeingProgramChanged = false;
+					functionList.setValueIsAdjusting(false);
+					
+					System.out.print(functionList.getSelectedIndex());
+					
 					functionList.getListSelectionListeners()[0].valueChanged(null);
 				}
 			}

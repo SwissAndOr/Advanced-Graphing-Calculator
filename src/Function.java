@@ -5,8 +5,8 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 public class Function {
-	public String name = "";
-	public String string = "";
+	public String name;
+	public String string = null;
 	public Color color = Color.BLUE;
 	public int thickness = 2;
 	
