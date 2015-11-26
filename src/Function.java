@@ -24,7 +24,7 @@ public class Function {
 		} catch (ScriptException e) {
 			// TODO: The error message below is displayed once for every horizontal pixel. Fix it.
 			// JOptionPane.showMessageDialog(Main.window, "Something's wrong with the function", "Error", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
+//			e.printStackTrace();
 			return 0;
 		}
 	}

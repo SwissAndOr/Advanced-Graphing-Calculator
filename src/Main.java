@@ -294,7 +294,7 @@ public class Main {
 
 				Function currentFunc;
 				try {
-					 currentFunc = GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
+					currentFunc = GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
 				} catch (IndexOutOfBoundsException exception) {
 					return;
 				}

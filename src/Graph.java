@@ -56,7 +56,7 @@ public class Graph {
 				g.setStroke(new BasicStroke(func.thickness));
 
 				double previousValue = dim.height - ((func.evaluate(GraphTabbedPane.xMin) - GraphTabbedPane.yMin) / (GraphTabbedPane.yMax - GraphTabbedPane.yMin) * dim.height);
-				for (double x = 0; x < dim.width || cancelling; x++) {
+				for (double x = 0; x < dim.width && !cancelling; x++) {
 					// height - ((n - yMin) / (yMax - yMin) * height) (absolute to relative)
 					// (n / width) * (xMax - xMin) + xMin (relative to absolute)
 
@@ -73,7 +73,7 @@ public class Graph {
 						double min = (x / dim.width) * (GraphTabbedPane.xMax - GraphTabbedPane.xMin) + GraphTabbedPane.xMin;
 						double max = ((x + 1) / dim.width) * (GraphTabbedPane.xMax - GraphTabbedPane.xMin) + GraphTabbedPane.xMin;
 
-						for (int ii = 0; ii < 10 || cancelling; ii++) {
+						for (int ii = 0; ii < 10 && !cancelling; ii++) {
 							double currentGuessX = (max - min) / 2 + min;
 							currentGuess = dim.height - ((func.evaluate(currentGuessX) - GraphTabbedPane.yMin) / (GraphTabbedPane.yMax - GraphTabbedPane.yMin) * dim.height);
 

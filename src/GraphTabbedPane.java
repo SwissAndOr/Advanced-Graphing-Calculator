@@ -11,6 +11,8 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,22 +46,22 @@ public class GraphTabbedPane extends JPanel {
 	private static final TabHandler handle = new TabHandler();
 
 	private static JPanel space = new JPanel();
-	
+
 	public static GraphTabbedPane pane = tabPane();
 
 	private static GraphTabbedPane tabPane() {
 		GraphTabbedPane pane = new GraphTabbedPane();
 
 		pane.setLayout(new BorderLayout());
-				
+
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 0;
 		c.weighty = 1;
-		
+
 		space.setPreferredSize(new Dimension(0, 20));
 		tabButtonPanel.add(space, c);
-		
+
 		c.weightx = 1;
 		buttonScrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(buttonScrollPane.getPreferredSize().width, 5));
 		tabPanel.add(buttonScrollPane, c);
@@ -71,11 +73,11 @@ public class GraphTabbedPane extends JPanel {
 		addButton.addActionListener(new ActionListener() {
 
 			private Pattern p = Pattern.compile("Untitled ([0-9]+)");
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int high = 0;
-				
+
 				for (JPanel panel : tabButtons) {
 					Matcher m = p.matcher(((JButton) panel.getComponent(0)).getText());
 					if (m.find()) {
@@ -85,7 +87,7 @@ public class GraphTabbedPane extends JPanel {
 						} catch (NumberFormatException exception) {}
 					}
 				}
-				
+
 				addGraph(new Graph("Untitled " + (high + 1)));
 			}
 
@@ -97,7 +99,17 @@ public class GraphTabbedPane extends JPanel {
 		pane.add(tabPanel, BorderLayout.PAGE_START);
 
 		pane.add(graphPane);
-		
+
+		pane.addComponentListener(new ComponentAdapter() {
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+				for (Graph g : graphs) {
+					g.invalidate();
+				}
+			}
+		});
+
 		return pane;
 	}
 
@@ -116,17 +128,17 @@ public class GraphTabbedPane extends JPanel {
 	 */
 	public static void addGraph(Graph graph) {
 		graphs.addElement(graph);
-		
+
 		GridBagConstraints c = new GridBagConstraints();
-		
+
 //		for (JPanel panel : tabButtons) {
 //			panel.setBackground(new Color(238, 238, 238));
 //		}
-		
+
 		JPanel panel = new JPanel(new GridBagLayout());
 //		panel.setBackground(new Color(200, 221, 242));
 		panel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY));
-		
+
 		JButton button = new JButton(graph.name);
 		button.setOpaque(false);
 		button.setBackground(new Color(0, 0, 0, 0));
@@ -136,13 +148,13 @@ public class GraphTabbedPane extends JPanel {
 		button.setFocusPainted(false);
 		button.setMargin(new Insets(0, 5, 0, 0));
 		button.addActionListener(handle);
-		
+
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1;
 		c.weighty = 1;
 		c.gridx = 0;
 		panel.add(button, c);
-		
+
 		JButton del = new JButton("\u00D7");
 		del.setBorderPainted(false);
 		del.setFocusPainted(false);
@@ -150,26 +162,26 @@ public class GraphTabbedPane extends JPanel {
 		del.setBackground(new Color(0, 0, 0, 0));
 		del.setMargin(new Insets(0, 0, 0, 2));
 		del.addActionListener(handle);
-		
+
 		c.gridx = 1;
 		c.weightx = 0;
 		panel.add(del, c);
-		
+
 		c.weightx = 0.5;
 		c.gridx = graphs.size();
 		tabButtonPanel.add(panel, c);
 		tabButtons.addElement(panel);
-		
+
 		setSelectedIndex(graphs.size() - 1);
-		
+
 //		System.out.println(tabButtonPanel.getPreferredSize().width);
 //		tabButtonPanel.setPreferredSize(new Dimension(tabButtonPanel.getPreferredSize().width + button.getPreferredSize().width, tabButtonPanel.getPreferredSize().height));
-		
+
 		buttonScrollPane.validate();
 		buttonScrollPane.getHorizontalScrollBar().setValue(buttonScrollPane.getHorizontalScrollBar().getMaximum());
 		buttonScrollPane.repaint();
 	}
-	
+
 	public static void removeAtIndex(int index) {
 		graphs.remove(index);
 		tabButtons.remove(index);
@@ -177,27 +189,27 @@ public class GraphTabbedPane extends JPanel {
 		if (selectedGraph >= tabButtons.size()) selectedGraph--;
 
 		tabButtonPanel.removeAll();
-		
+
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 0;
 		c.weighty = 1;
-		
+
 		tabButtonPanel.add(space, c);
-		
+
 		c.weightx = 0.5;
 		c.gridx = 1;
-		
+
 		for (int i = 0; i < tabButtons.size(); i++) {
 			tabButtonPanel.add(tabButtons.get(i), c);
 			tabButtons.get(i).setBackground(selectedGraph != i ? new Color(238, 238, 238) : new Color(200, 221, 242));
 			c.gridx++;
 		}
-		
+
 		tabButtonPanel.revalidate();
 		tabButtonPanel.repaint();
 	}
-	
+
 	public static void removeGraph(Graph graph) {
 		removeAtIndex(graphs.indexOf(graph));
 	}
@@ -210,16 +222,16 @@ public class GraphTabbedPane extends JPanel {
 		for (int i = 0; i < tabButtons.size(); i++) {
 			tabButtons.get(i).setBackground(index != i ? new Color(238, 238, 238) : new Color(200, 221, 242));
 		}
-		
+
 		selectedGraph = index;
-		
+
 		if (Main.functionList != null) Main.functionList.setListData(graphs.get(selectedGraph).functions);
 	}
 
 	public static Graph getSelectedGraph() {
 		return graphs.get(selectedGraph);
 	}
-	
+
 	public static Dimension getGraphSize() {
 		return graphPane.getSize();
 	}
@@ -229,7 +241,7 @@ public class GraphTabbedPane extends JPanel {
 		@Override
 		protected void paintComponent(Graphics gg) {
 			if (!(gg instanceof Graphics2D)) return;
-			
+
 			Graphics2D g = (Graphics2D) gg;
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -245,7 +257,7 @@ public class GraphTabbedPane extends JPanel {
 					g.drawLine((int) ((x - xMin) / (xMax - xMin) * width), 0, (int) ((x - xMin) / (xMax - xMin) * width), height);
 				}
 			}
-			
+
 			if (gridLineIntervalY > 0) {
 				for (double y = gridLineIntervalY * Math.floor((yMax - yMin > 0 ? yMin : yMax) / gridLineIntervalY); y < height; y += gridLineIntervalY) {
 					g.drawLine(0, (int) (height - (y - yMin) / (yMax - yMin) * height), width, (int) (height - (y - yMin) / (yMax - yMin) * height));
@@ -259,9 +271,9 @@ public class GraphTabbedPane extends JPanel {
 				g.fillRect(0, zeroY - 1, width, 3); // Draw horizontal 0 line
 			if (axisY)
 				g.fillRect(zeroX - 1, 0, 3, height); // Draw vertical 0 line
-			
+
 			Graph currentGraph = graphs.get(selectedGraph);
-			
+
 			if (currentGraph.isImageValid()) {
 				g.drawImage(currentGraph.getImage(), 0, 0, null);
 			} else {
@@ -270,7 +282,7 @@ public class GraphTabbedPane extends JPanel {
 		}
 
 	}
-	
+
 	protected static class TabHandler implements ActionListener {
 
 		@Override
@@ -283,6 +295,6 @@ public class GraphTabbedPane extends JPanel {
 				setSelectedIndex(i);
 			}
 		}
-		
+
 	}
 }
