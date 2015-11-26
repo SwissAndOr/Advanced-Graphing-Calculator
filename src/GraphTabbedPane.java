@@ -25,14 +25,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.RepaintManager;
 
 @SuppressWarnings("serial")
 public class GraphTabbedPane extends JPanel {
-
-	public static double xMin = -5, xMax = 5, yMin = -5, yMax = 5;
-	public static double gridLineIntervalX = 1, gridLineIntervalY = 1;
-	public static boolean axisX = true, axisY = true;
-
 	public static Vector<Graph> graphs = new Vector<>();
 	private static int selectedGraph;
 
@@ -99,7 +95,7 @@ public class GraphTabbedPane extends JPanel {
 					}
 				}
 
-				addGraph(new Graph("Untitled " + (high + 1)));
+				addGraph(new Graph("Untitled " + (high + 1), -5, 5, -5, 5, 1, 1, true, true));
 			}
 
 		});
@@ -192,6 +188,9 @@ public class GraphTabbedPane extends JPanel {
 		buttonScrollPane.validate();
 		buttonScrollPane.getHorizontalScrollBar().setValue(buttonScrollPane.getHorizontalScrollBar().getMaximum());
 		buttonScrollPane.repaint();
+		
+		graphPane.repaint();
+		Main.refreshWindowSettings();
 	}
 
 	public static void removeAtIndex(int index) {
@@ -220,6 +219,9 @@ public class GraphTabbedPane extends JPanel {
 
 		tabButtonPanel.revalidate();
 		tabButtonPanel.repaint();
+		
+		graphPane.repaint();
+		Main.refreshWindowSettings();
 	}
 
 	public static void removeGraph(Graph graph) {
@@ -251,9 +253,11 @@ public class GraphTabbedPane extends JPanel {
 	protected static class GraphPane extends JComponent {
 
 		@Override
-		protected void paintComponent(Graphics gg) {
+		protected void paintComponent(Graphics gg) { // TODO: Possibly further optimize graphing
 			if (!(gg instanceof Graphics2D)) return;
+			System.out.println("Printing ");
 
+			Graph currentGraph = graphs.get(selectedGraph);
 			Graphics2D g = (Graphics2D) gg;
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -264,27 +268,27 @@ public class GraphTabbedPane extends JPanel {
 			int height = this.getHeight();
 
 			g.setColor(Color.LIGHT_GRAY);
-			if (gridLineIntervalX > 0) {
-				for (double x = gridLineIntervalX * Math.floor((xMax - xMin > 0 ? xMin : xMax) / gridLineIntervalX); x < width; x += gridLineIntervalX) {
-					g.drawLine((int) ((x - xMin) / (xMax - xMin) * width), 0, (int) ((x - xMin) / (xMax - xMin) * width), height);
+			if (currentGraph.gridLineIntervalX > 0) {
+				for (double x = currentGraph.gridLineIntervalX * Math.floor((currentGraph.xMax - currentGraph.xMin > 0 ? currentGraph.xMin : currentGraph.xMax) / currentGraph.gridLineIntervalX); x < width; x += currentGraph.gridLineIntervalX) {
+					g.drawLine((int) ((x - currentGraph.xMin) / (currentGraph.xMax - currentGraph.xMin) * width), 0, (int) ((x - currentGraph.xMin) / (currentGraph.xMax - currentGraph.xMin) * width), height);
 				}
 			}
 
-			if (gridLineIntervalY > 0) {
-				for (double y = gridLineIntervalY * Math.floor((yMax - yMin > 0 ? yMin : yMax) / gridLineIntervalY); y < height; y += gridLineIntervalY) {
-					g.drawLine(0, (int) (height - (y - yMin) / (yMax - yMin) * height), width, (int) (height - (y - yMin) / (yMax - yMin) * height));
+			if (currentGraph.gridLineIntervalY > 0) {
+				for (double y = currentGraph.gridLineIntervalY * Math.floor((currentGraph.yMax - currentGraph.yMin > 0 ? currentGraph.yMin : currentGraph.yMax) / currentGraph.gridLineIntervalY); y < height; y += currentGraph.gridLineIntervalY) {
+					g.drawLine(0, (int) (height - (y - currentGraph.yMin) / (currentGraph.yMax - currentGraph.yMin) * height), width, (int) (height - (y - currentGraph.yMin) / (currentGraph.yMax - currentGraph.yMin) * height));
 				}
 			}
 
 			g.setColor(Color.BLACK);
-			int zeroX = (int) ((double) -xMin / (xMax - xMin) * width);
-			int zeroY = (int) (height - ((double) -yMin / (yMax - yMin) * height));
-			if (axisX)
+			int zeroX = (int) ((double) -currentGraph.xMin / (currentGraph.xMax - currentGraph.xMin) * width);
+			int zeroY = (int) (height - ((double) -currentGraph.yMin / (currentGraph.yMax - currentGraph.yMin) * height));
+			if (currentGraph.axisX)
 				g.fillRect(0, zeroY - 1, width, 3); // Draw horizontal 0 line
-			if (axisY)
+			if (currentGraph.axisY)
 				g.fillRect(zeroX - 1, 0, 3, height); // Draw vertical 0 line
 
-			Graph currentGraph = graphs.get(selectedGraph);
+			
 
 			if (currentGraph.isImageValid()) {
 				g.drawImage(currentGraph.getImage(), 0, 0, null);
@@ -303,10 +307,10 @@ public class GraphTabbedPane extends JPanel {
 			if (e.getSource() == rename) {
 				int i = tabButtons.indexOf(tabPopup.getInvoker().getParent());
 				
-				String newFunctionName = JOptionPane.showInputDialog(Main.window, "Please input a new name for \"" + graphs.get(i).name + "\":", "Rename Graph", JOptionPane.PLAIN_MESSAGE);
-				if (newFunctionName != null && !newFunctionName.isEmpty()) {
-					graphs.get(i).name = newFunctionName;
-					((JButton) tabButtons.get(i).getComponent(0)).setText(newFunctionName);
+				String newGraphName = JOptionPane.showInputDialog(Main.window, "Please input a new name for \"" + graphs.get(i).name + "\":", "Rename Graph", JOptionPane.PLAIN_MESSAGE);
+				if (newGraphName != null && !newGraphName.isEmpty()) {
+					graphs.get(i).name = newGraphName;
+					((JButton) tabButtons.get(i).getComponent(0)).setText(newGraphName);
 					tabButtons.get(i).repaint();
 				}
 			} else {
@@ -317,6 +321,8 @@ public class GraphTabbedPane extends JPanel {
 						removeAtIndex(i);
 				} else {
 					setSelectedIndex(i);
+					graphPane.repaint();
+					Main.refreshWindowSettings();
 				}
 			}
 		}

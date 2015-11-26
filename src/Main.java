@@ -29,7 +29,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 public class Main {
-
 	public static JFrame window = new JFrame();
 
 	private static NumberFormat numbers = NumberFormat.getNumberInstance();
@@ -92,12 +91,11 @@ public class Main {
 		yMax.setValue(5);
 		yMax.setColumns(4);
 
-		GraphTabbedPane.addGraph(new Graph("Graph"));
+		GraphTabbedPane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
 		GraphTabbedPane.getSelectedGraph().functions.add(new Function("Function"));
 
 		functionList = new JList<>(GraphTabbedPane.getSelectedGraph().functions);
 		functionList.addListSelectionListener(new ListSelectionListener() {
-
 			public void valueChanged(ListSelectionEvent e) {
 				if (!functionList.getValueIsAdjusting()) {
 					if (functionList.getSelectedIndex() != -1) {
@@ -148,7 +146,6 @@ public class Main {
 		c.weighty = 0.5;
 		c.gridx = 1;
 		functionUp.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
 				int i = functionList.getSelectedIndex();
 				if (i > 0) {
@@ -170,7 +167,6 @@ public class Main {
 		functionDown.setMargin(new Insets(functionDown.getMargin().top, 5, functionDown.getMargin().bottom, 5));
 		c.gridy = 1;
 		functionDown.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
 				int i = functionList.getSelectedIndex();
 				if (i < GraphTabbedPane.getSelectedGraph().functions.size() - 1) {
@@ -193,7 +189,6 @@ public class Main {
 
 		functionNew.setMargin(new Insets(functionNew.getMargin().top, 8, functionNew.getMargin().bottom, 8));
 		functionNew.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
 				String newFunctionName = JOptionPane.showInputDialog(window, "Please input the new function's name:", "New Function", JOptionPane.PLAIN_MESSAGE);
 				if (newFunctionName != null && !newFunctionName.isEmpty()) {
@@ -210,7 +205,6 @@ public class Main {
 		sidebar.add(functionNew);
 		functionDelete.setMargin(new Insets(functionDelete.getMargin().top, 8, functionDelete.getMargin().bottom, 8));
 		functionDelete.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
 				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete this function?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					functionList.setValueIsAdjusting(true);
@@ -227,7 +221,6 @@ public class Main {
 		sidebar.add(functionDelete);
 		functionRename.setMargin(new Insets(functionRename.getMargin().top, 8, functionRename.getMargin().bottom, 8));
 		functionRename.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
 				if (functionList.getSelectedIndex() >= 0) {
 					String newFunctionName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + functionList.getSelectedValue().name + "\":", "Rename Function", JOptionPane.PLAIN_MESSAGE);
@@ -246,7 +239,6 @@ public class Main {
 		functionPropertiesPanel.add(colorChooserLabel);
 		colorChooserButton.setPreferredSize(new Dimension(85, 20));
 		colorChooserButton.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent e) {
 				selectedColor = JColorChooser.showDialog(null, "Color Chooser", GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color);
 				if (selectedColor == null)
@@ -292,29 +284,27 @@ public class Main {
 				gridLineIntervalX.setText(Double.toString(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
 				gridLineIntervalY.setText(Double.toString(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
 
-				Function currentFunc;
-				try {
-					currentFunc = GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
-				} catch (IndexOutOfBoundsException exception) {
-					return;
+				if (functionList.getSelectedIndex() >= 0) {
+					Function currentFunc = GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
+					currentFunc.string = functionTextField.getText();
+					currentFunc.color = selectedColor;
+					currentFunc.thickness = thicknessSlider.getValue();
+					
+					if (!currentFunc.string.equals(functionTextField.getText()) || !currentFunc.color.equals(selectedColor) || currentFunc.thickness != thicknessSlider.getValue()) {
+						GraphTabbedPane.getSelectedGraph().invalidate();
+					}
 				}
 
-				if (!currentFunc.string.equals(functionTextField.getText()) || !currentFunc.color.equals(selectedColor) || currentFunc.thickness != thicknessSlider.getValue()) {
-					GraphTabbedPane.getSelectedGraph().invalidate();
-				}
+				GraphTabbedPane.getSelectedGraph().xMin = Double.parseDouble(xMin.getText());
+				GraphTabbedPane.getSelectedGraph().xMax = Double.parseDouble(xMax.getText());
+				GraphTabbedPane.getSelectedGraph().yMin = Double.parseDouble(yMin.getText());
+				GraphTabbedPane.getSelectedGraph().yMax = Double.parseDouble(yMax.getText());
+				GraphTabbedPane.getSelectedGraph().gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
+				GraphTabbedPane.getSelectedGraph().gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
+				GraphTabbedPane.getSelectedGraph().axisX = axisX.isSelected();
+				GraphTabbedPane.getSelectedGraph().axisY = axisY.isSelected();
 
-				currentFunc.string = functionTextField.getText();
-				currentFunc.color = selectedColor;
-				currentFunc.thickness = thicknessSlider.getValue();
-				GraphTabbedPane.xMin = Double.parseDouble(xMin.getText());
-				GraphTabbedPane.xMax = Double.parseDouble(xMax.getText());
-				GraphTabbedPane.yMin = Double.parseDouble(yMin.getText());
-				GraphTabbedPane.yMax = Double.parseDouble(yMax.getText());
-				GraphTabbedPane.gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
-				GraphTabbedPane.gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
-				GraphTabbedPane.axisX = axisX.isSelected();
-				GraphTabbedPane.axisY = axisY.isSelected();
-
+				GraphTabbedPane.getSelectedGraph().invalidate();
 				GraphTabbedPane.graphPane.repaint();
 			}
 		});
@@ -329,5 +319,16 @@ public class Main {
 		window.add(progressBar, BorderLayout.PAGE_END);
 
 		window.setVisible(true);
+	}
+	
+	public static void refreshWindowSettings() {
+		xMin.setText(Double.toString(GraphTabbedPane.getSelectedGraph().xMin));
+		xMax.setText(Double.toString(GraphTabbedPane.getSelectedGraph().xMax));
+		yMin.setText(Double.toString(GraphTabbedPane.getSelectedGraph().yMin));
+		yMax.setText(Double.toString(GraphTabbedPane.getSelectedGraph().yMax));
+		gridLineIntervalX.setText(Double.toString(GraphTabbedPane.getSelectedGraph().gridLineIntervalX));
+		gridLineIntervalY.setText(Double.toString(GraphTabbedPane.getSelectedGraph().gridLineIntervalY));
+		axisX.setSelected(GraphTabbedPane.getSelectedGraph().axisX);
+		axisY.setSelected(GraphTabbedPane.getSelectedGraph().axisY);
 	}
 }

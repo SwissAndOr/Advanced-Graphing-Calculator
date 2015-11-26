@@ -10,10 +10,13 @@ import java.util.Vector;
 import javax.swing.SwingWorker;
 
 public class Graph {
-
 	public String name = null;
 	public Vector<Function> functions = new Vector<>();
 
+	public double xMin = -5, xMax = 5, yMin = -5, yMax = 5;
+	public double gridLineIntervalX = 1, gridLineIntervalY = 1;
+	public boolean axisX = true, axisY = true;
+	
 	private boolean imageValid = false;
 	private BufferedImage image;
 
@@ -55,12 +58,12 @@ public class Graph {
 				g.setColor(func.color);
 				g.setStroke(new BasicStroke(func.thickness));
 
-				double previousValue = dim.height - ((func.evaluate(GraphTabbedPane.xMin) - GraphTabbedPane.yMin) / (GraphTabbedPane.yMax - GraphTabbedPane.yMin) * dim.height);
+				double previousValue = dim.height - ((func.evaluate(xMin) - yMin) / (yMax - yMin) * dim.height);
 				for (double x = 0; x < dim.width && !cancelling; x++) {
 					// height - ((n - yMin) / (yMax - yMin) * height) (absolute to relative)
 					// (n / width) * (xMax - xMin) + xMin (relative to absolute)
 
-					double currentValue = dim.height - ((func.evaluate(((x + 1) / dim.width) * (GraphTabbedPane.xMax - GraphTabbedPane.xMin) + GraphTabbedPane.xMin) - GraphTabbedPane.yMin) / (GraphTabbedPane.yMax - GraphTabbedPane.yMin) * dim.height);
+					double currentValue = dim.height - ((func.evaluate(((x + 1) / dim.width) * (xMax - xMin) + xMin) - yMin) / (yMax - yMin) * dim.height);
 
 					// TODO: Make it so that it only graphs functions when absolutely needed, and improve binary search
 					if (Double.isFinite(currentValue) && Double.isFinite(previousValue)) {
@@ -70,12 +73,12 @@ public class Graph {
 						boolean finiteOnRight = Double.isFinite(currentValue);
 
 						// TODO: Check if these two values work when xMin > xMax and make them if not
-						double min = (x / dim.width) * (GraphTabbedPane.xMax - GraphTabbedPane.xMin) + GraphTabbedPane.xMin;
-						double max = ((x + 1) / dim.width) * (GraphTabbedPane.xMax - GraphTabbedPane.xMin) + GraphTabbedPane.xMin;
+						double min = (x / dim.width) * (xMax - xMin) + xMin;
+						double max = ((x + 1) / dim.width) * (xMax - xMin) + xMin;
 
 						for (int ii = 0; ii < 10 && !cancelling; ii++) {
 							double currentGuessX = (max - min) / 2 + min;
-							currentGuess = dim.height - ((func.evaluate(currentGuessX) - GraphTabbedPane.yMin) / (GraphTabbedPane.yMax - GraphTabbedPane.yMin) * dim.height);
+							currentGuess = dim.height - ((func.evaluate(currentGuessX) - yMin) / (yMax - yMin) * dim.height);
 
 							if (Double.isFinite(currentGuess)) {
 								lastFiniteGuess = currentGuess;
@@ -115,9 +118,12 @@ public class Graph {
 
 	public Graph() {}
 
-	public Graph(String name) {
-		this.name = name;
-	}
+    public Graph(String newName, double newXMin, double newXMax, double newYMin, double newYMax, double newGridLineIntervalX, double newGridLineIntervalY, boolean newAxisX, boolean newAxisY) {
+    	name = newName;
+    	xMin = newXMin; xMax = newXMax; yMin = newYMin; yMax = newYMax;
+    	gridLineIntervalX = newGridLineIntervalX; gridLineIntervalY = newGridLineIntervalY;
+    	axisX = newAxisX; axisY = newAxisY;
+    }
 
 	public void invalidate() {
 		imageValid = false;
