@@ -22,6 +22,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -69,7 +70,8 @@ public class Main {
 	private static JButton applyButton = new JButton("Apply");
 	
 	private static JPanel sidebar = new JPanel();
-	private static Graph graph = new Graph();
+	
+	private static JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 	
 	public static void main(String[] a) {	
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -82,24 +84,24 @@ public class Main {
 		yMin.setValue(-5); yMin.setColumns(4);
 		yMax.setValue(5); yMax.setColumns(4);
 		
-		GridBagConstraints c = new GridBagConstraints();
-		graph.functions.add(new Function("Function"));
-		functionList = new JList<>(graph.functions);
+		graphTabs.addTab("Graph", new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
+		((Graph) graphTabs.getSelectedComponent()).functions.add(new Function("Function"));
+		functionList = new JList<>(((Graph) graphTabs.getSelectedComponent()).functions);
 		functionList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
 				if (!functionList.getValueIsAdjusting()) {
 					if (functionList.getSelectedIndex() != -1) {
-						functionTextField.setText(graph.functions.get(functionList.getSelectedIndex()).string);
-						selectedColor = graph.functions.get(functionList.getSelectedIndex()).color;
+						functionTextField.setText(((Graph) graphTabs.getSelectedComponent()).functions.get(functionList.getSelectedIndex()).string);
+						selectedColor = ((Graph) graphTabs.getSelectedComponent()).functions.get(functionList.getSelectedIndex()).color;
 						colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
-						thicknessSlider.setValue(graph.functions.get(functionList.getSelectedIndex()).thickness);
+						thicknessSlider.setValue(((Graph) graphTabs.getSelectedComponent()).functions.get(functionList.getSelectedIndex()).thickness);
 						
 						if (functionList.getSelectedIndex() == 0)
 							functionUp.setEnabled(false);
 						else
 							functionUp.setEnabled(true);
 						
-						if (functionList.getSelectedIndex() == graph.functions.size() - 1)
+						if (functionList.getSelectedIndex() == ((Graph) graphTabs.getSelectedComponent()).functions.size() - 1)
 							functionDown.setEnabled(false);
 						else
 							functionDown.setEnabled(true);
@@ -125,6 +127,7 @@ public class Main {
 		functionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		functionList.setVisibleRowCount(4);
 		functionList.setSelectedIndex(0);
+		GridBagConstraints c = new GridBagConstraints();
 		c.gridheight = 2; c.weightx = 1; c.fill = GridBagConstraints.BOTH;
 		functionPanel.add(new JScrollPane(functionList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), c);
 		functionUp.setMargin(new Insets(functionUp.getMargin().top, 5, functionUp.getMargin().bottom, 5));
@@ -134,9 +137,9 @@ public class Main {
 				int i = functionList.getSelectedIndex();
 				if (i > 0) {
 					functionList.setValueIsAdjusting(true);
-					graph.functions.add(i - 1, graph.functions.get(i));
-					graph.functions.remove(i + 1);
-					functionList.setListData(graph.functions);
+					((Graph) graphTabs.getSelectedComponent()).functions.add(i - 1, ((Graph) graphTabs.getSelectedComponent()).functions.get(i));
+					((Graph) graphTabs.getSelectedComponent()).functions.remove(i + 1);
+					functionList.setListData(((Graph) graphTabs.getSelectedComponent()).functions);
 					functionList.setSelectedIndex(i - 1);
 					functionList.setValueIsAdjusting(false);
 					
@@ -153,15 +156,15 @@ public class Main {
 		functionDown.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int i = functionList.getSelectedIndex();
-				if (i < graph.functions.size() - 1) {
+				if (i < ((Graph) graphTabs.getSelectedComponent()).functions.size() - 1) {
 					functionList.setValueIsAdjusting(true);
-					graph.functions.add(i + 2, graph.functions.get(i));
-					graph.functions.remove(i);
-					functionList.setListData(graph.functions);
+					((Graph) graphTabs.getSelectedComponent()).functions.add(i + 2, ((Graph) graphTabs.getSelectedComponent()).functions.get(i));
+					((Graph) graphTabs.getSelectedComponent()).functions.remove(i);
+					functionList.setListData(((Graph) graphTabs.getSelectedComponent()).functions);
 					functionList.setSelectedIndex(i + 1);
 					functionList.setValueIsAdjusting(false);
 					
-					if (functionList.getSelectedIndex() != graph.functions.size() - 1)
+					if (functionList.getSelectedIndex() != ((Graph) graphTabs.getSelectedComponent()).functions.size() - 1)
 						functionUp.setEnabled(true);
 					else
 						functionDown.setEnabled(false);
@@ -177,9 +180,9 @@ public class Main {
 				String newFunctionName = JOptionPane.showInputDialog(window, "Please input the new function's name:", "New Function", JOptionPane.PLAIN_MESSAGE);
 				if (newFunctionName != null && !newFunctionName.isEmpty()) {
 					functionList.setValueIsAdjusting(true);
-					graph.functions.add(new Function(newFunctionName));
-					functionList.setListData(graph.functions);
-					functionList.setSelectedIndex(graph.functions.size() - 1);
+					((Graph) graphTabs.getSelectedComponent()).functions.add(new Function(newFunctionName));
+					functionList.setListData(((Graph) graphTabs.getSelectedComponent()).functions);
+					functionList.setSelectedIndex(((Graph) graphTabs.getSelectedComponent()).functions.size() - 1);
 					functionList.setValueIsAdjusting(false);
 					
 					functionList.getListSelectionListeners()[0].valueChanged(null);
@@ -193,9 +196,9 @@ public class Main {
 				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete this function?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					functionList.setValueIsAdjusting(true);
 					int i = functionList.getSelectedIndex();
-					graph.functions.remove(i);
-					functionList.setListData(graph.functions);
-					functionList.setSelectedIndex(graph.functions.size() > 0 ? Math.max(i - 1, 0) : -1);
+					((Graph) graphTabs.getSelectedComponent()).functions.remove(i);
+					functionList.setListData(((Graph) graphTabs.getSelectedComponent()).functions);
+					functionList.setSelectedIndex(((Graph) graphTabs.getSelectedComponent()).functions.size() > 0 ? Math.max(i - 1, 0) : -1);
 					functionList.setValueIsAdjusting(false);
 					
 					System.out.print(functionList.getSelectedIndex());
@@ -226,9 +229,9 @@ public class Main {
 		colorChooserButton.setPreferredSize(new Dimension(85, 20));
 		colorChooserButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				selectedColor = JColorChooser.showDialog(null, "Color Chooser", graph.functions.get(functionList.getSelectedIndex()).color);
+				selectedColor = JColorChooser.showDialog(null, "Color Chooser", ((Graph) graphTabs.getSelectedComponent()).functions.get(functionList.getSelectedIndex()).color);
 				if (selectedColor == null)
-					selectedColor = graph.functions.get(functionList.getSelectedIndex()).color;
+					selectedColor = ((Graph) graphTabs.getSelectedComponent()).functions.get(functionList.getSelectedIndex()).color;
 				else
 					colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
 			}
@@ -267,19 +270,19 @@ public class Main {
 				gridLineIntervalX.setText(Double.toString(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
 				gridLineIntervalY.setText(Double.toString(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
 				
-				graph.functions.get(functionList.getSelectedIndex()).string = functionTextField.getText();
-				graph.functions.get(functionList.getSelectedIndex()).color = selectedColor;
-				graph.functions.get(functionList.getSelectedIndex()).thickness = thicknessSlider.getValue();
-				graph.xMin = Double.parseDouble(xMin.getText());
-				graph.xMax = Double.parseDouble(xMax.getText());
-				graph.yMin = Double.parseDouble(yMin.getText());
-				graph.yMax = Double.parseDouble(yMax.getText());
-				graph.gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
-				graph.gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
-				graph.axisX = axisX.isSelected();
-				graph.axisY = axisY.isSelected();
-				
-				graph.repaint();
+				((Graph) graphTabs.getSelectedComponent()).functions.get(functionList.getSelectedIndex()).string = functionTextField.getText();
+				((Graph) graphTabs.getSelectedComponent()).functions.get(functionList.getSelectedIndex()).color = selectedColor;
+				((Graph) graphTabs.getSelectedComponent()).functions.get(functionList.getSelectedIndex()).thickness = thicknessSlider.getValue();
+				((Graph) graphTabs.getSelectedComponent()).xMin = Double.parseDouble(xMin.getText());
+				((Graph) graphTabs.getSelectedComponent()).xMax = Double.parseDouble(xMax.getText());
+				((Graph) graphTabs.getSelectedComponent()).yMin = Double.parseDouble(yMin.getText());
+				((Graph) graphTabs.getSelectedComponent()).yMax = Double.parseDouble(yMax.getText());
+				((Graph) graphTabs.getSelectedComponent()).gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
+				((Graph) graphTabs.getSelectedComponent()).gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
+				((Graph) graphTabs.getSelectedComponent()).axisX = axisX.isSelected();
+				((Graph) graphTabs.getSelectedComponent()).axisY = axisY.isSelected();
+
+				graphTabs.getSelectedComponent().repaint();
 			}
 		});
 		sidebar.add(applyButton);
@@ -287,7 +290,7 @@ public class Main {
 		sidebar.setPreferredSize(new Dimension(200, Integer.MAX_VALUE));
 		window.add(sidebar, BorderLayout.LINE_START);
 		
-		window.add(graph);
+		window.add(graphTabs);
 		
 		window.setVisible(true);
 	}
