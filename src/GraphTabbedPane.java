@@ -20,7 +20,10 @@ import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
 @SuppressWarnings("serial")
@@ -39,6 +42,9 @@ public class GraphTabbedPane extends JPanel {
 
 	private static Vector<JPanel> tabButtons = new Vector<>();
 
+	private static JPopupMenu tabPopup = new JPopupMenu();
+	private static JMenuItem rename = new JMenuItem("Rename");
+
 	private static JButton addButton = new JButton("+");
 
 	public static GraphPane graphPane = new GraphPane();
@@ -54,6 +60,9 @@ public class GraphTabbedPane extends JPanel {
 
 		pane.setLayout(new BorderLayout());
 
+		tabPopup.add(rename);
+		rename.addActionListener(handle);
+
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 0;
@@ -63,7 +72,9 @@ public class GraphTabbedPane extends JPanel {
 		tabButtonPanel.add(space, c);
 
 		c.weightx = 1;
+		// This can be set to 0, 0 to remove the scroll bar entirely and let the user scroll with the mouse wheel only 
 		buttonScrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(buttonScrollPane.getPreferredSize().width, 5));
+		buttonScrollPane.getHorizontalScrollBar().setUnitIncrement(10);
 		tabPanel.add(buttonScrollPane, c);
 
 		addButton.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 20));
@@ -148,7 +159,8 @@ public class GraphTabbedPane extends JPanel {
 		button.setFocusPainted(false);
 		button.setMargin(new Insets(0, 5, 0, 0));
 		button.addActionListener(handle);
-
+		button.setComponentPopupMenu(tabPopup);
+		
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1;
 		c.weighty = 1;
@@ -287,12 +299,25 @@ public class GraphTabbedPane extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			int i = tabButtons.indexOf(((Component) e.getSource()).getParent());
 
-			if (e.getActionCommand().equals("\u00D7")) {
-				if (i >= 0) removeAtIndex(i);
+			if (e.getSource() == rename) {
+				int i = tabButtons.indexOf(tabPopup.getInvoker().getParent());
+				
+				String newFunctionName = JOptionPane.showInputDialog(Main.window, "Please input a new name for \"" + graphs.get(i).name + "\":", "Rename Graph", JOptionPane.PLAIN_MESSAGE);
+				if (newFunctionName != null && !newFunctionName.isEmpty()) {
+					graphs.get(i).name = newFunctionName;
+					((JButton) tabButtons.get(i).getComponent(0)).setText(newFunctionName);
+					tabButtons.get(i).repaint();
+				}
 			} else {
-				setSelectedIndex(i);
+				int i = tabButtons.indexOf(((Component) e.getSource()).getParent());
+				
+				if (e.getActionCommand().equals("\u00D7")) {
+					if (i >= 0 && JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do delete this graph?", "Delete graph", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
+						removeAtIndex(i);
+				} else {
+					setSelectedIndex(i);
+				}
 			}
 		}
 

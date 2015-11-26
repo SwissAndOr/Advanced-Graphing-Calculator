@@ -230,7 +230,7 @@ public class Main {
 
 			public void actionPerformed(ActionEvent e) {
 				if (functionList.getSelectedIndex() >= 0) {
-					String newFunctionName = JOptionPane.showInputDialog(window, "Please input the function's new name:", "Rename Function", JOptionPane.PLAIN_MESSAGE);
+					String newFunctionName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + functionList.getSelectedValue().name + "\":", "Rename Function", JOptionPane.PLAIN_MESSAGE);
 					if (newFunctionName != null && !newFunctionName.isEmpty()) {
 						functionList.getSelectedValue().name = newFunctionName;
 						functionList.repaint();
