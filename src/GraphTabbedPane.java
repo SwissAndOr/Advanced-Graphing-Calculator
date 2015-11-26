@@ -25,7 +25,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.RepaintManager;
 
 @SuppressWarnings("serial")
 public class GraphTabbedPane extends JPanel {
@@ -197,7 +196,9 @@ public class GraphTabbedPane extends JPanel {
 		graphs.remove(index);
 		tabButtons.remove(index);
 
-		if (selectedGraph >= tabButtons.size()) selectedGraph--;
+		// I'm not sure if the selectedGraph was changed manually here for a reason or not, so I'm leaving it commented
+//		if (selectedGraph >= tabButtons.size()) selectedGraph--;
+		setSelectedIndex(selectedGraph >= tabButtons.size() ? selectedGraph - 1 : selectedGraph);
 
 		tabButtonPanel.removeAll();
 
@@ -239,7 +240,7 @@ public class GraphTabbedPane extends JPanel {
 
 		selectedGraph = index;
 
-		if (Main.functionList != null) Main.functionList.setListData(graphs.get(selectedGraph).functions);
+		if (Main.functionList != null) Main.functionList.setListData(selectedGraph >= 0 ? graphs.get(selectedGraph).functions : new Vector<Function>());
 	}
 
 	public static Graph getSelectedGraph() {
@@ -254,8 +255,7 @@ public class GraphTabbedPane extends JPanel {
 
 		@Override
 		protected void paintComponent(Graphics gg) { // TODO: Possibly further optimize graphing
-			if (!(gg instanceof Graphics2D)) return;
-			System.out.println("Printing ");
+			if (!(gg instanceof Graphics2D) || graphs.size() <= 0) return;
 
 			Graph currentGraph = graphs.get(selectedGraph);
 			Graphics2D g = (Graphics2D) gg;

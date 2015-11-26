@@ -9,6 +9,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.NumberFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -38,6 +40,7 @@ public class Main {
 	private static JButton functionUp = new JButton("/\\");
 	private static JButton functionDown = new JButton("\\/");
 
+	private static Pattern p = Pattern.compile("Untitled ([0-9]+)");
 	private static JButton functionNew = new JButton("New");
 	private static JButton functionDelete = new JButton("Delete");
 	private static JButton functionRename = new JButton("Rename");
@@ -50,6 +53,7 @@ public class Main {
 	private static JLabel thicknessLabel = new JLabel("Line Thickness");
 	private static JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, 15, 2);
 
+	private static JPanel windowPanel = new JPanel();
 	private static JLabel xMinLabel = new JLabel("X Min");
 	private static JFormattedTextField xMin = new JFormattedTextField(numbers);
 	private static JLabel xMaxLabel = new JLabel("X Max");
@@ -190,16 +194,25 @@ public class Main {
 		functionNew.setMargin(new Insets(functionNew.getMargin().top, 8, functionNew.getMargin().bottom, 8));
 		functionNew.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String newFunctionName = JOptionPane.showInputDialog(window, "Please input the new function's name:", "New Function", JOptionPane.PLAIN_MESSAGE);
-				if (newFunctionName != null && !newFunctionName.isEmpty()) {
-					functionList.setValueIsAdjusting(true);
-					GraphTabbedPane.getSelectedGraph().functions.add(new Function(newFunctionName));
-					functionList.setListData(GraphTabbedPane.getSelectedGraph().functions);
-					functionList.setSelectedIndex(GraphTabbedPane.getSelectedGraph().functions.size() - 1);
-					functionList.setValueIsAdjusting(false);
+				int high = 0;
 
-					functionList.getListSelectionListeners()[0].valueChanged(null);
+				for (Function function : GraphTabbedPane.getSelectedGraph().functions) {
+					Matcher m = p.matcher(function.name);
+					if (m.find()) {
+						try {
+							int i = Integer.parseInt(m.group(1));
+							if (i > high) high = i;
+						} catch (NumberFormatException exception) {}
+					}
 				}
+
+				functionList.setValueIsAdjusting(true);
+				GraphTabbedPane.getSelectedGraph().functions.add(new Function("Untitled " + (high + 1)));
+				functionList.setListData(GraphTabbedPane.getSelectedGraph().functions);
+				functionList.setSelectedIndex(GraphTabbedPane.getSelectedGraph().functions.size() - 1);
+				functionList.setValueIsAdjusting(false);
+
+				functionList.getListSelectionListeners()[0].valueChanged(null);
 			}
 		});
 		sidebar.add(functionNew);
@@ -256,27 +269,30 @@ public class Main {
 		functionPropertiesPanel.add(thicknessSlider);
 		sidebar.add(functionPropertiesPanel);
 
-		sidebar.add(xMinLabel);
-		sidebar.add(xMin);
-		sidebar.add(xMaxLabel);
-		sidebar.add(xMax);
-		sidebar.add(yMinLabel);
-		sidebar.add(yMin);
-		sidebar.add(yMaxLabel);
-		sidebar.add(yMax);
+		windowPanel.setPreferredSize(new Dimension(190, 140));
+		windowPanel.add(xMinLabel);
+		windowPanel.add(xMin);
+		windowPanel.add(xMaxLabel);
+		windowPanel.add(xMax);
+		windowPanel.add(yMinLabel);
+		windowPanel.add(yMin);
+		windowPanel.add(yMaxLabel);
+		windowPanel.add(yMax);
 
 		gridLineIntervalX.setValue(1);
 		gridLineIntervalX.setColumns(6);
 		gridLineIntervalY.setValue(1);
 		gridLineIntervalY.setColumns(6);
 
-		sidebar.add(gridLineIntervalXLabel);
-		sidebar.add(gridLineIntervalX);
-		sidebar.add(gridLineIntervalYLabel);
-		sidebar.add(gridLineIntervalY);
+		windowPanel.add(gridLineIntervalXLabel);
+		windowPanel.add(gridLineIntervalX);
+		windowPanel.add(gridLineIntervalYLabel);
+		windowPanel.add(gridLineIntervalY);
 
-		sidebar.add(axisX);
-		sidebar.add(axisY);
+		windowPanel.add(axisX);
+		windowPanel.add(axisY);
+		
+		sidebar.add(windowPanel);
 
 		applyButton.addActionListener(new ActionListener() {
 
@@ -322,13 +338,40 @@ public class Main {
 	}
 	
 	public static void refreshWindowSettings() {
-		xMin.setText(Double.toString(GraphTabbedPane.getSelectedGraph().xMin));
-		xMax.setText(Double.toString(GraphTabbedPane.getSelectedGraph().xMax));
-		yMin.setText(Double.toString(GraphTabbedPane.getSelectedGraph().yMin));
-		yMax.setText(Double.toString(GraphTabbedPane.getSelectedGraph().yMax));
-		gridLineIntervalX.setText(Double.toString(GraphTabbedPane.getSelectedGraph().gridLineIntervalX));
-		gridLineIntervalY.setText(Double.toString(GraphTabbedPane.getSelectedGraph().gridLineIntervalY));
-		axisX.setSelected(GraphTabbedPane.getSelectedGraph().axisX);
-		axisY.setSelected(GraphTabbedPane.getSelectedGraph().axisY);
+		try {
+			xMin.setText(Double.toString(GraphTabbedPane.getSelectedGraph().xMin));
+			xMax.setText(Double.toString(GraphTabbedPane.getSelectedGraph().xMax));
+			yMin.setText(Double.toString(GraphTabbedPane.getSelectedGraph().yMin));
+			yMax.setText(Double.toString(GraphTabbedPane.getSelectedGraph().yMax));
+			gridLineIntervalX.setText(Double.toString(GraphTabbedPane.getSelectedGraph().gridLineIntervalX));
+			gridLineIntervalY.setText(Double.toString(GraphTabbedPane.getSelectedGraph().gridLineIntervalY));
+			axisX.setSelected(GraphTabbedPane.getSelectedGraph().axisX);
+			axisY.setSelected(GraphTabbedPane.getSelectedGraph().axisY);
+			
+			for (Component component : windowPanel.getComponents()) {
+				component.setEnabled(true);
+			}
+			functionNew.setEnabled(true);
+			functionDelete.setEnabled(true);
+			functionRename.setEnabled(true);
+			applyButton.setEnabled(true);
+		} catch (IndexOutOfBoundsException e) {
+			xMin.setText(null);
+			xMax.setText(null);
+			yMin.setText(null);
+			yMax.setText(null);
+			gridLineIntervalX.setText(null);
+			gridLineIntervalY.setText(null);
+			axisX.setSelected(true);
+			axisY.setSelected(true);
+			
+			for (Component component : windowPanel.getComponents()) {
+				component.setEnabled(false);
+			}
+			functionNew.setEnabled(false);
+			functionDelete.setEnabled(false);
+			functionRename.setEnabled(false);
+			applyButton.setEnabled(false);
+		}
 	}
 }
