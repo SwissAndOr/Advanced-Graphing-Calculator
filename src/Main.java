@@ -485,8 +485,8 @@ public class Main {
 		applyButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				gridLineIntervalX.setText(Double.toString(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
-				gridLineIntervalY.setText(Double.toString(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
+				gridLineIntervalX.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
+				gridLineIntervalY.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
 
 				functionList.repaint();
 
