@@ -317,7 +317,7 @@ public class GraphTabbedPane extends JPanel {
 				int i = tabButtons.indexOf(((Component) e.getSource()).getParent());
 				
 				if (e.getActionCommand().equals("\u00D7")) {
-					if (i >= 0 && JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do delete this graph?", "Delete graph", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
+					if (i >= 0 && JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do delete \"" + graphs.get(i).name + "\"?", "Delete graph", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
 						removeAtIndex(i);
 				} else {
 					setSelectedIndex(i);

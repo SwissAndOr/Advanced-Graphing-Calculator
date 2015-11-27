@@ -242,7 +242,7 @@ public class Main {
 		functionDelete.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete this function?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete \"" + functionList.getSelectedValue().name + "\"?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					functionList.setValueIsAdjusting(true);
 					int i = functionList.getSelectedIndex();
 					GraphTabbedPane.getSelectedGraph().functions.remove(i);
@@ -263,6 +263,7 @@ public class Main {
 				if (functionList.getSelectedIndex() >= 0) {
 					String newFunctionName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + functionList.getSelectedValue().name + "\":", "Rename Function", JOptionPane.PLAIN_MESSAGE);
 					if (newFunctionName != null && !newFunctionName.isEmpty()) {
+						newFunctionName = newFunctionName.replaceAll("\\<\\/?html\\>", "");
 						functionList.getSelectedValue().name = newFunctionName;
 						functionList.repaint();
 					}
