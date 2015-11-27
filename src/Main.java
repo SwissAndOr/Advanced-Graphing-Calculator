@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +31,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -36,14 +39,14 @@ public class Main {
 
 	public static JFrame window = new JFrame();
 
-	private static NumberFormat numbers = NumberFormat.getNumberInstance();
+	private static NumberFormat numbers = new DecimalFormat("0");// NumberFormat.getNumberInstance();
 
 	private static JPanel functionPanel = new JPanel(new GridBagLayout());
 	public static JList<Function> functionList;
 	private static JButton functionUp = new JButton("/\\");
 	private static JButton functionDown = new JButton("\\/");
 
-	private static Pattern p = Pattern.compile("Untitled ([0-9]+)");
+	private static final Pattern p = Pattern.compile("Untitled ([0-9]+)");
 	private static JButton functionNew = new JButton("New");
 	private static JButton functionDelete = new JButton("Delete");
 	private static JButton functionRename = new JButton("Rename");
@@ -66,6 +69,20 @@ public class Main {
 	private static JLabel yMaxLabel = new JLabel("Y Max");
 	private static JFormattedTextField yMax = new JFormattedTextField(numbers);
 
+	private static final MouseListener formattedListener = new MouseAdapter() {
+
+		public void mousePressed(MouseEvent e) {
+			SwingUtilities.invokeLater(new Runnable() {
+
+				public void run() {
+					JTextField tf = (JTextField) e.getSource();
+					int offset = tf.viewToModel(e.getPoint());
+					tf.setCaretPosition(offset);
+				}
+			});
+		}
+	};
+
 	private static JLabel gridLineIntervalXLabel = new JLabel("Grid Line Interval X");
 	private static JFormattedTextField gridLineIntervalX = new JFormattedTextField(numbers);
 	private static JLabel gridLineIntervalYLabel = new JLabel("Grid Line Interval Y");
@@ -80,7 +97,6 @@ public class Main {
 
 	public static JProgressBar progressBar = new JProgressBar();
 
-//	@Deprecated
 //	private static JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
 	public static void main(String[] a) {
@@ -88,6 +104,9 @@ public class Main {
 		window.setMinimumSize(new Dimension(400, 500));
 		window.setSize(677, 500);
 		window.setTitle("Advanced Graphing Calculator");
+
+		// This can be set to something else if 340 is too many. Do not go over 340
+		numbers.setMaximumFractionDigits(340);
 
 		xMin.setValue(-5);
 		xMin.setColumns(4);
@@ -97,6 +116,15 @@ public class Main {
 		yMin.setColumns(4);
 		yMax.setValue(5);
 		yMax.setColumns(4);
+
+		xMin.addMouseListener(formattedListener);
+		xMin.addMouseListener(formattedListener);
+		xMax.addMouseListener(formattedListener);
+		xMax.addMouseListener(formattedListener);
+		yMin.addMouseListener(formattedListener);
+		yMin.addMouseListener(formattedListener);
+		yMax.addMouseListener(formattedListener);
+		yMax.addMouseListener(formattedListener);
 
 		GraphTabbedPane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
 		GraphTabbedPane.getSelectedGraph().functions.add(new Function("Function"));
@@ -328,7 +356,7 @@ public class Main {
 				gridLineIntervalY.setText(Double.toString(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
 
 				functionList.repaint();
-				
+
 				if (functionList.getSelectedIndex() >= 0) {
 					Function currentFunc = GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
 					currentFunc.string = functionTextField.getText();
@@ -368,12 +396,12 @@ public class Main {
 
 	public static void refreshWindowSettings() {
 		try {
-			xMin.setText(Double.toString(GraphTabbedPane.getSelectedGraph().xMin));
-			xMax.setText(Double.toString(GraphTabbedPane.getSelectedGraph().xMax));
-			yMin.setText(Double.toString(GraphTabbedPane.getSelectedGraph().yMin));
-			yMax.setText(Double.toString(GraphTabbedPane.getSelectedGraph().yMax));
-			gridLineIntervalX.setText(Double.toString(GraphTabbedPane.getSelectedGraph().gridLineIntervalX));
-			gridLineIntervalY.setText(Double.toString(GraphTabbedPane.getSelectedGraph().gridLineIntervalY));
+			xMin.setText(numbers.format(GraphTabbedPane.getSelectedGraph().xMin));
+			xMax.setText(numbers.format(GraphTabbedPane.getSelectedGraph().xMax));
+			yMin.setText(numbers.format(GraphTabbedPane.getSelectedGraph().yMin));
+			yMax.setText(numbers.format(GraphTabbedPane.getSelectedGraph().yMax));
+			gridLineIntervalX.setText(numbers.format(GraphTabbedPane.getSelectedGraph().gridLineIntervalX));
+			gridLineIntervalY.setText(numbers.format(GraphTabbedPane.getSelectedGraph().gridLineIntervalY));
 			axisX.setSelected(GraphTabbedPane.getSelectedGraph().axisX);
 			axisY.setSelected(GraphTabbedPane.getSelectedGraph().axisY);
 
