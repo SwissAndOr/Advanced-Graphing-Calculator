@@ -120,7 +120,7 @@ public class Main {
 	private static JMenuItem closeGraph = new JMenuItem("Close Graph");
 	private static JMenuItem closeAllGraphs = new JMenuItem("Close All Graphs");
 	private static JMenuItem newWorkspace = new JMenuItem("New Workspace");
-	private static JMenuItem openWorkspace = new JMenuItem("Open Workspace");
+	private static JMenuItem loadWorkspace = new JMenuItem("Load Workspace");
 	private static JMenuItem saveWorkspace = new JMenuItem("Save Workspace");
 	private static JMenuItem saveWorkspaceAs = new JMenuItem("Save Workspace As");
 	private static JMenuItem importWorkspace = new JMenuItem("Import Workspace");
@@ -196,10 +196,10 @@ public class Main {
 		newWorkspace.addActionListener(menuListener);
 		fileMenu.add(newWorkspace);
 		
-		openWorkspace.setMnemonic(KeyEvent.VK_P);
-		openWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
-		openWorkspace.addActionListener(menuListener);
-		fileMenu.add(openWorkspace);
+		loadWorkspace.setMnemonic(KeyEvent.VK_P);
+		loadWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
+		loadWorkspace.addActionListener(menuListener);
+		fileMenu.add(loadWorkspace);
 
 		saveWorkspace.setMnemonic(KeyEvent.VK_V);
 		saveWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
@@ -634,7 +634,7 @@ public class Main {
 				}
 			} else if (e.getSource() == newWorkspace) {	
 				// TODO Prompt to save, then close all graphs.
-			} else if (e.getSource() == openWorkspace) {
+			} else if (e.getSource() == loadWorkspace) {
 				// TODO Prompt to save
 				fileChooser.setFileFilter(workspaceFilter);
 				
