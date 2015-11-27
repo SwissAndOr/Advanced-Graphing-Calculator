@@ -78,23 +78,10 @@ public class GraphTabbedPane extends JPanel {
 		addButton.setFocusPainted(false);
 		addButton.addActionListener(new ActionListener() {
 
-			private Pattern p = Pattern.compile("Untitled ([0-9]+)");
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int high = 0;
-
-				for (JPanel panel : tabButtons) {
-					Matcher m = p.matcher(((JButton) panel.getComponent(0)).getText());
-					if (m.find()) {
-						try {
-							int i = Integer.parseInt(m.group(1));
-							if (i > high) high = i;
-						} catch (NumberFormatException exception) {}
-					}
-				}
-
-				addGraph(new Graph("Untitled " + (high + 1), -5, 5, -5, 5, 1, 1, true, true));
+				addGraph(new Graph(getNameForNewGraph(), -5, 5, -5, 5, 1, 1, true, true));
 			}
 
 		});
@@ -121,6 +108,24 @@ public class GraphTabbedPane extends JPanel {
 
 	private GraphTabbedPane() {}
 
+	private static final Pattern p = Pattern.compile("Untitled ([0-9]+)");
+
+	protected static String getNameForNewGraph() {
+		int high = 0;
+		
+		for (JPanel panel : tabButtons) {
+			Matcher m = p.matcher(((JButton) panel.getComponent(0)).getText());
+			if (m.find()) {
+				try {
+					int i = Integer.parseInt(m.group(1));
+					if (i > high) high = i;
+				} catch (NumberFormatException exception) {}
+			}
+		}
+		
+		return "Untitled " + (high + 1);
+	}
+	
 	/**
 	 * <ul>
 	 * <li><b><i>addGraph</i></b><br>
@@ -228,6 +233,12 @@ public class GraphTabbedPane extends JPanel {
 	public static void removeGraph(Graph graph) {
 		removeAtIndex(graphs.indexOf(graph));
 	}
+	
+	public static void renameGraphAtIndex(int index, String name) {
+		graphs.get(index).name = name;
+		((JButton) tabButtons.get(index).getComponent(0)).setText(name);
+		tabButtons.get(index).repaint();
+	}
 
 	public static int getSelectedIndex() {
 		return selectedGraph;
@@ -309,9 +320,7 @@ public class GraphTabbedPane extends JPanel {
 				
 				String newGraphName = JOptionPane.showInputDialog(Main.window, "Please input a new name for \"" + graphs.get(i).name + "\":", "Rename Graph", JOptionPane.PLAIN_MESSAGE);
 				if (newGraphName != null && !newGraphName.isEmpty()) {
-					graphs.get(i).name = newGraphName;
-					((JButton) tabButtons.get(i).getComponent(0)).setText(newGraphName);
-					tabButtons.get(i).repaint();
+					renameGraphAtIndex(i, newGraphName);
 				}
 			} else {
 				int i = tabButtons.indexOf(((Component) e.getSource()).getParent());

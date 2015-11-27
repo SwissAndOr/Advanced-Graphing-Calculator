@@ -8,9 +8,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.regex.Matcher;
@@ -20,20 +23,27 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Main {
 
@@ -97,16 +107,132 @@ public class Main {
 
 	public static JProgressBar progressBar = new JProgressBar();
 
+	private static JMenuBar menuBar = new JMenuBar();
+	private static JMenu fileMenu = new JMenu("File");
+	private static JMenu helpMenu = new JMenu("Help");
+	private static JMenuItem newGraph = new JMenuItem("New");
+	private static JMenuItem openGraph = new JMenuItem("Open...");
+	private static JMenuItem saveGraph = new JMenuItem("Save");
+	private static JMenuItem saveGraphAs = new JMenuItem("Save As...");
+	private static JMenuItem saveAllGraphs = new JMenuItem("Save All");
+	private static JMenuItem importGraph = new JMenuItem("Import Functions...");
+	private static JMenuItem renameGraph = new JMenuItem("Rename...");
+	private static JMenuItem closeGraph = new JMenuItem("Close");
+	private static JMenuItem closeAllGraphs = new JMenuItem("Close All");
+	private static JMenuItem newWorkspace = new JMenuItem("New Workspace");
+	private static JMenuItem openWorkspace = new JMenuItem("Open Workspace");
+	private static JMenuItem saveWorkspace = new JMenuItem("Save Workspace");
+	private static JMenuItem saveWorkspaceAs = new JMenuItem("Save Workspace As");
+	private static JMenuItem importWorkspace = new JMenuItem("Import Workspace");
+	private static JMenuItem exit = new JMenuItem("Exit");
+	private static JMenuItem help = new JMenuItem("Help");
+	private static JMenuItem about = new JMenuItem("About");
+
+	private static final MenuActionHandler menuListener = new MenuActionHandler();
+	private static JFileChooser fileChooser = new JFileChooser();
+	private static Path currentSaveLocation = null;
+
 //	private static JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
 	public static void main(String[] a) {
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		window.setMinimumSize(new Dimension(400, 500));
-		window.setSize(677, 500);
+		window.setMinimumSize(new Dimension(400, 530));
+		window.setSize(677, 530);
 		window.setTitle("Advanced Graphing Calculator");
 
 		// This can be set to something else if 340 is too many. Do not go over 340
 		numbers.setMaximumFractionDigits(340);
+
+		fileMenu.setMnemonic(KeyEvent.VK_F);
+
+		newGraph.setMnemonic(KeyEvent.VK_N);
+		newGraph.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
+		newGraph.addActionListener(menuListener);
+		fileMenu.add(newGraph);
+
+		openGraph.setMnemonic(KeyEvent.VK_O);
+		openGraph.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
+		openGraph.addActionListener(menuListener);
+		fileMenu.add(openGraph);
+
+		saveGraph.setMnemonic(KeyEvent.VK_S);
+		saveGraph.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+		saveGraph.addActionListener(menuListener);
+		fileMenu.add(saveGraph);
+
+		saveGraphAs.setMnemonic(KeyEvent.VK_A);
+		saveGraphAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
+		saveGraphAs.addActionListener(menuListener);
+		fileMenu.add(saveGraphAs);
+
+		saveAllGraphs.addActionListener(menuListener);
+		fileMenu.add(saveAllGraphs);
+
+		importGraph.setMnemonic(KeyEvent.VK_I);
+		importGraph.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
+		importGraph.addActionListener(menuListener);
+		fileMenu.add(importGraph);
+
+		renameGraph.setMnemonic(KeyEvent.VK_R);
+		renameGraph.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK));
+		renameGraph.addActionListener(menuListener);
+		fileMenu.add(renameGraph);
+
+		closeGraph.setMnemonic(KeyEvent.VK_C);
+		closeGraph.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_DOWN_MASK));
+		closeGraph.addActionListener(menuListener);
+		fileMenu.add(closeGraph);
+
+		closeAllGraphs.setMnemonic(KeyEvent.VK_L);
+		closeAllGraphs.addActionListener(menuListener);
+		fileMenu.add(closeAllGraphs);
+
+		fileMenu.add(new JSeparator());
+
+		openWorkspace.setMnemonic(KeyEvent.VK_P);
+		openWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
+		openWorkspace.addActionListener(menuListener);
+		fileMenu.add(openWorkspace);
+
+		saveWorkspace.setMnemonic(KeyEvent.VK_V);
+		saveWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
+		saveWorkspace.addActionListener(menuListener);
+		fileMenu.add(saveWorkspace);
+
+		saveWorkspaceAs.setMnemonic(KeyEvent.VK_W);
+		saveWorkspaceAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
+		saveWorkspaceAs.addActionListener(menuListener);
+		fileMenu.add(saveWorkspaceAs);
+
+		importWorkspace.setMnemonic(KeyEvent.VK_M);
+		importWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
+		importWorkspace.addActionListener(menuListener);
+		fileMenu.add(importWorkspace);
+
+		fileMenu.add(new JSeparator());
+
+		exit.setMnemonic(KeyEvent.VK_E);
+		exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK));
+		exit.addActionListener(menuListener);
+		fileMenu.add(exit);
+
+		menuBar.add(fileMenu);
+
+		helpMenu.setMnemonic(KeyEvent.VK_H);
+
+		help.setMnemonic(KeyEvent.VK_H);
+		help.addActionListener(menuListener);
+		helpMenu.add(help);
+
+		fileMenu.add(new JSeparator());
+
+		about.setMnemonic(KeyEvent.VK_A);
+		about.addActionListener(menuListener);
+		helpMenu.add(about);
+
+		menuBar.add(helpMenu);
+
+		window.setJMenuBar(menuBar);
 
 		xMin.setValue(-5);
 		xMin.setColumns(4);
@@ -430,5 +556,100 @@ public class Main {
 			functionRename.setEnabled(false);
 			applyButton.setEnabled(false);
 		}
+	}
+
+	public static void readFromPath(Path path) {
+		
+	}
+	
+	protected static class MenuActionHandler implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == newGraph) {
+				GraphTabbedPane.addGraph(new Graph(GraphTabbedPane.getNameForNewGraph(), -5, 5, -5, 5, 1, 1, true, true));
+			} else if (e.getSource() == openGraph) {
+				fileChooser.setFileFilter(new FileNameExtensionFilter("Graphs", ".graph"));
+				
+				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
+					Graph graph = Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+					if (graph == null) {
+						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
+					} else {
+						GraphTabbedPane.addGraph(graph);
+					}
+				}
+			} else if ((e.getSource() == saveGraph && !GraphTabbedPane.getSelectedGraph().save()) || e.getSource() == saveGraphAs) {
+				fileChooser.setFileFilter(new FileNameExtensionFilter("Graphs", ".graph"));
+				
+				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
+					GraphTabbedPane.getSelectedGraph().save(fileChooser.getSelectedFile().toPath());
+				}
+			} else if (e.getSource() == saveAllGraphs) {
+				fileChooser.setFileFilter(new FileNameExtensionFilter("Graphs", ".graph"));
+				File cur = fileChooser.getCurrentDirectory();
+				
+				for (Graph graph : GraphTabbedPane.graphs) {
+					System.out.println(graph.name);
+					if (!graph.save()) {
+						fileChooser.setSelectedFile(new File(cur.getAbsolutePath() + System.getProperty("file.separator") + graph.name + ".graph"));
+						if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
+							GraphTabbedPane.getSelectedGraph().save(fileChooser.getSelectedFile().toPath());
+						}
+					}
+				}
+			} else if (e.getSource() == importGraph) {
+				fileChooser.setFileFilter(new FileNameExtensionFilter("Graphs", ".graph"));
+				
+				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
+					Graph graph = Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+					if (graph == null) {
+						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
+					} else {
+						GraphTabbedPane.getSelectedGraph().functions.addAll(graph.functions);
+					}
+				}
+			} else if (e.getSource() == renameGraph) {
+				String newGraphName = JOptionPane.showInputDialog(Main.window, "Please input a new name for \"" + GraphTabbedPane.getSelectedGraph().name + "\":", "Rename Graph", JOptionPane.PLAIN_MESSAGE);
+				if (newGraphName != null && !newGraphName.isEmpty()) {
+					GraphTabbedPane.renameGraphAtIndex(GraphTabbedPane.getSelectedIndex(), newGraphName);
+				}
+			} else if (e.getSource() == closeGraph) {
+				// TODO Prompt to save
+				GraphTabbedPane.removeAtIndex(GraphTabbedPane.getSelectedIndex());
+			} else if (e.getSource() == closeAllGraphs) {
+				// TODO Prompt to save
+				while (!GraphTabbedPane.graphs.isEmpty()) {
+					GraphTabbedPane.removeAtIndex(0);
+				}
+			} else if (e.getSource() == newWorkspace) {	
+				// TODO Prompt to save, then close all graphs.
+			} else if (e.getSource() == openWorkspace) {
+				// TODO Prompt to save
+				fileChooser.setFileFilter(new FileNameExtensionFilter("Workspaces", ".wksp"));
+				
+				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
+					readFromPath(fileChooser.getSelectedFile().toPath());
+				}
+			} else if (e.getSource() == saveWorkspace) {
+				// TODO Save workspace to currentSaveLocation. If it doesn't exist, save as
+			} else if (e.getSource() == saveWorkspaceAs) {
+				// TODO JFileChooser to select location to save to. Set currentFileLocation to said location
+			} else if (e.getSource() == importWorkspace) {
+				// TODO Open workspace, read all graphs, and add each one to GraphTabbedPane
+			} else if (e.getSource() == exit) {
+				// TODO Do this only if there are unsaved changes
+				if (JOptionPane.showConfirmDialog(window, "Are you sure you want to quit?", "Exit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+					System.exit(0);
+				}
+			} else if (e.getSource() == help) {
+				// TODO Help
+				JOptionPane.showMessageDialog(window, "Unfortunately, there is no help at this time.", "Help", JOptionPane.PLAIN_MESSAGE);
+			} else if (e.getSource() == about) {
+				// TODO Use something better than JOptionPane
+				JOptionPane.showMessageDialog(window, "<html><span style=\"width:500px\">Advanced Graphing Calculator v. Indev 0.0<br>An advanced, feature rich graphing program created in Java using Swing<br>and other default libraries. Still in the process of being developed.</span></html>", "Advanced Graphing Calculator v. Indev 0.0", JOptionPane.PLAIN_MESSAGE);
+			}
+		}
+
 	}
 }
