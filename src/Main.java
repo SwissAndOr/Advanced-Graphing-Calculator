@@ -8,6 +8,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +33,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 public class Main {
+
 	public static JFrame window = new JFrame();
 
 	private static NumberFormat numbers = NumberFormat.getNumberInstance();
@@ -82,7 +85,7 @@ public class Main {
 
 	public static void main(String[] a) {
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		window.setMinimumSize(new Dimension(300, 450));
+		window.setMinimumSize(new Dimension(400, 500));
 		window.setSize(677, 500);
 		window.setTitle("Advanced Graphing Calculator");
 
@@ -100,6 +103,7 @@ public class Main {
 
 		functionList = new JList<>(GraphTabbedPane.getSelectedGraph().functions);
 		functionList.addListSelectionListener(new ListSelectionListener() {
+
 			public void valueChanged(ListSelectionEvent e) {
 				if (!functionList.getValueIsAdjusting()) {
 					if (functionList.getSelectedIndex() != -1) {
@@ -135,21 +139,35 @@ public class Main {
 				}
 			}
 		});
+		functionList.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getX() > 140) {
+					e.consume();
+					GraphTabbedPane.getSelectedGraph().functions.get(e.getY() / 30).enabled ^= true;
+					functionList.setListData(GraphTabbedPane.getSelectedGraph().functions);
+				}
+			}
+		});
 		functionList.setFixedCellWidth(160);
 		functionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		functionList.setVisibleRowCount(4);
 		functionList.setSelectedIndex(0);
+		functionList.setCellRenderer(new FunctionListCellRenderer());
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridheight = 2;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
 		functionPanel.add(new JScrollPane(functionList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), c);
+
 		functionUp.setMargin(new Insets(functionUp.getMargin().top, 5, functionUp.getMargin().bottom, 5));
 		c.gridheight = 1;
 		c.weightx = 0;
 		c.weighty = 0.5;
 		c.gridx = 1;
 		functionUp.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				int i = functionList.getSelectedIndex();
 				if (i > 0) {
@@ -168,9 +186,11 @@ public class Main {
 			}
 		});
 		functionPanel.add(functionUp, c);
+
 		functionDown.setMargin(new Insets(functionDown.getMargin().top, 5, functionDown.getMargin().bottom, 5));
 		c.gridy = 1;
 		functionDown.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				int i = functionList.getSelectedIndex();
 				if (i < GraphTabbedPane.getSelectedGraph().functions.size() - 1) {
@@ -193,6 +213,7 @@ public class Main {
 
 		functionNew.setMargin(new Insets(functionNew.getMargin().top, 8, functionNew.getMargin().bottom, 8));
 		functionNew.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				int high = 0;
 
@@ -216,8 +237,10 @@ public class Main {
 			}
 		});
 		sidebar.add(functionNew);
+
 		functionDelete.setMargin(new Insets(functionDelete.getMargin().top, 8, functionDelete.getMargin().bottom, 8));
 		functionDelete.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete this function?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					functionList.setValueIsAdjusting(true);
@@ -232,8 +255,10 @@ public class Main {
 			}
 		});
 		sidebar.add(functionDelete);
+
 		functionRename.setMargin(new Insets(functionRename.getMargin().top, 8, functionRename.getMargin().bottom, 8));
 		functionRename.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				if (functionList.getSelectedIndex() >= 0) {
 					String newFunctionName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + functionList.getSelectedValue().name + "\":", "Rename Function", JOptionPane.PLAIN_MESSAGE);
@@ -252,6 +277,7 @@ public class Main {
 		functionPropertiesPanel.add(colorChooserLabel);
 		colorChooserButton.setPreferredSize(new Dimension(85, 20));
 		colorChooserButton.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				selectedColor = JColorChooser.showDialog(null, "Color Chooser", GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color);
 				if (selectedColor == null)
@@ -291,7 +317,7 @@ public class Main {
 
 		windowPanel.add(axisX);
 		windowPanel.add(axisY);
-		
+
 		sidebar.add(windowPanel);
 
 		applyButton.addActionListener(new ActionListener() {
@@ -300,12 +326,14 @@ public class Main {
 				gridLineIntervalX.setText(Double.toString(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
 				gridLineIntervalY.setText(Double.toString(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
 
+				functionList.repaint();
+				
 				if (functionList.getSelectedIndex() >= 0) {
 					Function currentFunc = GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
 					currentFunc.string = functionTextField.getText();
 					currentFunc.color = selectedColor;
 					currentFunc.thickness = thicknessSlider.getValue();
-					
+
 					if (!currentFunc.string.equals(functionTextField.getText()) || !currentFunc.color.equals(selectedColor) || currentFunc.thickness != thicknessSlider.getValue()) {
 						GraphTabbedPane.getSelectedGraph().invalidate();
 					}
@@ -336,7 +364,7 @@ public class Main {
 
 		window.setVisible(true);
 	}
-	
+
 	public static void refreshWindowSettings() {
 		try {
 			xMin.setText(Double.toString(GraphTabbedPane.getSelectedGraph().xMin));
@@ -347,7 +375,7 @@ public class Main {
 			gridLineIntervalY.setText(Double.toString(GraphTabbedPane.getSelectedGraph().gridLineIntervalY));
 			axisX.setSelected(GraphTabbedPane.getSelectedGraph().axisX);
 			axisY.setSelected(GraphTabbedPane.getSelectedGraph().axisY);
-			
+
 			for (Component component : windowPanel.getComponents()) {
 				component.setEnabled(true);
 			}
@@ -364,7 +392,7 @@ public class Main {
 			gridLineIntervalY.setText(null);
 			axisX.setSelected(true);
 			axisY.setSelected(true);
-			
+
 			for (Component component : windowPanel.getComponents()) {
 				component.setEnabled(false);
 			}

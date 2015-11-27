@@ -10,6 +10,7 @@ public class Function {
 	public String string = "";
 	public Color color = Color.BLUE;
 	public int thickness = 2;
+	public boolean enabled = true;
 
 	private static ScriptEngineManager mgr = new ScriptEngineManager();
 	private static ScriptEngine engine = mgr.getEngineByName("JavaScript");

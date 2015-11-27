@@ -39,7 +39,7 @@ public class Graph {
 			int progressMax = 0;
 			
 			for (int i = functions.size() - 1; i >= 0; i--) {
-				if (functions.get(i).string != null && !functions.get(i).string.isEmpty()) {
+				if (functions.get(i).enabled && functions.get(i).string != null && !functions.get(i).string.isEmpty()) {
 					validFunctions.add(functions.get(i));
 					progressMax += dim.width;
 				}
