@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.nio.file.Path;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +31,7 @@ import javax.swing.JScrollPane;
 public class GraphTabbedPane extends JPanel {
 	public static Vector<Graph> graphs = new Vector<>();
 	private static int selectedGraph;
+	private static Path currentSaveLocation = null;
 
 	private static JPanel tabPanel = new JPanel(new GridBagLayout());
 	private static JPanel tabButtonPanel = new JPanel(new GridBagLayout());

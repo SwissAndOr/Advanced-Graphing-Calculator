@@ -110,15 +110,15 @@ public class Main {
 	private static JMenuBar menuBar = new JMenuBar();
 	private static JMenu fileMenu = new JMenu("File");
 	private static JMenu helpMenu = new JMenu("Help");
-	private static JMenuItem newGraph = new JMenuItem("New");
-	private static JMenuItem openGraph = new JMenuItem("Open...");
-	private static JMenuItem saveGraph = new JMenuItem("Save");
-	private static JMenuItem saveGraphAs = new JMenuItem("Save As...");
+	private static JMenuItem newGraph = new JMenuItem("New Graph");
+	private static JMenuItem openGraph = new JMenuItem("Open Graph...");
+	private static JMenuItem saveGraph = new JMenuItem("Save Graph");
+	private static JMenuItem saveGraphAs = new JMenuItem("Save Graph As...");
 	private static JMenuItem saveAllGraphs = new JMenuItem("Save All");
 	private static JMenuItem importGraph = new JMenuItem("Import Functions...");
-	private static JMenuItem renameGraph = new JMenuItem("Rename...");
-	private static JMenuItem closeGraph = new JMenuItem("Close");
-	private static JMenuItem closeAllGraphs = new JMenuItem("Close All");
+	private static JMenuItem renameGraph = new JMenuItem("Rename Graph...");
+	private static JMenuItem closeGraph = new JMenuItem("Close Graph");
+	private static JMenuItem closeAllGraphs = new JMenuItem("Close All Graphs");
 	private static JMenuItem newWorkspace = new JMenuItem("New Workspace");
 	private static JMenuItem openWorkspace = new JMenuItem("Open Workspace");
 	private static JMenuItem saveWorkspace = new JMenuItem("Save Workspace");
@@ -127,10 +127,12 @@ public class Main {
 	private static JMenuItem exit = new JMenuItem("Exit");
 	private static JMenuItem help = new JMenuItem("Help");
 	private static JMenuItem about = new JMenuItem("About");
+	
+	private static final FileNameExtensionFilter graphFilter = new FileNameExtensionFilter("Graphs", ".graph");
+	private static final FileNameExtensionFilter workspaceFilter = new FileNameExtensionFilter("Workspaces", ".wksp");
 
 	private static final MenuActionHandler menuListener = new MenuActionHandler();
 	private static JFileChooser fileChooser = new JFileChooser();
-	private static Path currentSaveLocation = null;
 
 //	private static JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
@@ -189,6 +191,11 @@ public class Main {
 
 		fileMenu.add(new JSeparator());
 
+		newWorkspace.setMnemonic(KeyEvent.VK_N);
+		newWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
+		newWorkspace.addActionListener(menuListener);
+		fileMenu.add(newWorkspace);
+		
 		openWorkspace.setMnemonic(KeyEvent.VK_P);
 		openWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
 		openWorkspace.addActionListener(menuListener);
@@ -569,8 +576,8 @@ public class Main {
 			if (e.getSource() == newGraph) {
 				GraphTabbedPane.addGraph(new Graph(GraphTabbedPane.getNameForNewGraph(), -5, 5, -5, 5, 1, 1, true, true));
 			} else if (e.getSource() == openGraph) {
-				fileChooser.setFileFilter(new FileNameExtensionFilter("Graphs", ".graph"));
-				
+				fileChooser.setFileFilter(graphFilter);
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
 					Graph graph = Graph.readFromPath(fileChooser.getSelectedFile().toPath());
 					if (graph == null) {
@@ -580,13 +587,13 @@ public class Main {
 					}
 				}
 			} else if ((e.getSource() == saveGraph && !GraphTabbedPane.getSelectedGraph().save()) || e.getSource() == saveGraphAs) {
-				fileChooser.setFileFilter(new FileNameExtensionFilter("Graphs", ".graph"));
+				fileChooser.setFileFilter(graphFilter);
 				
 				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
 					GraphTabbedPane.getSelectedGraph().save(fileChooser.getSelectedFile().toPath());
 				}
 			} else if (e.getSource() == saveAllGraphs) {
-				fileChooser.setFileFilter(new FileNameExtensionFilter("Graphs", ".graph"));
+				fileChooser.setFileFilter(graphFilter);
 				File cur = fileChooser.getCurrentDirectory();
 				
 				for (Graph graph : GraphTabbedPane.graphs) {
@@ -599,7 +606,7 @@ public class Main {
 					}
 				}
 			} else if (e.getSource() == importGraph) {
-				fileChooser.setFileFilter(new FileNameExtensionFilter("Graphs", ".graph"));
+				fileChooser.setFileFilter(graphFilter);
 				
 				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
 					Graph graph = Graph.readFromPath(fileChooser.getSelectedFile().toPath());
@@ -616,17 +623,20 @@ public class Main {
 				}
 			} else if (e.getSource() == closeGraph) {
 				// TODO Prompt to save
-				GraphTabbedPane.removeAtIndex(GraphTabbedPane.getSelectedIndex());
+				if (JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do close \"" + GraphTabbedPane.getSelectedGraph().name + "\"?", "Close graph", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
+					GraphTabbedPane.removeAtIndex(GraphTabbedPane.getSelectedIndex());
 			} else if (e.getSource() == closeAllGraphs) {
 				// TODO Prompt to save
-				while (!GraphTabbedPane.graphs.isEmpty()) {
-					GraphTabbedPane.removeAtIndex(0);
+				if (JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do close all your graphs?", "Close all graphs", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+					while (!GraphTabbedPane.graphs.isEmpty()) {
+						GraphTabbedPane.removeAtIndex(0);
+					}
 				}
 			} else if (e.getSource() == newWorkspace) {	
 				// TODO Prompt to save, then close all graphs.
 			} else if (e.getSource() == openWorkspace) {
 				// TODO Prompt to save
-				fileChooser.setFileFilter(new FileNameExtensionFilter("Workspaces", ".wksp"));
+				fileChooser.setFileFilter(workspaceFilter);
 				
 				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
 					readFromPath(fileChooser.getSelectedFile().toPath());
@@ -644,10 +654,10 @@ public class Main {
 				}
 			} else if (e.getSource() == help) {
 				// TODO Help
-				JOptionPane.showMessageDialog(window, "Unfortunately, there is no help at this time.", "Help", JOptionPane.PLAIN_MESSAGE);
+				JOptionPane.showMessageDialog(window, "<html><span style=\"width:500px\">Unfortunately, there is no help at this time.<br>Try contacting SwissAndOr at <a href=\"mailto:2000matu@gmail.com\">2000matu@gmail.com</a> for help.</span></html>", "Help", JOptionPane.PLAIN_MESSAGE);
 			} else if (e.getSource() == about) {
 				// TODO Use something better than JOptionPane
-				JOptionPane.showMessageDialog(window, "<html><span style=\"width:500px\">Advanced Graphing Calculator v. Indev 0.0<br>An advanced, feature rich graphing program created in Java using Swing<br>and other default libraries. Still in the process of being developed.</span></html>", "Advanced Graphing Calculator v. Indev 0.0", JOptionPane.PLAIN_MESSAGE);
+				JOptionPane.showMessageDialog(window, "<html><span style=\"width:500px\">Advanced Graphing Calculator v. Indev 0.0<br><br>Copyright (c) 2015 SwissAndOr and ricky3350<br><br>An advanced, feature rich graphing program created in Java using Swing<br>and other default libraries. Still in the process of being developed.</span></html>", "Advanced Graphing Calculator v. Indev 0.0", JOptionPane.PLAIN_MESSAGE);
 			}
 		}
 

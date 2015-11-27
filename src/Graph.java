@@ -3,12 +3,23 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Graph {
 
@@ -173,18 +184,81 @@ public class Graph {
 	 * @return Whether the graph saved successfully.
 	 *         </ul>
 	 */
-	public boolean save() {
-		// TODO Save to currentSaveLocation. If does not exist, return false, else return true
-		return false;
+	public boolean save() {	
+		if (currentSaveLocation == null) 
+			return false;
+		
+		Map<String, Object> obj = new LinkedHashMap<>();
+		
+		obj.put("Name", name);
+		obj.put("xMin", xMin);
+		obj.put("xMax", xMax);
+		obj.put("yMin", yMin);
+		obj.put("yMax", yMax);
+		obj.put("Grid Line Interval X", gridLineIntervalX);
+		obj.put("Grid Line Interval Y", gridLineIntervalY);
+		obj.put("Axis X", axisX);
+		obj.put("Axis Y", axisY);
+		
+		LinkedList<Map<String, Object>> functionsList = new LinkedList<>();
+		for (Function function : functions)
+			functionsList.add(function.toMap());
+		obj.put("Functions", functionsList);
+		
+		try (FileWriter file = new FileWriter(currentSaveLocation.toFile())) {
+			file.write(JSONValue.toJSONString(obj));
+			file.flush();
+			file.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		System.out.println(JSONValue.toJSONString(obj));
+		return true;
 	}
 
 	public void save(Path path) {
-		// TODO Save graph as and set currentSaveLocation
+		currentSaveLocation = path;
+		save();
 	}
 	
 	public static Graph readFromPath(Path path) {
-		// TODO Load
-		return null;
+		Map<String, Object> obj = new LinkedHashMap<>();
+		JSONArray functionsList = new JSONArray();
+		JSONParser parser = new JSONParser();
+		Graph newGraph = new Graph();
+		
+		String s = null;
+		try {
+			s = new String(Files.readAllBytes(path));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+				
+		try {
+			obj = (Map<String, Object>) parser.parse(s);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		newGraph.name = (String) obj.get("Name");
+		newGraph.xMin = (double) obj.get("xMin");
+		newGraph.xMax = (double) obj.get("xMax");
+		newGraph.yMin = (double) obj.get("yMin");
+		newGraph.yMax = (double) obj.get("yMax");
+		newGraph.gridLineIntervalX = (double) obj.get("Grid Line Interval X");
+		newGraph.gridLineIntervalY = (double) obj.get("Grid Line Interval Y");
+		newGraph.axisX = (boolean) obj.get("Axis X");
+		newGraph.axisY = (boolean) obj.get("Axis Y");
+		
+		functionsList = (JSONArray) obj.get("Functions");
+		for (Object map : functionsList)
+			newGraph.functions.add(new Function((Map<String, Object>) map));
+		
+		return newGraph;
 	}
 
 	private class BarPainter extends SwingWorker<Object, Object> {
