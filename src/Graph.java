@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -137,27 +134,6 @@ public class Graph {
 		gridLineIntervalY = newGridLineIntervalY;
 		axisX = newAxisX;
 		axisY = newAxisY;
-	}
-
-	public Map<String, Object> toMap() {
-		Map<String, Object> map = new LinkedHashMap<>();
-
-		map.put("Name", name);
-		map.put("xMin", xMin);
-		map.put("xMax", xMax);
-		map.put("yMin", yMin);
-		map.put("yMax", yMax);
-		map.put("Grid Line Interval X", gridLineIntervalX);
-		map.put("Grid Line Interval Y", gridLineIntervalY);
-		map.put("Axis X", axisX);
-		map.put("Axis Y", axisY);
-
-		LinkedList<Map<String, Object>> functionList = new LinkedList<>();
-		for (Function function : functions)
-			functionList.add(function.toMap());
-		map.put("Functions", functionList);
-
-		return map;
 	}
 
 	public void invalidate() {

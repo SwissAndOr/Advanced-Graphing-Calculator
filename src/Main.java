@@ -57,16 +57,15 @@ public class Main {
 	private static JButton functionUp = new JButton("/\\");
 	private static JButton functionDown = new JButton("\\/");
 
-	private static final Pattern p = Pattern.compile("Untitled ([0-9]+)");
 	private static JButton functionNew = new JButton("New");
 	private static JButton functionDelete = new JButton("Delete");
 	private static JButton functionRename = new JButton("Rename");
 
 	private static JPanel functionPropertiesPanel = new JPanel(new FlowLayout());
 	private static JTextField functionTextField = new JTextField(16);
-	private static Color selectedColor = Color.BLUE;
 	private static JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private static JButton colorChooserButton = new JButton();
+	private static Color selectedColor = Color.BLUE;
 	private static JLabel thicknessLabel = new JLabel("Line Thickness");
 	private static JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, 15, 2);
 
@@ -102,7 +101,7 @@ public class Main {
 	private static JCheckBox axisX = new JCheckBox("Axis X", true);
 	private static JCheckBox axisY = new JCheckBox("Axis Y", true);
 
-	private static JButton applyButton = new JButton("Apply");
+	public static JButton applyButton = new JButton("Apply");
 
 	private static JPanel sidebar = new JPanel();
 
@@ -134,6 +133,9 @@ public class Main {
 
 	private static final MenuActionHandler menuListener = new MenuActionHandler();
 	private static JFileChooser fileChooser = new JFileChooser();
+	
+	private static final Pattern p = Pattern.compile("Untitled ([0-9]+)");
+	private static final ActionListeners actionListeners = new ActionListeners();
 
 //	private static JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
@@ -328,110 +330,25 @@ public class Main {
 		c.weightx = 0;
 		c.weighty = 0.5;
 		c.gridx = 1;
-		functionUp.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				int i = functionList.getSelectedIndex();
-				if (i > 0) {
-					functionList.setValueIsAdjusting(true);
-					GraphTabbedPane.pane.getSelectedGraph().functions.add(i - 1, GraphTabbedPane.pane.getSelectedGraph().functions.get(i));
-					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i + 1);
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
-					functionList.setSelectedIndex(i - 1);
-					functionList.setValueIsAdjusting(false);
-
-					if (functionList.getSelectedIndex() != 0)
-						functionDown.setEnabled(true);
-					else
-						functionUp.setEnabled(false);
-				}
-			}
-		});
+		functionUp.addActionListener(actionListeners);
 		functionPanel.add(functionUp, c);
 
 		functionDown.setMargin(new Insets(functionDown.getMargin().top, 5, functionDown.getMargin().bottom, 5));
 		c.gridy = 1;
-		functionDown.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				int i = functionList.getSelectedIndex();
-				if (i < GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1) {
-					functionList.setValueIsAdjusting(true);
-					GraphTabbedPane.pane.getSelectedGraph().functions.add(i + 2, GraphTabbedPane.pane.getSelectedGraph().functions.get(i));
-					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i);
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
-					functionList.setSelectedIndex(i + 1);
-					functionList.setValueIsAdjusting(false);
-
-					if (functionList.getSelectedIndex() != GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1)
-						functionUp.setEnabled(true);
-					else
-						functionDown.setEnabled(false);
-				}
-			}
-		});
+		functionDown.addActionListener(actionListeners);
 		functionPanel.add(functionDown, c);
 		sidebar.add(functionPanel);
 
 		functionNew.setMargin(new Insets(functionNew.getMargin().top, 8, functionNew.getMargin().bottom, 8));
-		functionNew.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				int high = 0;
-
-				for (Function function : GraphTabbedPane.pane.getSelectedGraph().functions) {
-					Matcher m = p.matcher(function.name);
-					if (m.find()) {
-						try {
-							int i = Integer.parseInt(m.group(1));
-							if (i > high) high = i;
-						} catch (NumberFormatException exception) {}
-					}
-				}
-
-				functionList.setValueIsAdjusting(true);
-				GraphTabbedPane.pane.getSelectedGraph().functions.add(new Function("Untitled " + (high + 1)));
-				functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
-				functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1);
-				functionList.setValueIsAdjusting(false);
-
-				functionList.getListSelectionListeners()[0].valueChanged(null);
-			}
-		});
+		functionNew.addActionListener(actionListeners);
 		sidebar.add(functionNew);
 
 		functionDelete.setMargin(new Insets(functionDelete.getMargin().top, 8, functionDelete.getMargin().bottom, 8));
-		functionDelete.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete \"" + functionList.getSelectedValue().name + "\"?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-					functionList.setValueIsAdjusting(true);
-					int i = functionList.getSelectedIndex();
-					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i);
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
-					functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().functions.size() > 0 ? Math.max(i - 1, 0) : -1);
-					functionList.setValueIsAdjusting(false);
-
-					functionList.getListSelectionListeners()[0].valueChanged(null);
-				}
-			}
-		});
+		functionDelete.addActionListener(actionListeners);
 		sidebar.add(functionDelete);
 
 		functionRename.setMargin(new Insets(functionRename.getMargin().top, 8, functionRename.getMargin().bottom, 8));
-		functionRename.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				if (functionList.getSelectedIndex() >= 0) {
-					String newFunctionName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + functionList.getSelectedValue().name + "\":", "Rename Function", JOptionPane.PLAIN_MESSAGE);
-					if (newFunctionName != null && !newFunctionName.isEmpty()) {
-						newFunctionName = newFunctionName.replaceAll("\\<\\/?html\\>", "");
-						functionList.getSelectedValue().name = newFunctionName;
-						functionList.repaint();
-					}
-				}
-			}
-		});
+		functionRename.addActionListener(actionListeners);
 		sidebar.add(functionRename);
 
 		functionPropertiesPanel.setPreferredSize(new Dimension(190, 120));
@@ -439,16 +356,7 @@ public class Main {
 		functionPropertiesPanel.add(functionTextField);
 		functionPropertiesPanel.add(colorChooserLabel);
 		colorChooserButton.setPreferredSize(new Dimension(85, 20));
-		colorChooserButton.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				selectedColor = JColorChooser.showDialog(null, "Color Chooser", GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color);
-				if (selectedColor == null)
-					selectedColor = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color;
-				else
-					colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
-			}
-		});
+		colorChooserButton.addActionListener(actionListeners);
 		colorChooserButton.setBackground(selectedColor);
 		functionPropertiesPanel.add(colorChooserButton);
 		functionPropertiesPanel.add(thicknessLabel);
@@ -486,33 +394,7 @@ public class Main {
 		applyButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				gridLineIntervalX.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
-				gridLineIntervalY.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
 
-				functionList.repaint();
-
-				if (functionList.getSelectedIndex() >= 0) {
-					Function currentFunc = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
-					currentFunc.string = functionTextField.getText();
-					currentFunc.color = selectedColor;
-					currentFunc.thickness = thicknessSlider.getValue();
-
-					if (!currentFunc.string.equals(functionTextField.getText()) || !currentFunc.color.equals(selectedColor) || currentFunc.thickness != thicknessSlider.getValue()) {
-						GraphTabbedPane.pane.getSelectedGraph().invalidate();
-					}
-				}
-
-				GraphTabbedPane.pane.getSelectedGraph().xMin = Double.parseDouble(xMin.getText());
-				GraphTabbedPane.pane.getSelectedGraph().xMax = Double.parseDouble(xMax.getText());
-				GraphTabbedPane.pane.getSelectedGraph().yMin = Double.parseDouble(yMin.getText());
-				GraphTabbedPane.pane.getSelectedGraph().yMax = Double.parseDouble(yMax.getText());
-				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
-				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
-				GraphTabbedPane.pane.getSelectedGraph().axisX = axisX.isSelected();
-				GraphTabbedPane.pane.getSelectedGraph().axisY = axisY.isSelected();
-
-				GraphTabbedPane.pane.getSelectedGraph().invalidate();
-				GraphTabbedPane.pane.graphPane.repaint();
 			}
 		});
 		sidebar.add(applyButton);
@@ -565,10 +447,6 @@ public class Main {
 			applyButton.setEnabled(false);
 		}
 	}
-
-//	public static void readFromPath(Path path) {
-//
-//	}
 
 	protected static class MenuActionHandler implements ActionListener {
 
@@ -659,18 +537,7 @@ public class Main {
 			} else if (e.getSource() == loadWorkspace) {
 				fileChooser.setFileFilter(workspaceFilter);
 				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
-				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
-//					GraphTabbedPane pane = GraphTabbedPane.readFromPath(fileChooser.getSelectedFile().toPath());
-//					if (pane == null) {
-//						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
-//					} else {
-//						window.remove(GraphTabbedPane.pane);
-//						GraphTabbedPane.pane = pane;
-//						window.add(GraphTabbedPane.pane, BorderLayout.CENTER);
-//						GraphTabbedPane.pane.revalidate();
-//						GraphTabbedPane.pane.repaint();
-//					}
-					
+				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {					
 					try {
 						JSON.parsePane(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath())));
 					} catch (IOException exception) {
@@ -701,6 +568,117 @@ public class Main {
 				JOptionPane.showMessageDialog(window, "<html><span style=\"width:500px\">Advanced Graphing Calculator v. Indev 0.0<br><br>Copyright (c) 2015 SwissAndOr and ricky3350<br><br>An advanced, feature rich graphing program created in Java using Swing<br>and other default libraries. Still in the process of being developed.</span></html>", "Advanced Graphing Calculator v. Indev 0.0", JOptionPane.PLAIN_MESSAGE);
 			}
 		}
+	}
+	
+	public static class ActionListeners implements ActionListener {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == functionUp)	 {	
+				int i = functionList.getSelectedIndex();
+				if (i > 0) {
+					functionList.setValueIsAdjusting(true);
+					GraphTabbedPane.pane.getSelectedGraph().functions.add(i - 1, GraphTabbedPane.pane.getSelectedGraph().functions.get(i));
+					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i + 1);
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+					functionList.setSelectedIndex(i - 1);
+					functionList.setValueIsAdjusting(false);
 
+					if (functionList.getSelectedIndex() != 0)
+						functionDown.setEnabled(true);
+					else
+						functionUp.setEnabled(false);
+				}
+			} else if (e.getSource() == functionDown) {
+				int i = functionList.getSelectedIndex();
+				if (i < GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1) {
+					functionList.setValueIsAdjusting(true);
+					GraphTabbedPane.pane.getSelectedGraph().functions.add(i + 2, GraphTabbedPane.pane.getSelectedGraph().functions.get(i));
+					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i);
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+					functionList.setSelectedIndex(i + 1);
+					functionList.setValueIsAdjusting(false);
+
+					if (functionList.getSelectedIndex() != GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1)
+						functionUp.setEnabled(true);
+					else
+						functionDown.setEnabled(false);
+				}
+			} else if (e.getSource() == functionNew) {
+				int high = 0;
+
+				for (Function function : GraphTabbedPane.pane.getSelectedGraph().functions) {
+					Matcher m = p.matcher(function.name);
+					if (m.find()) {
+						try {
+							int i = Integer.parseInt(m.group(1));
+							if (i > high) high = i;
+						} catch (NumberFormatException exception) {}
+					}
+				}
+
+				functionList.setValueIsAdjusting(true);
+				GraphTabbedPane.pane.getSelectedGraph().functions.add(new Function("Untitled " + (high + 1)));
+				functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+				functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1);
+				functionList.setValueIsAdjusting(false);
+
+				functionList.getListSelectionListeners()[0].valueChanged(null);
+			} else if (e.getSource() == functionDelete) {
+				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete \"" + functionList.getSelectedValue().name + "\"?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+					functionList.setValueIsAdjusting(true);
+					int i = functionList.getSelectedIndex();
+					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i);
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+					functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().functions.size() > 0 ? Math.max(i - 1, 0) : -1);
+					functionList.setValueIsAdjusting(false);
+
+					functionList.getListSelectionListeners()[0].valueChanged(null);
+				}
+			} else if (e.getSource() == functionRename) {
+				if (functionList.getSelectedIndex() >= 0) {
+					String newFunctionName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + functionList.getSelectedValue().name + "\":", "Rename Function", JOptionPane.PLAIN_MESSAGE);
+					if (newFunctionName != null && !newFunctionName.isEmpty()) {
+						newFunctionName = newFunctionName.replaceAll("\\<\\/?html\\>", "");
+						functionList.getSelectedValue().name = newFunctionName;
+						functionList.repaint();
+					}
+				}
+			} else if (e.getSource() == colorChooserButton) {
+				selectedColor = JColorChooser.showDialog(null, "Color Chooser", GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color);
+				if (selectedColor == null)
+					selectedColor = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color;
+				else
+					colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
+			} else if (e.getSource() == applyButton) {
+				gridLineIntervalX.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
+				gridLineIntervalY.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
+
+				functionList.repaint();
+
+				if (functionList.getSelectedIndex() >= 0) {
+					Function currentFunc = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
+					currentFunc.string = functionTextField.getText();
+					currentFunc.color = selectedColor;
+					currentFunc.thickness = thicknessSlider.getValue();
+
+					if (!currentFunc.string.equals(functionTextField.getText()) || !currentFunc.color.equals(selectedColor) || currentFunc.thickness != thicknessSlider.getValue()) {
+						GraphTabbedPane.pane.getSelectedGraph().invalidate();
+					}
+				}
+
+				GraphTabbedPane.pane.getSelectedGraph().xMin = Double.parseDouble(xMin.getText());
+				GraphTabbedPane.pane.getSelectedGraph().xMax = Double.parseDouble(xMax.getText());
+				GraphTabbedPane.pane.getSelectedGraph().yMin = Double.parseDouble(yMin.getText());
+				GraphTabbedPane.pane.getSelectedGraph().yMax = Double.parseDouble(yMax.getText());
+				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
+				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
+				GraphTabbedPane.pane.getSelectedGraph().axisX = axisX.isSelected();
+				GraphTabbedPane.pane.getSelectedGraph().axisY = axisY.isSelected();
+
+				GraphTabbedPane.pane.getSelectedGraph().invalidate();
+				GraphTabbedPane.pane.graphPane.repaint();
+			}
+		}
 	}
 }

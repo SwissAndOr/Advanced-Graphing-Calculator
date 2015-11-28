@@ -16,9 +16,6 @@ import java.awt.event.ComponentEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -107,17 +104,6 @@ public class GraphTabbedPane extends JPanel {
 				}
 			}
 		});
-	}
-
-	public Map<String, Object> toMap() {
-		Map<String, Object> map = new LinkedHashMap<>();
-
-		LinkedList<Map<String, Object>> graphList = new LinkedList<>();
-		for (Graph graph : graphs)
-			graphList.add(graph.toMap());
-		map.put("Graphs", graphList);
-
-		return map;
 	}
 
 	public boolean save() {
