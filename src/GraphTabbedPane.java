@@ -13,7 +13,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,13 +32,9 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-@SuppressWarnings({"serial", "unchecked"})
+@SuppressWarnings("serial")
 public class GraphTabbedPane extends JPanel {
+
 	public Vector<Graph> graphs = new Vector<>();
 	private int selectedGraph;
 	private Path currentSaveLocation = null;
@@ -78,7 +73,7 @@ public class GraphTabbedPane extends JPanel {
 		tabButtonPanel.add(space, c);
 
 		c.weightx = 1;
-		// This can be set to 0, 0 to remove the scroll bar entirely and let the user scroll with the mouse wheel only 
+		// This can be set to 0, 0 to remove the scroll bar entirely and let the user scroll with the mouse wheel only
 		buttonScrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(buttonScrollPane.getPreferredSize().width, 5));
 		buttonScrollPane.getHorizontalScrollBar().setUnitIncrement(10);
 		tabPanel.add(buttonScrollPane, c);
@@ -88,7 +83,6 @@ public class GraphTabbedPane extends JPanel {
 		addButton.setBackground(new Color(238, 238, 238));
 		addButton.setFocusPainted(false);
 		addButton.addActionListener(new ActionListener() {
-
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -115,74 +109,71 @@ public class GraphTabbedPane extends JPanel {
 		});
 	}
 
-	public GraphTabbedPane(Map<String, Object> map) {
-		this();
-		
-		JSONArray graphList = (JSONArray) map.get("Graphs");
-		for (Object graphMap : graphList)
-			addGraph(new Graph((Map<String, Object>) graphMap));
-		setSelectedIndex(graphs.size() > 0 ? 0 : -1);
-	}
-	
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<>();
-		
+
 		LinkedList<Map<String, Object>> graphList = new LinkedList<>();
 		for (Graph graph : graphs)
 			graphList.add(graph.toMap());
 		map.put("Graphs", graphList);
-		
+
 		return map;
 	}
-	
+
 	public boolean save() {
-		if (currentSaveLocation == null) 
+		if (currentSaveLocation == null)
 			return false;
-		
-		try (FileWriter file = new FileWriter(currentSaveLocation.toFile())) {
-			file.write(JSONValue.toJSONString(toMap()));
-			file.flush();
-			file.close();
+
+		try {
+			Files.write(currentSaveLocation, JSON.writeWorkspace().getBytes());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return false;
 		}
+
+//		try (FileWriter file = new FileWriter(currentSaveLocation.toFile())) {
+//			file.write(JSONValue.toJSONString(toMap()));
+//			file.flush();
+//			file.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		return true;
 	}
-	
+
 	public void save(Path path) {
 		currentSaveLocation = path;
 		save();
 	}
-	
-	public static GraphTabbedPane readFromPath(Path path) {
-		Map<String, Object> map = new LinkedHashMap<>();
-		JSONParser parser = new JSONParser();
-		
-		String s = null;
-		try {
-			s = new String(Files.readAllBytes(path));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-				
-		try {
-			map = (Map<String, Object>) parser.parse(s);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return new GraphTabbedPane(map);
-	}
-	
+
+//	public static GraphTabbedPane readFromPath(Path path) {
+//		Map<String, Object> map = new LinkedHashMap<>();
+//		JSONParser parser = new JSONParser();
+//
+//		String s = null;
+//		try {
+//			s = new String(Files.readAllBytes(path));
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		try {
+//			map = (Map<String, Object>) parser.parse(s);
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		return new GraphTabbedPane(map);
+//	}
+
 	private static final Pattern p = Pattern.compile("Untitled ([0-9]+)");
 
 	protected String getNameForNewGraph() {
 		int high = 0;
-		
+
 		for (JPanel panel : tabButtons) {
 			Matcher m = p.matcher(((JButton) panel.getComponent(0)).getText());
 			if (m.find()) {
@@ -192,10 +183,10 @@ public class GraphTabbedPane extends JPanel {
 				} catch (NumberFormatException exception) {}
 			}
 		}
-		
+
 		return "Untitled " + (high + 1);
 	}
-	
+
 	/**
 	 * <ul>
 	 * <li><b><i>addGraph</i></b><br>
@@ -230,7 +221,7 @@ public class GraphTabbedPane extends JPanel {
 		button.setMargin(new Insets(0, 5, 0, 0));
 		button.addActionListener(handle);
 		button.setComponentPopupMenu(tabPopup);
-		
+
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1;
 		c.weighty = 1;
@@ -262,7 +253,7 @@ public class GraphTabbedPane extends JPanel {
 		buttonScrollPane.validate();
 		buttonScrollPane.getHorizontalScrollBar().setValue(buttonScrollPane.getHorizontalScrollBar().getMaximum());
 		buttonScrollPane.repaint();
-		
+
 		graphPane.repaint();
 		Main.refreshWindowSettings();
 	}
@@ -295,7 +286,7 @@ public class GraphTabbedPane extends JPanel {
 
 		tabButtonPanel.revalidate();
 		tabButtonPanel.repaint();
-		
+
 		graphPane.repaint();
 		Main.refreshWindowSettings();
 	}
@@ -303,7 +294,7 @@ public class GraphTabbedPane extends JPanel {
 	public void removeGraph(Graph graph) {
 		removeAtIndex(graphs.indexOf(graph));
 	}
-	
+
 	public void renameGraphAtIndex(int index, String name) {
 		graphs.get(index).name = name;
 		((JButton) tabButtons.get(index).getComponent(0)).setText(name);
@@ -369,8 +360,6 @@ public class GraphTabbedPane extends JPanel {
 			if (currentGraph.axisY)
 				g.fillRect(zeroX - 1, 0, 3, height); // Draw vertical 0 line
 
-			
-
 			if (currentGraph.isImageValid()) {
 				g.drawImage(currentGraph.getImage(), 0, 0, null);
 			} else {
@@ -387,14 +376,14 @@ public class GraphTabbedPane extends JPanel {
 
 			if (e.getSource() == rename) {
 				int i = tabButtons.indexOf(tabPopup.getInvoker().getParent());
-				
+
 				String newGraphName = JOptionPane.showInputDialog(Main.window, "Please input a new name for \"" + graphs.get(i).name + "\":", "Rename Graph", JOptionPane.PLAIN_MESSAGE);
 				if (newGraphName != null && !newGraphName.isEmpty()) {
 					renameGraphAtIndex(i, newGraphName);
 				}
 			} else {
 				int i = tabButtons.indexOf(((Component) e.getSource()).getParent());
-				
+
 				if (e.getActionCommand().equals("\u00D7")) {
 					if (i >= 0 && JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do delete \"" + graphs.get(i).name + "\"?", "Delete graph", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
 						removeAtIndex(i);

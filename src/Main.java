@@ -13,7 +13,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.regex.Matcher;
@@ -49,7 +50,7 @@ public class Main {
 
 	public static JFrame window = new JFrame();
 
-	private static NumberFormat numbers = new DecimalFormat("0");// NumberFormat.getNumberInstance();
+	public static final NumberFormat numbers = new DecimalFormat("0");// NumberFormat.getNumberInstance();
 
 	private static JPanel functionPanel = new JPanel(new GridBagLayout());
 	public static JList<Function> functionList;
@@ -127,7 +128,7 @@ public class Main {
 	private static JMenuItem exit = new JMenuItem("Exit");
 	private static JMenuItem help = new JMenuItem("Help");
 	private static JMenuItem about = new JMenuItem("About");
-	
+
 	private static final FileNameExtensionFilter graphFilter = new FileNameExtensionFilter("Graph", "graph");
 	private static final FileNameExtensionFilter workspaceFilter = new FileNameExtensionFilter("Workspace", "wksp");
 
@@ -195,7 +196,7 @@ public class Main {
 		newWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
 		newWorkspace.addActionListener(menuListener);
 		fileMenu.add(newWorkspace);
-		
+
 		loadWorkspace.setMnemonic(KeyEvent.VK_P);
 		loadWorkspace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK));
 		loadWorkspace.addActionListener(menuListener);
@@ -565,14 +566,14 @@ public class Main {
 		}
 	}
 
-	public static void readFromPath(Path path) {
-		
-	}
-	
+//	public static void readFromPath(Path path) {
+//
+//	}
+
 	protected static class MenuActionHandler implements ActionListener {
 
 		private boolean hasExtension(String filename) {
-			for (int i = filename.length() - 1; i >=0; i--) {
+			for (int i = filename.length() - 1; i >= 0; i--) {
 				if (filename.charAt(i) == ' ')
 					break;
 				if (filename.charAt(i) == '.')
@@ -580,7 +581,7 @@ public class Main {
 			}
 			return false;
 		}
-		
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == newGraph) {
@@ -588,8 +589,13 @@ public class Main {
 			} else if (e.getSource() == openGraph) {
 				fileChooser.setFileFilter(graphFilter);
 				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+
 				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
-					Graph graph = Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+					Graph graph = null;
+					try {
+						graph = JSON.parseGraph(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath()))); // Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+					} catch (IOException exception) {}
+					
 					if (graph == null) {
 						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
@@ -598,7 +604,7 @@ public class Main {
 				}
 			} else if ((e.getSource() == saveGraph && !GraphTabbedPane.pane.getSelectedGraph().save()) || e.getSource() == saveGraphAs) {
 				fileChooser.setFileFilter(graphFilter);
-				
+
 				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
 					if (!hasExtension(file.getName()))
@@ -608,9 +614,8 @@ public class Main {
 			} else if (e.getSource() == saveAllGraphs) {
 				fileChooser.setFileFilter(graphFilter);
 				File cur = fileChooser.getCurrentDirectory();
-				
+
 				for (Graph graph : GraphTabbedPane.pane.graphs) {
-					System.out.println(graph.name);
 					if (!graph.save()) {
 						fileChooser.setSelectedFile(new File(cur.getAbsolutePath() + System.getProperty("file.separator") + graph.name + ".graph"));
 						if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
@@ -620,9 +625,13 @@ public class Main {
 				}
 			} else if (e.getSource() == importGraph) {
 				fileChooser.setFileFilter(graphFilter);
-				
+
 				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
-					Graph graph = Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+					Graph graph = null;
+					try {
+						graph = JSON.parseGraph(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath())));// Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+					} catch (IOException exception) {}
+
 					if (graph == null) {
 						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
@@ -645,26 +654,32 @@ public class Main {
 						GraphTabbedPane.pane.removeAtIndex(0);
 					}
 				}
-			} else if (e.getSource() == newWorkspace) {	
+			} else if (e.getSource() == newWorkspace) {
 				// TODO Prompt to save, then close all graphs.
 			} else if (e.getSource() == loadWorkspace) {
 				fileChooser.setFileFilter(workspaceFilter);
 				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
-					GraphTabbedPane pane = GraphTabbedPane.readFromPath(fileChooser.getSelectedFile().toPath());
-					if (pane == null) {
+//					GraphTabbedPane pane = GraphTabbedPane.readFromPath(fileChooser.getSelectedFile().toPath());
+//					if (pane == null) {
+//						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
+//					} else {
+//						window.remove(GraphTabbedPane.pane);
+//						GraphTabbedPane.pane = pane;
+//						window.add(GraphTabbedPane.pane, BorderLayout.CENTER);
+//						GraphTabbedPane.pane.revalidate();
+//						GraphTabbedPane.pane.repaint();
+//					}
+					
+					try {
+						JSON.parsePane(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath())));
+					} catch (IOException exception) {
 						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
-					} else {
-						window.remove(GraphTabbedPane.pane);
-						GraphTabbedPane.pane = pane;
-						window.add(GraphTabbedPane.pane, BorderLayout.CENTER);
-						GraphTabbedPane.pane.revalidate();
-						GraphTabbedPane.pane.repaint();
 					}
 				}
 			} else if ((e.getSource() == saveWorkspace && !GraphTabbedPane.pane.save()) || e.getSource() == saveWorkspaceAs) {
 				fileChooser.setFileFilter(workspaceFilter);
-				
+
 				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
 					if (!hasExtension(file.getName()))
