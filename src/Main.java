@@ -109,6 +109,7 @@ public class Main {
 
 	private static JMenuBar menuBar = new JMenuBar();
 	private static JMenu fileMenu = new JMenu("File");
+	private static JMenu calculateMenu = new JMenu("Calculate");
 	private static JMenu helpMenu = new JMenu("Help");
 	private static JMenuItem newGraph = new JMenuItem("New Graph");
 	private static JMenuItem openGraph = new JMenuItem("Open Graph...");
@@ -125,6 +126,14 @@ public class Main {
 	private static JMenuItem saveWorkspaceAs = new JMenuItem("Save Workspace As");
 	private static JMenuItem importWorkspace = new JMenuItem("Import Workspace");
 	private static JMenuItem exit = new JMenuItem("Exit");
+	private static JMenuItem calculateY = new JMenuItem("Calculate Y...");
+	private static JMenuItem trace = new JMenuItem("Trace");
+	private static JMenuItem minimum = new JMenuItem("Find Minimum");
+	private static JMenuItem maximum = new JMenuItem("Find Maximum");
+	private static JMenuItem intersect = new JMenuItem("Find Intersection");
+	private static JMenuItem zeroes = new JMenuItem("Find Zeroes");
+	private static JMenuItem derivative = new JMenuItem("Find Derivative");
+	private static JMenuItem integral = new JMenuItem("Find Integral");
 	private static JMenuItem help = new JMenuItem("Help");
 	private static JMenuItem about = new JMenuItem("About");
 
@@ -225,16 +234,26 @@ public class Main {
 		exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK));
 		exit.addActionListener(menuListener);
 		fileMenu.add(exit);
-
+		
 		menuBar.add(fileMenu);
 
+		
+		calculateMenu.setMnemonic(KeyEvent.VK_C);
+
+		calculateY.setMnemonic(KeyEvent.VK_C);
+		calculateY.addActionListener(menuListener);
+		calculateMenu.add(calculateY);
+
+		menuBar.add(calculateMenu);
+		
+		
 		helpMenu.setMnemonic(KeyEvent.VK_H);
 
 		help.setMnemonic(KeyEvent.VK_H);
 		help.addActionListener(menuListener);
 		helpMenu.add(help);
 
-		fileMenu.add(new JSeparator());
+		helpMenu.add(new JSeparator());
 
 		about.setMnemonic(KeyEvent.VK_A);
 		about.addActionListener(menuListener);
@@ -583,6 +602,17 @@ public class Main {
 				// TODO Do this only if there are unsaved changes
 				if (JOptionPane.showConfirmDialog(window, "Are you sure you want to quit?", "Exit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					System.exit(0);
+				}
+			} else if (e.getSource() == calculateY) {
+				if (functionList.getSelectedIndex() < 0) {
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else {
+					String xValue = JOptionPane.showInputDialog(Main.window, "Please input an X value:", "Calculate Y", JOptionPane.PLAIN_MESSAGE);
+					if (xValue != null && !xValue.isEmpty()) {
+						JOptionPane.showMessageDialog(window, functionList.getSelectedValue().evaluate(Double.parseDouble(xValue)), "CalculateY", JOptionPane.PLAIN_MESSAGE);
+					}
 				}
 			} else if (e.getSource() == help) {
 				// TODO Help
