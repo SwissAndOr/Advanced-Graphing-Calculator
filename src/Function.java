@@ -31,6 +31,16 @@ public class Function {
 			return 0;
 		}
 	}
+	
+	public Map<String, Object> toMap() {
+		Map<String, Object> map = new LinkedHashMap<>();
+		map.put("Name", name);
+		map.put("String", string);
+		map.put("Color RGB", color.getRGB());
+		map.put("Thickness", thickness);
+		map.put("Enabled", enabled);
+		return map;
+	}
 
 	@Override
 	public String toString() {

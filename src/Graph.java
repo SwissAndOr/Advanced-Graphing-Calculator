@@ -139,22 +139,6 @@ public class Graph {
 		axisY = newAxisY;
 	}
 
-//	public Graph(Map<String, Object> map) {
-//		name = (String) map.get("Name");
-//		xMin = (double) map.get("xMin");
-//		xMax = (double) map.get("xMax");
-//		yMin = (double) map.get("yMin");
-//		yMax = (double) map.get("yMax");
-//		gridLineIntervalX = (double) map.get("Grid Line Interval X");
-//		gridLineIntervalY = (double) map.get("Grid Line Interval Y");
-//		axisX = (boolean) map.get("Axis X");
-//		axisY = (boolean) map.get("Axis Y");
-//		
-//		JSONArray functionList = (JSONArray) map.get("Functions");
-//		for (Object functionMap : functionList)
-//			functions.add(new Function((Map<String, Object>) functionMap));
-//	}
-
 	public Map<String, Object> toMap() {
 		Map<String, Object> map = new LinkedHashMap<>();
 
@@ -225,15 +209,6 @@ public class Graph {
 			return false;
 		}
 
-//		try (FileWriter file = new FileWriter(currentSaveLocation.toFile())) {
-//			file.write(JSONValue.toJSONString(toMap()));
-//			file.flush();
-//			file.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-
 		return true;
 	}
 
@@ -241,28 +216,6 @@ public class Graph {
 		currentSaveLocation = path;
 		save();
 	}
-
-//	public static Graph readFromPath(Path path) {
-//		Map<String, Object> map = new LinkedHashMap<>();
-//		JSONParser parser = new JSONParser();
-//
-//		String s = null;
-//		try {
-//			s = new String(Files.readAllBytes(path));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		try {
-//			map = (Map<String, Object>) parser.parse(s);
-//		} catch (ParseException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		return new Graph(map);
-//	}
 
 	private class BarPainter extends SwingWorker<Object, Object> {
 

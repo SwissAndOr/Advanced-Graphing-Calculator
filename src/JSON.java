@@ -10,50 +10,7 @@ import java.util.regex.Pattern;
 
 public final class JSON {
 
-	private JSON() {}
-
-/*	public static String writeWithSpace(Object o) {
-		String ret = "";
-		
-		if (o == null) {
-			ret += "null";
-		} else if (o instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) o;
-			
-			ret += "{\n";
-			
-			for (Object key : map.keySet()) {
-				ret += String.format("\t\"%s\": %s,\n", key, writeWithSpace(map.get(key)).replaceAll("(?m)^", "\t").trim());
-			}
-			
-			ret += "}";
-		} else if (o instanceof Iterable<?>) {
-			Iterable<?> i = (Iterable<?>) o;
-			Iterator<?> iter = i.iterator();
-			
-			ret += "[\n";
-			
-			while (iter.hasNext()) {
-				ret += "\t" + writeWithSpace(iter.next()).replaceAll("(?m)^", "\t").trim() + ",\n";
-			}
-			
-			ret += "]";
-		} else if (o instanceof BigDecimal) {
-			ret += ((BigDecimal) o).toString();
-		} else if (o instanceof BigInteger) {
-			ret += ((BigInteger) o).toString();
-		} else if (o instanceof Number) {
-			ret += Main.numbers.format(((Number) o).doubleValue());
-		} else if (o instanceof Boolean) {
-			ret += String.format("%s", o);
-		} else {
-			ret += String.format("\"%s\"", o);
-		}
-		
-		return ret;
-	}
-	*/
-	
+	private JSON() {}	
 	/**
 	 * <ul>
 	 * <li><b><i>write</i></b><br>

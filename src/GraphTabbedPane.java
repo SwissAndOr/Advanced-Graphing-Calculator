@@ -130,15 +130,6 @@ public class GraphTabbedPane extends JPanel {
 			return false;
 		}
 
-//		try (FileWriter file = new FileWriter(currentSaveLocation.toFile())) {
-//			file.write(JSONValue.toJSONString(toMap()));
-//			file.flush();
-//			file.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-
 		return true;
 	}
 
@@ -146,28 +137,6 @@ public class GraphTabbedPane extends JPanel {
 		currentSaveLocation = path;
 		save();
 	}
-
-//	public static GraphTabbedPane readFromPath(Path path) {
-//		Map<String, Object> map = new LinkedHashMap<>();
-//		JSONParser parser = new JSONParser();
-//
-//		String s = null;
-//		try {
-//			s = new String(Files.readAllBytes(path));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		try {
-//			map = (Map<String, Object>) parser.parse(s);
-//		} catch (ParseException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		return new GraphTabbedPane(map);
-//	}
 
 	private static final Pattern p = Pattern.compile("Untitled ([0-9]+)");
 
@@ -262,8 +231,6 @@ public class GraphTabbedPane extends JPanel {
 		graphs.remove(index);
 		tabButtons.remove(index);
 
-		// I'm not sure if the selectedGraph was changed manually here for a reason or not, so I'm leaving it commented
-//		if (selectedGraph >= tabButtons.size()) selectedGraph--;
 		setSelectedIndex(selectedGraph >= tabButtons.size() ? selectedGraph - 1 : selectedGraph);
 
 		tabButtonPanel.removeAll();
