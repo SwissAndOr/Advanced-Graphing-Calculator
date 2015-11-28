@@ -20,14 +20,6 @@ public class Function {
 	public Function(String newName) {
 		name = newName;
 	}
-
-	public Function(Map<String, Object> map) {
-		name = (String) map.get("Name");
-		string = (String) map.get("String");
-		color = new Color(((Number) map.get("Color RGB")).intValue());
-		thickness = ((Number) map.get("Thickness")).intValue();
-		enabled = (boolean) map.get("Enabled");
-	}
 	
 	public double evaluate(double x) {
 		try {
