@@ -1,4 +1,3 @@
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,8 +65,9 @@ public final class JSON {
 		return String.format("{\"name\":\"%s\",\"string\":\"%s\",\"color\":%d,\"thickness\":%d,\"enabled\":%b}", function.name.replaceAll("[\"\\\\]", "\\\\$0"), function.string.replaceAll("[\"\\\\]", "\\\\$0"), function.color.getRGB(), function.thickness, function.enabled);
 	}
 
-	public static boolean parsePane(String string) {
+	public static GraphTabbedPane parsePane(String string) {
 		Map<?, ?> pane = (Map<?, ?>) parse(string).get(0);
+		GraphTabbedPane GTPane = new GraphTabbedPane();
 
 		int selectedGraph = pane.get("selectedgraph") instanceof Number ? ((Number) pane.get("selectedgraph")).intValue() : 0;
 
@@ -81,24 +81,13 @@ public final class JSON {
 			}
 		} catch (ClassCastException | NullPointerException e) {}
 
-//		while (!GraphTabbedPane.graphs.isEmpty())
-//			GraphTabbedPane.removeAtIndex(0);
-
-		Main.window.remove(GraphTabbedPane.pane);
-		
-		GraphTabbedPane.pane = new GraphTabbedPane();
-		
 		for (Graph graph : graphs) {
-			if (graph != null) GraphTabbedPane.pane.addGraph(graph);
+			if (graph != null) GTPane.addGraph(graph);
 		}
 
-		GraphTabbedPane.pane.setSelectedIndex(selectedGraph);
+		GTPane.setSelectedIndex(selectedGraph);
 		
-		Main.window.add(GraphTabbedPane.pane, BorderLayout.CENTER);
-		GraphTabbedPane.pane.revalidate();
-		GraphTabbedPane.pane.repaint();
-		
-		return true;
+		return GTPane;
 	}
 
 	public static Graph parseGraph(String string) {

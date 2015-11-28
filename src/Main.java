@@ -115,7 +115,7 @@ public class Main {
 	private static JMenuItem saveGraph = new JMenuItem("Save Graph");
 	private static JMenuItem saveGraphAs = new JMenuItem("Save Graph As...");
 	private static JMenuItem saveAllGraphs = new JMenuItem("Save All");
-	private static JMenuItem importGraph = new JMenuItem("Import Functions...");
+	private static JMenuItem importFunctions = new JMenuItem("Import Functions...");
 	private static JMenuItem renameGraph = new JMenuItem("Rename Graph...");
 	private static JMenuItem closeGraph = new JMenuItem("Close Graph");
 	private static JMenuItem closeAllGraphs = new JMenuItem("Close All Graphs");
@@ -173,10 +173,10 @@ public class Main {
 		saveAllGraphs.addActionListener(menuListener);
 		fileMenu.add(saveAllGraphs);
 
-		importGraph.setMnemonic(KeyEvent.VK_I);
-		importGraph.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
-		importGraph.addActionListener(menuListener);
-		fileMenu.add(importGraph);
+		importFunctions.setMnemonic(KeyEvent.VK_I);
+		importFunctions.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
+		importFunctions.addActionListener(menuListener);
+		fileMenu.add(importFunctions);
 
 		renameGraph.setMnemonic(KeyEvent.VK_R);
 		renameGraph.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK));
@@ -391,12 +391,7 @@ public class Main {
 
 		sidebar.add(windowPanel);
 
-		applyButton.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-
-			}
-		});
+		applyButton.addActionListener(actionListeners);
 		sidebar.add(applyButton);
 
 		sidebar.setPreferredSize(new Dimension(200, Integer.MAX_VALUE));
@@ -482,6 +477,7 @@ public class Main {
 				}
 			} else if ((e.getSource() == saveGraph && !GraphTabbedPane.pane.getSelectedGraph().save()) || e.getSource() == saveGraphAs) {
 				fileChooser.setFileFilter(graphFilter);
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 
 				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
@@ -491,6 +487,7 @@ public class Main {
 				}
 			} else if (e.getSource() == saveAllGraphs) {
 				fileChooser.setFileFilter(graphFilter);
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 				File cur = fileChooser.getCurrentDirectory();
 
 				for (Graph graph : GraphTabbedPane.pane.graphs) {
@@ -501,8 +498,9 @@ public class Main {
 						}
 					}
 				}
-			} else if (e.getSource() == importGraph) {
+			} else if (e.getSource() == importFunctions) {
 				fileChooser.setFileFilter(graphFilter);
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 
 				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
 					Graph graph = null;
@@ -514,6 +512,9 @@ public class Main {
 						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
 						GraphTabbedPane.pane.getSelectedGraph().functions.addAll(graph.functions);
+						functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+						GraphTabbedPane.pane.getSelectedGraph().invalidate();
+						GraphTabbedPane.pane.graphPane.repaint();
 					}
 				}
 			} else if (e.getSource() == renameGraph) {
@@ -539,13 +540,20 @@ public class Main {
 				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {					
 					try {
-						JSON.parsePane(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath())));
+						window.remove(GraphTabbedPane.pane);
+						
+						GraphTabbedPane.pane = JSON.parsePane(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath())));
+						
+						window.add(GraphTabbedPane.pane, BorderLayout.CENTER);
+						GraphTabbedPane.pane.revalidate();
+						GraphTabbedPane.pane.repaint();
 					} catch (IOException exception) {
 						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			} else if ((e.getSource() == saveWorkspace && !GraphTabbedPane.pane.save()) || e.getSource() == saveWorkspaceAs) {
 				fileChooser.setFileFilter(workspaceFilter);
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 
 				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
@@ -555,6 +563,22 @@ public class Main {
 				}
 			} else if (e.getSource() == importWorkspace) {
 				// TODO Open workspace, read all graphs, and add each one to GraphTabbedPane
+				fileChooser.setFileFilter(workspaceFilter);
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+
+				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
+					GraphTabbedPane pane = null;
+					try {
+						pane = JSON.parsePane(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath())));// Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+					} catch (IOException exception) {}
+
+					if (pane == null) {
+						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
+					} else {
+						for (Graph graph : pane.graphs)
+							GraphTabbedPane.pane.addGraph(graph);
+					}
+				}
 			} else if (e.getSource() == exit) {
 				// TODO Do this only if there are unsaved changes
 				if (JOptionPane.showConfirmDialog(window, "Are you sure you want to quit?", "Exit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
