@@ -13,7 +13,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,35 +33,38 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
-@SuppressWarnings("serial")
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+@SuppressWarnings({"serial", "unchecked"})
 public class GraphTabbedPane extends JPanel {
-	public static Vector<Graph> graphs = new Vector<>();
-	private static int selectedGraph;
-	private static Path currentSaveLocation = null;
+	public Vector<Graph> graphs = new Vector<>();
+	private int selectedGraph;
+	private Path currentSaveLocation = null;
 
-	private static JPanel tabPanel = new JPanel(new GridBagLayout());
-	private static JPanel tabButtonPanel = new JPanel(new GridBagLayout());
-	private static JScrollPane buttonScrollPane = new JScrollPane(tabButtonPanel, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+	private JPanel tabPanel = new JPanel(new GridBagLayout());
+	private JPanel tabButtonPanel = new JPanel(new GridBagLayout());
+	private JScrollPane buttonScrollPane = new JScrollPane(tabButtonPanel, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
-	private static Vector<JPanel> tabButtons = new Vector<>();
+	private Vector<JPanel> tabButtons = new Vector<>();
 
-	private static JPopupMenu tabPopup = new JPopupMenu();
-	private static JMenuItem rename = new JMenuItem("Rename");
+	private JPopupMenu tabPopup = new JPopupMenu();
+	private JMenuItem rename = new JMenuItem("Rename");
 
-	private static JButton addButton = new JButton("+");
+	private JButton addButton = new JButton("+");
 
-	public static GraphPane graphPane = new GraphPane();
+	public GraphPane graphPane = new GraphPane();
 
-	private static final TabHandler handle = new TabHandler();
+	private final TabHandler handle = new TabHandler();
 
-	private static JPanel space = new JPanel();
+	private JPanel space = new JPanel();
 
-	public static GraphTabbedPane pane = tabPane();
+	public static GraphTabbedPane pane = new GraphTabbedPane();
 
-	private static GraphTabbedPane tabPane() {
-		GraphTabbedPane pane = new GraphTabbedPane();
-
-		pane.setLayout(new BorderLayout());
+	public GraphTabbedPane() {
+		setLayout(new BorderLayout());
 
 		tabPopup.add(rename);
 		rename.addActionListener(handle);
@@ -91,11 +100,11 @@ public class GraphTabbedPane extends JPanel {
 		c.weightx = 0;
 		tabPanel.add(addButton, c);
 
-		pane.add(tabPanel, BorderLayout.PAGE_START);
+		add(tabPanel, BorderLayout.PAGE_START);
 
-		pane.add(graphPane);
+		add(graphPane);
 
-		pane.addComponentListener(new ComponentAdapter() {
+		addComponentListener(new ComponentAdapter() {
 
 			@Override
 			public void componentResized(ComponentEvent e) {
@@ -104,15 +113,74 @@ public class GraphTabbedPane extends JPanel {
 				}
 			}
 		});
-
-		return pane;
 	}
 
-	private GraphTabbedPane() {}
+	public GraphTabbedPane(Map<String, Object> map) {
+		this();
+		
+		JSONArray graphList = (JSONArray) map.get("Graphs");
+		for (Object graphMap : graphList)
+			addGraph(new Graph((Map<String, Object>) graphMap));
+		setSelectedIndex(graphs.size() > 0 ? 0 : -1);
+	}
+	
+	public Map<String, Object> toMap() {
+		Map<String, Object> map = new LinkedHashMap<>();
+		
+		LinkedList<Map<String, Object>> graphList = new LinkedList<>();
+		for (Graph graph : graphs)
+			graphList.add(graph.toMap());
+		map.put("Graphs", graphList);
+		
+		return map;
+	}
+	
+	public boolean save() {
+		if (currentSaveLocation == null) 
+			return false;
+		
+		try (FileWriter file = new FileWriter(currentSaveLocation.toFile())) {
+			file.write(JSONValue.toJSONString(toMap()));
+			file.flush();
+			file.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
+		return true;
+	}
+	
+	public void save(Path path) {
+		currentSaveLocation = path;
+		save();
+	}
+	
+	public static GraphTabbedPane readFromPath(Path path) {
+		Map<String, Object> map = new LinkedHashMap<>();
+		JSONParser parser = new JSONParser();
+		
+		String s = null;
+		try {
+			s = new String(Files.readAllBytes(path));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+				
+		try {
+			map = (Map<String, Object>) parser.parse(s);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return new GraphTabbedPane(map);
+	}
+	
 	private static final Pattern p = Pattern.compile("Untitled ([0-9]+)");
 
-	protected static String getNameForNewGraph() {
+	protected String getNameForNewGraph() {
 		int high = 0;
 		
 		for (JPanel panel : tabButtons) {
@@ -132,14 +200,14 @@ public class GraphTabbedPane extends JPanel {
 	 * <ul>
 	 * <li><b><i>addGraph</i></b><br>
 	 * <br>
-	 * {@code public static void addGraph(Graph graph)}<br>
+	 * {@code public void addGraph(Graph graph)}<br>
 	 * <br>
 	 * Adds a new graph to this {@link GraphTabbedPane}. This method should be used for most purposes, instead of directly using
 	 * {@link graphs}{@code .addElement()}, because this revalidates the pane as well.<br>
 	 * @param graph The graph to add
 	 *        </ul>
 	 */
-	public static void addGraph(Graph graph) {
+	public void addGraph(Graph graph) {
 		graphs.addElement(graph);
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -199,7 +267,7 @@ public class GraphTabbedPane extends JPanel {
 		Main.refreshWindowSettings();
 	}
 
-	public static void removeAtIndex(int index) {
+	public void removeAtIndex(int index) {
 		graphs.remove(index);
 		tabButtons.remove(index);
 
@@ -232,21 +300,21 @@ public class GraphTabbedPane extends JPanel {
 		Main.refreshWindowSettings();
 	}
 
-	public static void removeGraph(Graph graph) {
+	public void removeGraph(Graph graph) {
 		removeAtIndex(graphs.indexOf(graph));
 	}
 	
-	public static void renameGraphAtIndex(int index, String name) {
+	public void renameGraphAtIndex(int index, String name) {
 		graphs.get(index).name = name;
 		((JButton) tabButtons.get(index).getComponent(0)).setText(name);
 		tabButtons.get(index).repaint();
 	}
 
-	public static int getSelectedIndex() {
+	public int getSelectedIndex() {
 		return selectedGraph;
 	}
 
-	public static void setSelectedIndex(int index) {
+	public void setSelectedIndex(int index) {
 		for (int i = 0; i < tabButtons.size(); i++) {
 			tabButtons.get(i).setBackground(index != i ? new Color(238, 238, 238) : new Color(200, 221, 242));
 		}
@@ -256,15 +324,15 @@ public class GraphTabbedPane extends JPanel {
 		if (Main.functionList != null) Main.functionList.setListData(selectedGraph >= 0 ? graphs.get(selectedGraph).functions : new Vector<Function>());
 	}
 
-	public static Graph getSelectedGraph() {
+	public Graph getSelectedGraph() {
 		return graphs.get(selectedGraph);
 	}
 
-	public static Dimension getGraphSize() {
+	public Dimension getGraphSize() {
 		return graphPane.getSize();
 	}
 
-	protected static class GraphPane extends JComponent {
+	protected class GraphPane extends JComponent {
 
 		@Override
 		protected void paintComponent(Graphics gg) { // TODO: Possibly further optimize graphing
@@ -312,7 +380,7 @@ public class GraphTabbedPane extends JPanel {
 
 	}
 
-	protected static class TabHandler implements ActionListener {
+	protected class TabHandler implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -337,6 +405,5 @@ public class GraphTabbedPane extends JPanel {
 				}
 			}
 		}
-
 	}
 }

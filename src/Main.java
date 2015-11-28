@@ -128,8 +128,8 @@ public class Main {
 	private static JMenuItem help = new JMenuItem("Help");
 	private static JMenuItem about = new JMenuItem("About");
 	
-	private static final FileNameExtensionFilter graphFilter = new FileNameExtensionFilter("Graphs", ".graph");
-	private static final FileNameExtensionFilter workspaceFilter = new FileNameExtensionFilter("Workspaces", ".wksp");
+	private static final FileNameExtensionFilter graphFilter = new FileNameExtensionFilter("Graph", "graph");
+	private static final FileNameExtensionFilter workspaceFilter = new FileNameExtensionFilter("Workspace", "wksp");
 
 	private static final MenuActionHandler menuListener = new MenuActionHandler();
 	private static JFileChooser fileChooser = new JFileChooser();
@@ -142,7 +142,7 @@ public class Main {
 		window.setSize(677, 530);
 		window.setTitle("Advanced Graphing Calculator");
 
-		// This can be set to something else if 340 is too many. Do not go over 340
+		// This can be set to something else if 340 is too many. Do not go over 340. Do not build the seventh row.
 		numbers.setMaximumFractionDigits(340);
 
 		fileMenu.setMnemonic(KeyEvent.VK_F);
@@ -259,26 +259,26 @@ public class Main {
 		yMax.addMouseListener(formattedListener);
 		yMax.addMouseListener(formattedListener);
 
-		GraphTabbedPane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
-		GraphTabbedPane.getSelectedGraph().functions.add(new Function("Function"));
+		GraphTabbedPane.pane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
+		GraphTabbedPane.pane.getSelectedGraph().functions.add(new Function("Function"));
 
-		functionList = new JList<>(GraphTabbedPane.getSelectedGraph().functions);
+		functionList = new JList<>(GraphTabbedPane.pane.getSelectedGraph().functions);
 		functionList.addListSelectionListener(new ListSelectionListener() {
 
 			public void valueChanged(ListSelectionEvent e) {
 				if (!functionList.getValueIsAdjusting()) {
 					if (functionList.getSelectedIndex() != -1) {
-						functionTextField.setText(GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).string);
-						selectedColor = GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color;
+						functionTextField.setText(GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).string);
+						selectedColor = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color;
 						colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
-						thicknessSlider.setValue(GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).thickness);
+						thicknessSlider.setValue(GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).thickness);
 
 						if (functionList.getSelectedIndex() == 0)
 							functionUp.setEnabled(false);
 						else
 							functionUp.setEnabled(true);
 
-						if (functionList.getSelectedIndex() == GraphTabbedPane.getSelectedGraph().functions.size() - 1)
+						if (functionList.getSelectedIndex() == GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1)
 							functionDown.setEnabled(false);
 						else
 							functionDown.setEnabled(true);
@@ -306,8 +306,8 @@ public class Main {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getX() > 140) {
 					e.consume();
-					GraphTabbedPane.getSelectedGraph().functions.get(e.getY() / 30).enabled ^= true;
-					functionList.setListData(GraphTabbedPane.getSelectedGraph().functions);
+					GraphTabbedPane.pane.getSelectedGraph().functions.get(e.getY() / 30).enabled ^= true;
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
 				}
 			}
 		});
@@ -333,9 +333,9 @@ public class Main {
 				int i = functionList.getSelectedIndex();
 				if (i > 0) {
 					functionList.setValueIsAdjusting(true);
-					GraphTabbedPane.getSelectedGraph().functions.add(i - 1, GraphTabbedPane.getSelectedGraph().functions.get(i));
-					GraphTabbedPane.getSelectedGraph().functions.remove(i + 1);
-					functionList.setListData(GraphTabbedPane.getSelectedGraph().functions);
+					GraphTabbedPane.pane.getSelectedGraph().functions.add(i - 1, GraphTabbedPane.pane.getSelectedGraph().functions.get(i));
+					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i + 1);
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
 					functionList.setSelectedIndex(i - 1);
 					functionList.setValueIsAdjusting(false);
 
@@ -354,15 +354,15 @@ public class Main {
 
 			public void actionPerformed(ActionEvent e) {
 				int i = functionList.getSelectedIndex();
-				if (i < GraphTabbedPane.getSelectedGraph().functions.size() - 1) {
+				if (i < GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1) {
 					functionList.setValueIsAdjusting(true);
-					GraphTabbedPane.getSelectedGraph().functions.add(i + 2, GraphTabbedPane.getSelectedGraph().functions.get(i));
-					GraphTabbedPane.getSelectedGraph().functions.remove(i);
-					functionList.setListData(GraphTabbedPane.getSelectedGraph().functions);
+					GraphTabbedPane.pane.getSelectedGraph().functions.add(i + 2, GraphTabbedPane.pane.getSelectedGraph().functions.get(i));
+					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i);
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
 					functionList.setSelectedIndex(i + 1);
 					functionList.setValueIsAdjusting(false);
 
-					if (functionList.getSelectedIndex() != GraphTabbedPane.getSelectedGraph().functions.size() - 1)
+					if (functionList.getSelectedIndex() != GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1)
 						functionUp.setEnabled(true);
 					else
 						functionDown.setEnabled(false);
@@ -378,7 +378,7 @@ public class Main {
 			public void actionPerformed(ActionEvent e) {
 				int high = 0;
 
-				for (Function function : GraphTabbedPane.getSelectedGraph().functions) {
+				for (Function function : GraphTabbedPane.pane.getSelectedGraph().functions) {
 					Matcher m = p.matcher(function.name);
 					if (m.find()) {
 						try {
@@ -389,9 +389,9 @@ public class Main {
 				}
 
 				functionList.setValueIsAdjusting(true);
-				GraphTabbedPane.getSelectedGraph().functions.add(new Function("Untitled " + (high + 1)));
-				functionList.setListData(GraphTabbedPane.getSelectedGraph().functions);
-				functionList.setSelectedIndex(GraphTabbedPane.getSelectedGraph().functions.size() - 1);
+				GraphTabbedPane.pane.getSelectedGraph().functions.add(new Function("Untitled " + (high + 1)));
+				functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+				functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1);
 				functionList.setValueIsAdjusting(false);
 
 				functionList.getListSelectionListeners()[0].valueChanged(null);
@@ -406,9 +406,9 @@ public class Main {
 				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete \"" + functionList.getSelectedValue().name + "\"?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					functionList.setValueIsAdjusting(true);
 					int i = functionList.getSelectedIndex();
-					GraphTabbedPane.getSelectedGraph().functions.remove(i);
-					functionList.setListData(GraphTabbedPane.getSelectedGraph().functions);
-					functionList.setSelectedIndex(GraphTabbedPane.getSelectedGraph().functions.size() > 0 ? Math.max(i - 1, 0) : -1);
+					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i);
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+					functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().functions.size() > 0 ? Math.max(i - 1, 0) : -1);
 					functionList.setValueIsAdjusting(false);
 
 					functionList.getListSelectionListeners()[0].valueChanged(null);
@@ -441,9 +441,9 @@ public class Main {
 		colorChooserButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				selectedColor = JColorChooser.showDialog(null, "Color Chooser", GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color);
+				selectedColor = JColorChooser.showDialog(null, "Color Chooser", GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color);
 				if (selectedColor == null)
-					selectedColor = GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color;
+					selectedColor = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color;
 				else
 					colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
 			}
@@ -491,27 +491,27 @@ public class Main {
 				functionList.repaint();
 
 				if (functionList.getSelectedIndex() >= 0) {
-					Function currentFunc = GraphTabbedPane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
+					Function currentFunc = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
 					currentFunc.string = functionTextField.getText();
 					currentFunc.color = selectedColor;
 					currentFunc.thickness = thicknessSlider.getValue();
 
 					if (!currentFunc.string.equals(functionTextField.getText()) || !currentFunc.color.equals(selectedColor) || currentFunc.thickness != thicknessSlider.getValue()) {
-						GraphTabbedPane.getSelectedGraph().invalidate();
+						GraphTabbedPane.pane.getSelectedGraph().invalidate();
 					}
 				}
 
-				GraphTabbedPane.getSelectedGraph().xMin = Double.parseDouble(xMin.getText());
-				GraphTabbedPane.getSelectedGraph().xMax = Double.parseDouble(xMax.getText());
-				GraphTabbedPane.getSelectedGraph().yMin = Double.parseDouble(yMin.getText());
-				GraphTabbedPane.getSelectedGraph().yMax = Double.parseDouble(yMax.getText());
-				GraphTabbedPane.getSelectedGraph().gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
-				GraphTabbedPane.getSelectedGraph().gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
-				GraphTabbedPane.getSelectedGraph().axisX = axisX.isSelected();
-				GraphTabbedPane.getSelectedGraph().axisY = axisY.isSelected();
+				GraphTabbedPane.pane.getSelectedGraph().xMin = Double.parseDouble(xMin.getText());
+				GraphTabbedPane.pane.getSelectedGraph().xMax = Double.parseDouble(xMax.getText());
+				GraphTabbedPane.pane.getSelectedGraph().yMin = Double.parseDouble(yMin.getText());
+				GraphTabbedPane.pane.getSelectedGraph().yMax = Double.parseDouble(yMax.getText());
+				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
+				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
+				GraphTabbedPane.pane.getSelectedGraph().axisX = axisX.isSelected();
+				GraphTabbedPane.pane.getSelectedGraph().axisY = axisY.isSelected();
 
-				GraphTabbedPane.getSelectedGraph().invalidate();
-				GraphTabbedPane.graphPane.repaint();
+				GraphTabbedPane.pane.getSelectedGraph().invalidate();
+				GraphTabbedPane.pane.graphPane.repaint();
 			}
 		});
 		sidebar.add(applyButton);
@@ -529,14 +529,14 @@ public class Main {
 
 	public static void refreshWindowSettings() {
 		try {
-			xMin.setText(numbers.format(GraphTabbedPane.getSelectedGraph().xMin));
-			xMax.setText(numbers.format(GraphTabbedPane.getSelectedGraph().xMax));
-			yMin.setText(numbers.format(GraphTabbedPane.getSelectedGraph().yMin));
-			yMax.setText(numbers.format(GraphTabbedPane.getSelectedGraph().yMax));
-			gridLineIntervalX.setText(numbers.format(GraphTabbedPane.getSelectedGraph().gridLineIntervalX));
-			gridLineIntervalY.setText(numbers.format(GraphTabbedPane.getSelectedGraph().gridLineIntervalY));
-			axisX.setSelected(GraphTabbedPane.getSelectedGraph().axisX);
-			axisY.setSelected(GraphTabbedPane.getSelectedGraph().axisY);
+			xMin.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().xMin));
+			xMax.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().xMax));
+			yMin.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().yMin));
+			yMax.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().yMax));
+			gridLineIntervalX.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalX));
+			gridLineIntervalY.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalY));
+			axisX.setSelected(GraphTabbedPane.pane.getSelectedGraph().axisX);
+			axisY.setSelected(GraphTabbedPane.pane.getSelectedGraph().axisY);
 
 			for (Component component : windowPanel.getComponents()) {
 				component.setEnabled(true);
@@ -571,10 +571,20 @@ public class Main {
 	
 	protected static class MenuActionHandler implements ActionListener {
 
+		private boolean hasExtension(String filename) {
+			for (int i = filename.length() - 1; i >=0; i--) {
+				if (filename.charAt(i) == ' ')
+					break;
+				if (filename.charAt(i) == '.')
+					return true;
+			}
+			return false;
+		}
+		
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == newGraph) {
-				GraphTabbedPane.addGraph(new Graph(GraphTabbedPane.getNameForNewGraph(), -5, 5, -5, 5, 1, 1, true, true));
+				GraphTabbedPane.pane.addGraph(new Graph(GraphTabbedPane.pane.getNameForNewGraph(), -5, 5, -5, 5, 1, 1, true, true));
 			} else if (e.getSource() == openGraph) {
 				fileChooser.setFileFilter(graphFilter);
 				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
@@ -583,25 +593,28 @@ public class Main {
 					if (graph == null) {
 						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
-						GraphTabbedPane.addGraph(graph);
+						GraphTabbedPane.pane.addGraph(graph);
 					}
 				}
-			} else if ((e.getSource() == saveGraph && !GraphTabbedPane.getSelectedGraph().save()) || e.getSource() == saveGraphAs) {
+			} else if ((e.getSource() == saveGraph && !GraphTabbedPane.pane.getSelectedGraph().save()) || e.getSource() == saveGraphAs) {
 				fileChooser.setFileFilter(graphFilter);
 				
 				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
-					GraphTabbedPane.getSelectedGraph().save(fileChooser.getSelectedFile().toPath());
+					File file = fileChooser.getSelectedFile();
+					if (!hasExtension(file.getName()))
+						file = new File(file.getPath() + ".graph");
+					GraphTabbedPane.pane.getSelectedGraph().save(file.toPath());
 				}
 			} else if (e.getSource() == saveAllGraphs) {
 				fileChooser.setFileFilter(graphFilter);
 				File cur = fileChooser.getCurrentDirectory();
 				
-				for (Graph graph : GraphTabbedPane.graphs) {
+				for (Graph graph : GraphTabbedPane.pane.graphs) {
 					System.out.println(graph.name);
 					if (!graph.save()) {
 						fileChooser.setSelectedFile(new File(cur.getAbsolutePath() + System.getProperty("file.separator") + graph.name + ".graph"));
 						if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
-							GraphTabbedPane.getSelectedGraph().save(fileChooser.getSelectedFile().toPath());
+							GraphTabbedPane.pane.getSelectedGraph().save(fileChooser.getSelectedFile().toPath());
 						}
 					}
 				}
@@ -613,38 +626,51 @@ public class Main {
 					if (graph == null) {
 						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
-						GraphTabbedPane.getSelectedGraph().functions.addAll(graph.functions);
+						GraphTabbedPane.pane.getSelectedGraph().functions.addAll(graph.functions);
 					}
 				}
 			} else if (e.getSource() == renameGraph) {
-				String newGraphName = JOptionPane.showInputDialog(Main.window, "Please input a new name for \"" + GraphTabbedPane.getSelectedGraph().name + "\":", "Rename Graph", JOptionPane.PLAIN_MESSAGE);
+				String newGraphName = JOptionPane.showInputDialog(Main.window, "Please input a new name for \"" + GraphTabbedPane.pane.getSelectedGraph().name + "\":", "Rename Graph", JOptionPane.PLAIN_MESSAGE);
 				if (newGraphName != null && !newGraphName.isEmpty()) {
-					GraphTabbedPane.renameGraphAtIndex(GraphTabbedPane.getSelectedIndex(), newGraphName);
+					GraphTabbedPane.pane.renameGraphAtIndex(GraphTabbedPane.pane.getSelectedIndex(), newGraphName);
 				}
 			} else if (e.getSource() == closeGraph) {
 				// TODO Prompt to save
-				if (JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do close \"" + GraphTabbedPane.getSelectedGraph().name + "\"?", "Close graph", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
-					GraphTabbedPane.removeAtIndex(GraphTabbedPane.getSelectedIndex());
+				if (JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do close \"" + GraphTabbedPane.pane.getSelectedGraph().name + "\"?", "Close graph", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
+					GraphTabbedPane.pane.removeAtIndex(GraphTabbedPane.pane.getSelectedIndex());
 			} else if (e.getSource() == closeAllGraphs) {
 				// TODO Prompt to save
 				if (JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do close all your graphs?", "Close all graphs", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-					while (!GraphTabbedPane.graphs.isEmpty()) {
-						GraphTabbedPane.removeAtIndex(0);
+					while (!GraphTabbedPane.pane.graphs.isEmpty()) {
+						GraphTabbedPane.pane.removeAtIndex(0);
 					}
 				}
 			} else if (e.getSource() == newWorkspace) {	
 				// TODO Prompt to save, then close all graphs.
 			} else if (e.getSource() == loadWorkspace) {
-				// TODO Prompt to save
+				fileChooser.setFileFilter(workspaceFilter);
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
+					GraphTabbedPane pane = GraphTabbedPane.readFromPath(fileChooser.getSelectedFile().toPath());
+					if (pane == null) {
+						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
+					} else {
+						window.remove(GraphTabbedPane.pane);
+						GraphTabbedPane.pane = pane;
+						window.add(GraphTabbedPane.pane, BorderLayout.CENTER);
+						GraphTabbedPane.pane.revalidate();
+						GraphTabbedPane.pane.repaint();
+					}
+				}
+			} else if ((e.getSource() == saveWorkspace && !GraphTabbedPane.pane.save()) || e.getSource() == saveWorkspaceAs) {
 				fileChooser.setFileFilter(workspaceFilter);
 				
-				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
-					readFromPath(fileChooser.getSelectedFile().toPath());
+				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
+					File file = fileChooser.getSelectedFile();
+					if (!hasExtension(file.getName()))
+						file = new File(file.getPath() + ".wksp");
+					GraphTabbedPane.pane.save(file.toPath());
 				}
-			} else if (e.getSource() == saveWorkspace) {
-				// TODO Save workspace to currentSaveLocation. If it doesn't exist, save as
-			} else if (e.getSource() == saveWorkspaceAs) {
-				// TODO JFileChooser to select location to save to. Set currentFileLocation to said location
 			} else if (e.getSource() == importWorkspace) {
 				// TODO Open workspace, read all graphs, and add each one to GraphTabbedPane
 			} else if (e.getSource() == exit) {

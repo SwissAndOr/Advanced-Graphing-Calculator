@@ -21,8 +21,8 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+@SuppressWarnings("unchecked")
 public class Graph {
-
 	public String name = null;
 	public Vector<Function> functions = new Vector<>();
 
@@ -46,7 +46,7 @@ public class Graph {
 		public void run() {
 			BarPainter bp = new BarPainter();
 
-			Dimension dim = GraphTabbedPane.getGraphSize();
+			Dimension dim = GraphTabbedPane.pane.getGraphSize();
 			BufferedImage newImage = new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB);
 
 			List<Function> validFunctions = new ArrayList<>();
@@ -144,6 +144,43 @@ public class Graph {
 		axisX = newAxisX;
 		axisY = newAxisY;
 	}
+	
+	public Graph(Map<String, Object> map) {
+		name = (String) map.get("Name");
+		xMin = (double) map.get("xMin");
+		xMax = (double) map.get("xMax");
+		yMin = (double) map.get("yMin");
+		yMax = (double) map.get("yMax");
+		gridLineIntervalX = (double) map.get("Grid Line Interval X");
+		gridLineIntervalY = (double) map.get("Grid Line Interval Y");
+		axisX = (boolean) map.get("Axis X");
+		axisY = (boolean) map.get("Axis Y");
+		
+		JSONArray functionList = (JSONArray) map.get("Functions");
+		for (Object functionMap : functionList)
+			functions.add(new Function((Map<String, Object>) functionMap));
+	}
+	
+	public Map<String, Object> toMap() {
+		Map<String, Object> map = new LinkedHashMap<>();
+		
+		map.put("Name", name);
+		map.put("xMin", xMin);
+		map.put("xMax", xMax);
+		map.put("yMin", yMin);
+		map.put("yMax", yMax);
+		map.put("Grid Line Interval X", gridLineIntervalX);
+		map.put("Grid Line Interval Y", gridLineIntervalY);
+		map.put("Axis X", axisX);
+		map.put("Axis Y", axisY);
+		
+		LinkedList<Map<String, Object>> functionList = new LinkedList<>();
+		for (Function function : functions)
+			functionList.add(function.toMap());
+		map.put("Functions", functionList);
+		
+		return map;
+	}
 
 	public void invalidate() {
 		imageValid = false;
@@ -188,25 +225,8 @@ public class Graph {
 		if (currentSaveLocation == null) 
 			return false;
 		
-		Map<String, Object> obj = new LinkedHashMap<>();
-		
-		obj.put("Name", name);
-		obj.put("xMin", xMin);
-		obj.put("xMax", xMax);
-		obj.put("yMin", yMin);
-		obj.put("yMax", yMax);
-		obj.put("Grid Line Interval X", gridLineIntervalX);
-		obj.put("Grid Line Interval Y", gridLineIntervalY);
-		obj.put("Axis X", axisX);
-		obj.put("Axis Y", axisY);
-		
-		LinkedList<Map<String, Object>> functionsList = new LinkedList<>();
-		for (Function function : functions)
-			functionsList.add(function.toMap());
-		obj.put("Functions", functionsList);
-		
 		try (FileWriter file = new FileWriter(currentSaveLocation.toFile())) {
-			file.write(JSONValue.toJSONString(obj));
+			file.write(JSONValue.toJSONString(toMap()));
 			file.flush();
 			file.close();
 		} catch (IOException e) {
@@ -214,7 +234,6 @@ public class Graph {
 			e.printStackTrace();
 		}
 
-		System.out.println(JSONValue.toJSONString(obj));
 		return true;
 	}
 
@@ -224,10 +243,8 @@ public class Graph {
 	}
 	
 	public static Graph readFromPath(Path path) {
-		Map<String, Object> obj = new LinkedHashMap<>();
-		JSONArray functionsList = new JSONArray();
+		Map<String, Object> map = new LinkedHashMap<>();
 		JSONParser parser = new JSONParser();
-		Graph newGraph = new Graph();
 		
 		String s = null;
 		try {
@@ -238,27 +255,13 @@ public class Graph {
 		}
 				
 		try {
-			obj = (Map<String, Object>) parser.parse(s);
+			map = (Map<String, Object>) parser.parse(s);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		newGraph.name = (String) obj.get("Name");
-		newGraph.xMin = (double) obj.get("xMin");
-		newGraph.xMax = (double) obj.get("xMax");
-		newGraph.yMin = (double) obj.get("yMin");
-		newGraph.yMax = (double) obj.get("yMax");
-		newGraph.gridLineIntervalX = (double) obj.get("Grid Line Interval X");
-		newGraph.gridLineIntervalY = (double) obj.get("Grid Line Interval Y");
-		newGraph.axisX = (boolean) obj.get("Axis X");
-		newGraph.axisY = (boolean) obj.get("Axis Y");
-		
-		functionsList = (JSONArray) obj.get("Functions");
-		for (Object map : functionsList)
-			newGraph.functions.add(new Function((Map<String, Object>) map));
-		
-		return newGraph;
+		return new Graph(map);
 	}
 
 	private class BarPainter extends SwingWorker<Object, Object> {
