@@ -127,13 +127,13 @@ public class Main {
 	private static JMenuItem importWorkspace = new JMenuItem("Import Workspace");
 	private static JMenuItem exit = new JMenuItem("Exit");
 	private static JMenuItem calculateY = new JMenuItem("Calculate Y...");
-	private static JMenuItem trace = new JMenuItem("Trace");
-	private static JMenuItem minimum = new JMenuItem("Find Minimum");
-	private static JMenuItem maximum = new JMenuItem("Find Maximum");
-	private static JMenuItem intersect = new JMenuItem("Find Intersection");
-	private static JMenuItem zeroes = new JMenuItem("Find Zeroes");
-	private static JMenuItem derivative = new JMenuItem("Find Derivative");
-	private static JMenuItem integral = new JMenuItem("Find Integral");
+	private static JMenuItem trace = new JMenuItem("Trace Function");
+	private static JMenuItem minimum = new JMenuItem("Find Minimum...");
+	private static JMenuItem maximum = new JMenuItem("Find Maximum...");
+	private static JMenuItem intersect = new JMenuItem("Find Intersection...");
+	private static JMenuItem zeroes = new JMenuItem("Find Zeroes...");
+	private static JMenuItem derivative = new JMenuItem("Find Derivative...");
+	private static JMenuItem integral = new JMenuItem("Find Integral...");
 	private static JMenuItem help = new JMenuItem("Help");
 	private static JMenuItem about = new JMenuItem("About");
 
@@ -244,6 +244,37 @@ public class Main {
 		calculateY.addActionListener(menuListener);
 		calculateMenu.add(calculateY);
 
+		trace.setMnemonic(KeyEvent.VK_T);
+		trace.addActionListener(menuListener);
+		calculateMenu.add(trace);
+		
+		minimum.setMnemonic(KeyEvent.VK_M);
+		minimum.addActionListener(menuListener);
+		calculateMenu.add(minimum);
+		
+		maximum.setMnemonic(KeyEvent.VK_X);
+		maximum.addActionListener(menuListener);
+		calculateMenu.add(maximum);
+		
+		intersect.setMnemonic(KeyEvent.VK_I);
+		intersect.setDisplayedMnemonicIndex(5);
+		intersect.addActionListener(menuListener);
+		calculateMenu.add(intersect);
+		
+		zeroes.setMnemonic(KeyEvent.VK_Z);
+		zeroes.addActionListener(menuListener);
+		calculateMenu.add(zeroes);
+		
+		derivative.setMnemonic(KeyEvent.VK_D);
+		derivative.setDisplayedMnemonicIndex(5);
+		derivative.addActionListener(menuListener);
+		calculateMenu.add(derivative);
+		
+		integral.setMnemonic(KeyEvent.VK_N);
+		integral.setDisplayedMnemonicIndex(6);
+		integral.addActionListener(menuListener);
+		calculateMenu.add(integral);
+		
 		menuBar.add(calculateMenu);
 		
 		
@@ -611,8 +642,52 @@ public class Main {
 				} else {
 					String xValue = JOptionPane.showInputDialog(Main.window, "Please input an X value:", "Calculate Y", JOptionPane.PLAIN_MESSAGE);
 					if (xValue != null && !xValue.isEmpty()) {
-						JOptionPane.showMessageDialog(window, functionList.getSelectedValue().evaluate(Double.parseDouble(xValue)), "CalculateY", JOptionPane.PLAIN_MESSAGE);
+						JOptionPane.showMessageDialog(window, functionList.getSelectedValue().evaluate(Double.parseDouble(xValue)), "Calculate Y", JOptionPane.PLAIN_MESSAGE);
 					}
+				}
+			} else if (e.getSource() == trace) {
+				
+			} else if (e.getSource() == minimum) {
+				if (functionList.getSelectedIndex() < 0) {
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else {
+					JOptionPaneMulti("Left Bound:", "Right Bound:", "Enter shit", "Shit");
+				}
+			} else if (e.getSource() == maximum) {
+				if (functionList.getSelectedIndex() < 0) {
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else {
+					
+				}
+			} else if (e.getSource() == intersect) {
+				
+			} else if (e.getSource() == zeroes) {
+				if (functionList.getSelectedIndex() < 0) {
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else {
+					
+				}
+			} else if (e.getSource() == derivative) {
+				if (functionList.getSelectedIndex() < 0) {
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else {
+					
+				}
+			} else if (e.getSource() == integral) {
+				if (functionList.getSelectedIndex() < 0) {
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else {
+					
 				}
 			} else if (e.getSource() == help) {
 				// TODO Help
@@ -623,7 +698,30 @@ public class Main {
 			}
 		}
 	}
-	
+
+	public static double[] JOptionPaneMulti(String leftLabel, String rightLabel, String message, String title) {
+		double[] inputs = new double[2];
+		JLabel label = new JLabel(message);
+		JTextField leftField = new JTextField(10);
+		JTextField rightField = new JTextField(10);
+
+		JPanel panel = new JPanel();
+		panel.add(label);
+		panel.add(new JLabel(leftLabel));
+		panel.add(leftField);
+		panel.add(new JLabel(rightLabel));
+		panel.add(rightField);
+
+		int result = JOptionPane.showConfirmDialog(Main.window, panel, title, JOptionPane.OK_CANCEL_OPTION);
+		if (result == JOptionPane.OK_OPTION) {
+			inputs[0] = Double.parseDouble(leftField.getText());
+			inputs[1] = Double.parseDouble(rightField.getText());
+			return inputs;
+		} else {
+			return null;
+		}
+	}
+
 	public static class ActionListeners implements ActionListener {
 		
 		@Override
