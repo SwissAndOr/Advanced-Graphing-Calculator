@@ -13,16 +13,15 @@ public final class Evaluator {
 
 	private static final Pattern numbers = Pattern.compile("^([\\+\\-]?)([0-9\\.]+(?:E[\\-\\+]?[0-9]+)?|[xte]|pi)");
 	private static final Pattern ops = Pattern.compile("^(?:\\^|~|\\*|\\/|%|\\+|-|>>|<<|>>>|&&|\\^\\^|\\|\\|)");
-	private static final Pattern functions = Pattern.compile("^(?:abs|acos|asin|atan|ceil|cos|cosh|cot|csc|floor|fpart|log(?=\\D)|max|min|round|sec|sin|sinh|sqrt|tan|tanh|(?:[0-9\\.]+|[xte]|pi)rt\\(|log(?:[0-9\\.]+|[xte]|pi)\\()");
-	private static final Pattern numFunctions = Pattern.compile("^(log)?([0-9\\.]+|[xte]|pi)(rt)?");
+	private static final Pattern functions = Pattern.compile("^(?:abs|acos|asin|atan|ceil|cos|cosh|cot|csc|deg|floor|fpart|ln|log|max|min|rad|round|rt|sec|sin|sinh|sqrt|tan|tanh)");
 
 	private static final Map<String, Integer> opPrec = createOpPrec();
 
 	private static final List<String> arg2 = Arrays.asList("&&", "*", "-", "<<", ">>", ">>>", "/", "log", "max", "min", "%", "+", "rt", "^", "^^", "||");
-	private static final List<String> functionList = Arrays.asList("abs", "acos", "asin", "atan", "ceil", "cos", "cosh", "cot", "csc", "floor", "fpart", "log", "max", "min", "round", "rt", "sec", "sin", "sinh", "sqrt", "tan", "tanh");
 
 	public static Stack<Object> toRPN(String infix) {
-		Stack<Object> out = new Stack<>(), oper = new Stack<>();
+		Stack<Object> out = new Stack<>();
+		Stack<String> oper = new Stack<>();
 
 		String expr = infix.replaceAll("\\s", "");
 
@@ -33,25 +32,9 @@ public final class Evaluator {
 
 			if (fm.find()) {
 				String func = fm.group();
-				if (func.equals("log")) {
-					func = "loge(";
-				}
+				oper.push(func);
 
-				if (func.endsWith("(")) {
-					Matcher nfm = numFunctions.matcher(func);
-
-					if (nfm.find()) {
-						Object n = getValueForString(nfm.group(2));
-
-						oper.push(nfm.group(1) == null ? nfm.group(3) : nfm.group(1));
-						oper.push("(");
-						out.push(n);
-					}
-				} else {
-					oper.push(func);
-				}
-
-				expr = expr.replaceFirst("\\Q" + fm.group() + (func.equals("loge(") ? "(" : "") + "\\E", "");
+				expr = expr.replaceFirst("\\Q" + fm.group() + "\\E", "");
 
 				lastFunction = true;
 				continue;
@@ -101,6 +84,7 @@ public final class Evaluator {
 			}
 
 			if (nm.find()) {
+				if (!lastFunction) oper.push("*");
 				out.push(getValueForString(nm.group()));
 				expr = expr.replaceFirst("\\Q" + nm.group() + "\\E", "");
 
@@ -109,6 +93,7 @@ public final class Evaluator {
 			}
 
 			if (expr.startsWith("(")) {
+				if (!lastFunction) oper.push("*");
 				oper.push("(");
 				expr = expr.substring(1);
 
@@ -127,8 +112,11 @@ public final class Evaluator {
 
 				oper.pop();
 
-				if (functionList.contains(oper.peek()))
-					out.push(oper.pop());
+				if (!oper.isEmpty()) {
+					Matcher fm2 = functions.matcher(oper.peek());
+
+					if (fm2.find()) out.push(oper.pop());
+				}
 
 				expr = expr.substring(1);
 
@@ -211,10 +199,16 @@ public final class Evaluator {
 					return 1.0 / Math.tan(vals[0]);
 				case "csc":
 					return 1.0 / Math.sin(vals[0]);
+				case "deg":
+					return Math.toDegrees(vals[0]);
 				case "floor":
 					return Math.floor(vals[0]);
 				case "fpart":
 					return vals[0] - Math.floor(vals[0]);
+				case "ln":
+					return Math.log(vals[0]);
+				case "rad":
+					return Math.toRadians(vals[0]);
 				case "round":
 					return Math.round(vals[0]);
 				case "sec":
@@ -246,7 +240,7 @@ public final class Evaluator {
 				case "/":
 					return vals[1] / vals[0];
 				case "log":
-					return Math.log(vals[0]) / Math.log(vals[1]);
+					return Math.log(vals[1]) / Math.log(vals[0]);
 				case "max":
 					return Math.max(vals[1], vals[0]);
 				case "min":
@@ -256,7 +250,7 @@ public final class Evaluator {
 				case "+":
 					return vals[1] + vals[0];
 				case "rt":
-					return Math.pow(vals[0], 1.0 / vals[1]);
+					return Math.pow(vals[1], 1.0 / vals[0]);
 				case "^":
 					return Math.pow(vals[1], vals[0]);
 				case "^^":
@@ -324,9 +318,6 @@ public final class Evaluator {
 
 		while (!vals.isEmpty()) {
 			Object token = vals.remove(0);
-
-			System.out.println(ret);
-			System.out.println(token);
 
 			if (token instanceof Number) {
 				ret.push(((Number) token).doubleValue());
