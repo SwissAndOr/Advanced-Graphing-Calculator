@@ -810,7 +810,7 @@ public class Main {
 
 				if (functionList.getSelectedIndex() >= 0) {
 					Function currentFunc = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
-					currentFunc.string = functionTextField.getText();
+					currentFunc.setString(functionTextField.getText());
 					currentFunc.color = selectedColor;
 					currentFunc.thickness = thicknessSlider.getValue();
 

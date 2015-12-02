@@ -135,7 +135,7 @@ public final class JSON {
 		Function ret = new Function(name);
 		ret.color = color;
 		ret.enabled = enabled;
-		ret.string = string;
+		ret.setString(string);
 		ret.thickness = thickness;
 		return ret;
 	}
