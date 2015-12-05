@@ -6,6 +6,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Stack;
 
+@Deprecated
 public class Function {
 
 	public FunctionType functionType = FunctionType.POLAR_FUNCTION;
