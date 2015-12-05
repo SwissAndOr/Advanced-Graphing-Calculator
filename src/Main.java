@@ -339,7 +339,7 @@ public class Main {
 			public void valueChanged(ListSelectionEvent e) {
 				if (!functionList.getValueIsAdjusting()) {
 					if (functionList.getSelectedIndex() != -1) {
-						functionTextField.setText(GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).string);
+						functionTextField.setText(GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).yString);
 						selectedColor = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color;
 						colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
 						thicknessSlider.setValue(GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).thickness);
@@ -668,12 +668,12 @@ public class Main {
 			} else if (e.getSource() == calculateY) {
 				if (functionList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 					String xValue = JOptionPane.showInputDialog(Main.window, "Please input an X value:", "Calculate Y", JOptionPane.PLAIN_MESSAGE);
 					if (xValue != null && !xValue.isEmpty()) {
-						JOptionPane.showMessageDialog(window, functionList.getSelectedValue().evaluate(Double.parseDouble(xValue)), "Calculate Y", JOptionPane.PLAIN_MESSAGE);
+						JOptionPane.showMessageDialog(window, functionList.getSelectedValue().evaluateY(Double.parseDouble(xValue)), "Calculate Y", JOptionPane.PLAIN_MESSAGE);
 					}
 				}
 			} else if (e.getSource() == trace) {
@@ -681,7 +681,7 @@ public class Main {
 			} else if (e.getSource() == minimum) {
 				if (functionList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 					showMultiInputDialog("Left Bound:", "Right Bound:", "Enter shit", "Shit");
@@ -689,7 +689,7 @@ public class Main {
 			} else if (e.getSource() == maximum) {
 				if (functionList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
@@ -699,7 +699,7 @@ public class Main {
 			} else if (e.getSource() == zeroes) {
 				if (functionList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
@@ -707,7 +707,7 @@ public class Main {
 			} else if (e.getSource() == derivative) {
 				if (functionList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
@@ -715,7 +715,7 @@ public class Main {
 			} else if (e.getSource() == integral) {
 				if (functionList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
@@ -841,7 +841,7 @@ public class Main {
 
 				if (functionList.getSelectedIndex() >= 0) {
 					Function currentFunc = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
-					currentFunc.setString(functionTextField.getText());
+					currentFunc.setYString(functionTextField.getText());
 					currentFunc.color = selectedColor;
 					currentFunc.thickness = thicknessSlider.getValue();
 				}

@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,11 @@ public final class JSON {
 	 *         </ul>
 	 */
 	protected static String writeFunction(Function function) {
-		return String.format("{\"name\":\"%s\",\"string\":\"%s\",\"color\":%d,\"thickness\":%d,\"enabled\":%b}", function.name.replaceAll("[\"\\\\]", "\\\\$0"), function.string.replaceAll("[\"\\\\]", "\\\\$0"), function.color.getRGB(), function.thickness, function.enabled);
+		if (function.functionType == Function.FunctionType.SCATTERPLOT) {
+			return String.format("{\"type\":%d,\"name\":\"%s\",\"points\":%s,\"color\":%d,\"thickness\":%d,\"enabled\":%b}", function.functionType.ordinal(), function.name.replaceAll("[\"\\\\]", "\\\\$0"), Arrays.deepToString(function.points).replaceAll("\\s+", ""), function.color.getRGB(), function.thickness, function.enabled);
+		} else {
+			return String.format("{\"type\":%d,\"name\":\"%s\",\"yString\":\"%s\",\"xString\":\"%s\",\"color\":%d,\"thickness\":%d,\"enabled\":%b}", function.functionType.ordinal(), function.name.replaceAll("[\"\\\\]", "\\\\$0"), function.yString.replaceAll("[\"\\\\]", "\\\\$0"), function.xString.replaceAll("[\"\\\\]", "\\\\$0"), function.color.getRGB(), function.thickness, function.enabled);
+		}
 	}
 
 	public static GraphTabbedPane parsePane(String string) {
@@ -125,8 +130,8 @@ public final class JSON {
 	}
 
 	protected static Function parseFunction(Map<?, ?> map) {
-		// TODO Rename from untitiled graph to appropriate name?
-		String name = map.get("name") instanceof String ? (String) map.get("name") : "Untitled Graph";
+		// TODO Rename from untitiled function to appropriate name?
+		String name = map.get("name") instanceof String ? (String) map.get("name") : "Untitled Function";
 		String string = map.get("string") instanceof String ? (String) map.get("string") : "";
 		Color color = map.get("color") instanceof Number ? new Color(((Number) map.get("color")).intValue()) : Color.BLUE;
 		int thickness = map.get("thickness") instanceof Number ? ((Number) map.get("thickness")).intValue() : 2;
@@ -135,7 +140,7 @@ public final class JSON {
 		Function ret = new Function(name);
 		ret.color = color;
 		ret.enabled = enabled;
-		ret.setString(string);
+		ret.setYString(string);
 		ret.thickness = thickness;
 		return ret;
 	}
