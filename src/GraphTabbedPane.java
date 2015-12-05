@@ -11,8 +11,6 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -94,16 +92,6 @@ public class GraphTabbedPane extends JPanel {
 		add(tabPanel, BorderLayout.PAGE_START);
 
 		add(graphPane);
-
-		addComponentListener(new ComponentAdapter() {
-
-			@Override
-			public void componentResized(ComponentEvent e) {
-				for (Graph g : graphs) {
-					g.invalidate();
-				}
-			}
-		});
 	}
 
 	public boolean save() {
@@ -313,10 +301,9 @@ public class GraphTabbedPane extends JPanel {
 			if (currentGraph.axisY)
 				g.fillRect(zeroX - 1, 0, 3, height); // Draw vertical 0 line
 
-			if (currentGraph.isImageValid()) {
-				g.drawImage(currentGraph.getImage(), 0, 0, null);
-			} else {
-				currentGraph.calculateImage();
+			for (Function func : currentGraph.functions) {
+				func.createImage();
+				g.drawImage(func.image, 0, 0, null);
 			}
 		}
 

@@ -34,7 +34,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
@@ -104,8 +103,6 @@ public class Main {
 	public static JButton applyButton = new JButton("Apply");
 
 	private static JPanel sidebar = new JPanel();
-
-	public static JProgressBar progressBar = new JProgressBar();
 
 	private static JMenuBar menuBar = new JMenuBar();
 	private static JMenu fileMenu = new JMenu("File");
@@ -449,9 +446,6 @@ public class Main {
 
 		window.add(GraphTabbedPane.pane, BorderLayout.CENTER);
 
-		progressBar.setPreferredSize(new Dimension(progressBar.getPreferredSize().width, 8));
-		window.add(progressBar, BorderLayout.PAGE_END);
-
 		window.setVisible(true);
 	}
 
@@ -563,7 +557,6 @@ public class Main {
 					} else {
 						GraphTabbedPane.pane.getSelectedGraph().functions.addAll(graph.functions);
 						functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
-						GraphTabbedPane.pane.getSelectedGraph().invalidate();
 						GraphTabbedPane.pane.graphPane.repaint();
 					}
 				}
@@ -813,10 +806,6 @@ public class Main {
 					currentFunc.setString(functionTextField.getText());
 					currentFunc.color = selectedColor;
 					currentFunc.thickness = thicknessSlider.getValue();
-
-					if (!currentFunc.string.equals(functionTextField.getText()) || !currentFunc.color.equals(selectedColor) || currentFunc.thickness != thicknessSlider.getValue()) {
-						GraphTabbedPane.pane.getSelectedGraph().invalidate();
-					}
 				}
 
 				GraphTabbedPane.pane.getSelectedGraph().xMin = Double.parseDouble(xMin.getText());
@@ -828,7 +817,6 @@ public class Main {
 				GraphTabbedPane.pane.getSelectedGraph().axisX = axisX.isSelected();
 				GraphTabbedPane.pane.getSelectedGraph().axisY = axisY.isSelected();
 
-				GraphTabbedPane.pane.getSelectedGraph().invalidate();
 				GraphTabbedPane.pane.graphPane.repaint();
 			}
 		}

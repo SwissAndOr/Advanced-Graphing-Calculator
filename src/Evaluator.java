@@ -224,19 +224,19 @@ public final class Evaluator {
 				case "tanh":
 					return Math.tanh(vals[0]);
 				case "~":
-					return ~((int) vals[0]);
+					return ~((long) vals[0]);
 				case "&&":
-					return (int) vals[1] & (int) vals[0];
+					return (long) vals[1] & (long) vals[0];
 				case "*":
 					return vals[1] * vals[0];
 				case "-":
 					return vals[1] - vals[0];
 				case "<<":
-					return (int) vals[1] << (int) vals[0];
+					return (long) vals[1] << (long) vals[0];
 				case ">>":
-					return (int) vals[1] >> (int) vals[0];
+					return (long) vals[1] >> (long) vals[0];
 				case ">>>":
-					return (int) vals[1] >>> (int) vals[0];
+					return (long) vals[1] >>> (long) vals[0];
 				case "/":
 					return vals[1] / vals[0];
 				case "log":
@@ -254,11 +254,11 @@ public final class Evaluator {
 				case "^":
 					return Math.pow(vals[1], vals[0]);
 				case "^^":
-					return (int) vals[1] ^ (int) vals[0];
+					return (long) vals[1] ^ (long) vals[0];
 				case "||":
-					return (int) vals[1] | (int) vals[0];
+					return (long) vals[1] | (long) vals[0];
 				default:
-					return 0;
+					return Double.NaN;
 			}
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new IllegalArgumentException("Too few arguments to function " + func);

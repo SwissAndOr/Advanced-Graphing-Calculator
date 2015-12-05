@@ -27,7 +27,7 @@ public class FunctionListCellRenderer extends DefaultListCellRenderer {
 		panel.setBackground(label.getBackground());
 
 		JCheckBox cb = new JCheckBox();
-
+		
 		BufferedImage image = new BufferedImage(25, 25, BufferedImage.TYPE_INT_ARGB);
 		if (value instanceof Function) {
 			Function func = (Function) value;
@@ -39,8 +39,11 @@ public class FunctionListCellRenderer extends DefaultListCellRenderer {
 			g.dispose();
 
 			cb.setSelected(func.enabled);
+
+			JLabel newLabel = new JLabel(label.getText(), new ImageIcon(image), SwingConstants.LEFT);
+			if (func.invalid) newLabel.setForeground(Color.RED);
+			panel.add(newLabel);
 		}
-		panel.add(new JLabel(label.getText(), new ImageIcon(image), SwingConstants.LEFT));
 
 		cb.setBackground(new Color(0, 0, 0, 0));
 		panel.add(cb, BorderLayout.EAST);
