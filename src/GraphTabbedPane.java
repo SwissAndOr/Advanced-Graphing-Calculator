@@ -32,7 +32,7 @@ public class GraphTabbedPane extends JPanel {
 
 	public Vector<Graph> graphs = new Vector<>();
 	private int selectedGraph;
-	private Path currentSaveLocation = null;
+	protected Path currentSaveLocation = null;
 
 	private JPanel tabPanel = new JPanel(new GridBagLayout());
 	private JPanel tabButtonPanel = new JPanel(new GridBagLayout());
@@ -146,19 +146,12 @@ public class GraphTabbedPane extends JPanel {
 
 		GridBagConstraints c = new GridBagConstraints();
 
-//		for (JPanel panel : tabButtons) {
-//			panel.setBackground(new Color(238, 238, 238));
-//		}
-
 		JPanel panel = new JPanel(new GridBagLayout());
-//		panel.setBackground(new Color(200, 221, 242));
 		panel.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY));
 
 		JButton button = new JButton(graph.name);
 		button.setOpaque(false);
 		button.setBackground(new Color(0, 0, 0, 0));
-//		button.setBackground(new Color(238, 238, 238));
-//		button.setBackground(new Color(200, 221, 242));
 		button.setBorderPainted(false);
 		button.setFocusPainted(false);
 		button.setMargin(new Insets(0, 5, 0, 0));
@@ -189,9 +182,6 @@ public class GraphTabbedPane extends JPanel {
 		tabButtons.addElement(panel);
 
 		setSelectedIndex(graphs.size() - 1);
-
-//		System.out.println(tabButtonPanel.getPreferredSize().width);
-//		tabButtonPanel.setPreferredSize(new Dimension(tabButtonPanel.getPreferredSize().width + button.getPreferredSize().width, tabButtonPanel.getPreferredSize().height));
 
 		buttonScrollPane.validate();
 		buttonScrollPane.getHorizontalScrollBar().setValue(buttonScrollPane.getHorizontalScrollBar().getMaximum());

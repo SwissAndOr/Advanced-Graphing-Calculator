@@ -1,7 +1,12 @@
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Vector;
+
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Graph {
 
@@ -12,7 +17,7 @@ public class Graph {
 	public double gridLineIntervalX = 1, gridLineIntervalY = 1;
 	public boolean axisX = true, axisY = true;
 
-	private Path currentSaveLocation = null;
+	protected Path currentSaveLocation = null;
 
 	public Graph() {}
 
@@ -51,9 +56,20 @@ public class Graph {
 		return true;
 	}
 
-	public void save(Path path) {
-		currentSaveLocation = path;
-		save();
+	public void save(Path path, FileNameExtensionFilter format) {
+		if (format.getExtensions()[0].equals("graph")) {
+			currentSaveLocation = path;
+			save();
+		} else {
+			Dimension dim = GraphTabbedPane.pane.getGraphSize();
+			BufferedImage img = new BufferedImage(dim.width, dim.height, format.getDescription().startsWith("Bit") ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB); 
+			
+			GraphTabbedPane.pane.graphPane.paint(img.createGraphics());
+			
+			try {
+				ImageIO.write(img, format.getExtensions()[0], path.toFile());
+			} catch (IOException e) {}
+		}
 	}
 
 }

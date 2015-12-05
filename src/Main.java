@@ -49,7 +49,12 @@ public class Main {
 
 	public static JFrame window = new JFrame();
 
-	public static final NumberFormat numbers = new DecimalFormat("0");// NumberFormat.getNumberInstance();
+	/**
+	 * The file separator character
+	 */
+	public static final String fs = System.getProperty("file.separator");
+
+	public static final NumberFormat numbers = new DecimalFormat("0");
 
 	private static JPanel functionPanel = new JPanel(new GridBagLayout());
 	public static JList<Function> functionList;
@@ -135,21 +140,39 @@ public class Main {
 	private static JMenuItem about = new JMenuItem("About");
 
 	private static final FileNameExtensionFilter graphFilter = new FileNameExtensionFilter("Graph", "graph");
+	private static final FileNameExtensionFilter[] imageFilters = {
+			new FileNameExtensionFilter("PNG (*.png)", "png"),
+			new FileNameExtensionFilter("GIF (*.gif)", "gif"),
+			new FileNameExtensionFilter("JPEG (*.jpg;*.jpeg;*.jpe;*.jfif)", "jpg", "jpeg", "jpe", "jfif"),
+			new FileNameExtensionFilter("Bitmap (*.bmp;*.dib)", "bmp", "dib")
+	};
 	private static final FileNameExtensionFilter workspaceFilter = new FileNameExtensionFilter("Workspace", "wksp");
 
 	private static final MenuActionHandler menuListener = new MenuActionHandler();
-	private static JFileChooser fileChooser = new JFileChooser();
-	
+	private static JFileChooser graphOpen = new JFileChooser(System.getProperty("user.dir"));
+	private static JFileChooser graphSave = new JFileChooser(System.getProperty("user.dir"));
+	private static JFileChooser workspaceOpen = new JFileChooser(System.getProperty("user.dir"));
+	private static JFileChooser workspaceSave = new JFileChooser(System.getProperty("user.dir"));
+
 	private static final Pattern p = Pattern.compile("Untitled ([0-9]+)");
 	private static final ActionListeners actionListeners = new ActionListeners();
-
-//	private static JTabbedPane graphTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
 	public static void main(String[] a) {
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setMinimumSize(new Dimension(400, 530));
 		window.setSize(677, 530);
 		window.setTitle("Advanced Graphing Calculator");
+
+		graphSave.setAcceptAllFileFilterUsed(false);
+		workspaceSave.setAcceptAllFileFilterUsed(false);
+
+		graphOpen.setFileFilter(graphFilter);
+		graphSave.addChoosableFileFilter(graphFilter);
+		for (FileNameExtensionFilter filter : imageFilters) {
+			graphSave.addChoosableFileFilter(filter);
+		}
+		workspaceOpen.setFileFilter(workspaceFilter);
+		workspaceSave.setFileFilter(workspaceFilter);
 
 		// This can be set to something else if 340 is too many. Do not go over 340. Do not build the seventh row.
 		numbers.setMaximumFractionDigits(340);
@@ -231,10 +254,9 @@ public class Main {
 		exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK));
 		exit.addActionListener(menuListener);
 		fileMenu.add(exit);
-		
+
 		menuBar.add(fileMenu);
 
-		
 		calculateMenu.setMnemonic(KeyEvent.VK_C);
 
 		calculateY.setMnemonic(KeyEvent.VK_C);
@@ -244,37 +266,36 @@ public class Main {
 		trace.setMnemonic(KeyEvent.VK_T);
 		trace.addActionListener(menuListener);
 		calculateMenu.add(trace);
-		
+
 		minimum.setMnemonic(KeyEvent.VK_M);
 		minimum.addActionListener(menuListener);
 		calculateMenu.add(minimum);
-		
+
 		maximum.setMnemonic(KeyEvent.VK_X);
 		maximum.addActionListener(menuListener);
 		calculateMenu.add(maximum);
-		
+
 		intersect.setMnemonic(KeyEvent.VK_I);
 		intersect.setDisplayedMnemonicIndex(5);
 		intersect.addActionListener(menuListener);
 		calculateMenu.add(intersect);
-		
+
 		zeroes.setMnemonic(KeyEvent.VK_Z);
 		zeroes.addActionListener(menuListener);
 		calculateMenu.add(zeroes);
-		
+
 		derivative.setMnemonic(KeyEvent.VK_D);
 		derivative.setDisplayedMnemonicIndex(5);
 		derivative.addActionListener(menuListener);
 		calculateMenu.add(derivative);
-		
+
 		integral.setMnemonic(KeyEvent.VK_N);
 		integral.setDisplayedMnemonicIndex(6);
 		integral.addActionListener(menuListener);
 		calculateMenu.add(integral);
-		
+
 		menuBar.add(calculateMenu);
-		
-		
+
 		helpMenu.setMnemonic(KeyEvent.VK_H);
 
 		help.setMnemonic(KeyEvent.VK_H);
@@ -489,71 +510,80 @@ public class Main {
 
 	protected static class MenuActionHandler implements ActionListener {
 
-		private boolean hasExtension(String filename) {
-			for (int i = filename.length() - 1; i >= 0; i--) {
-				if (filename.charAt(i) == ' ')
-					break;
-				if (filename.charAt(i) == '.')
-					return true;
-			}
-			return false;
-		}
-
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == newGraph) {
 				GraphTabbedPane.pane.addGraph(new Graph(GraphTabbedPane.pane.getNameForNewGraph(), -5, 5, -5, 5, 1, 1, true, true));
 			} else if (e.getSource() == openGraph) {
-				fileChooser.setFileFilter(graphFilter);
-				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+				File dir = graphOpen.getCurrentDirectory();
+				graphOpen.setSelectedFile(new File(""));
+				graphOpen.setCurrentDirectory(dir);
 
-				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
+				if (graphOpen.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
 					Graph graph = null;
 					try {
-						graph = JSON.parseGraph(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath()))); // Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+						graph = JSON.parseGraph(new String(Files.readAllBytes(graphOpen.getSelectedFile().toPath())));
 					} catch (IOException exception) {}
-					
+
 					if (graph == null) {
-						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(window, "<html>" + graphOpen.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
+						graph.currentSaveLocation = graphOpen.getSelectedFile().toPath();
 						GraphTabbedPane.pane.addGraph(graph);
 					}
 				}
 			} else if ((e.getSource() == saveGraph && !GraphTabbedPane.pane.getSelectedGraph().save()) || e.getSource() == saveGraphAs) {
-				fileChooser.setFileFilter(graphFilter);
-				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+				graphSave.resetChoosableFileFilters();
+				graphSave.addChoosableFileFilter(graphFilter);
+				for (FileNameExtensionFilter filter : imageFilters) {
+					graphSave.addChoosableFileFilter(filter);
+				}
 
-				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
-					File file = fileChooser.getSelectedFile();
-					if (!hasExtension(file.getName()))
-						file = new File(file.getPath() + ".graph");
-					GraphTabbedPane.pane.getSelectedGraph().save(file.toPath());
+				Graph graph = GraphTabbedPane.pane.getSelectedGraph();
+				
+				File cur = graphSave.getCurrentDirectory();
+				graphSave.setSelectedFile(graph.currentSaveLocation == null ? new File(cur.getAbsolutePath() + fs + graph.name + "." + ((FileNameExtensionFilter) graphSave.getFileFilter()).getExtensions()[0]) : graph.currentSaveLocation.toFile());
+				if (graphSave.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
+					File file = graphSave.getSelectedFile();
+
+					if (!graphSave.getFileFilter().accept(file)) {
+						file = new File(file.getAbsolutePath() + "." + ((FileNameExtensionFilter) graphSave.getFileFilter()).getExtensions()[0]);
+					}
+
+					graph.save(file.toPath(), (FileNameExtensionFilter) graphSave.getFileFilter());
 				}
 			} else if (e.getSource() == saveAllGraphs) {
-				fileChooser.setFileFilter(graphFilter);
-				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
-				File cur = fileChooser.getCurrentDirectory();
+				graphSave.resetChoosableFileFilters();
+				graphSave.addChoosableFileFilter(graphFilter);
 
+				File cur = graphSave.getCurrentDirectory();
 				for (Graph graph : GraphTabbedPane.pane.graphs) {
 					if (!graph.save()) {
-						fileChooser.setSelectedFile(new File(cur.getAbsolutePath() + System.getProperty("file.separator") + graph.name + ".graph"));
-						if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
-							GraphTabbedPane.pane.getSelectedGraph().save(fileChooser.getSelectedFile().toPath());
+						graphSave.setSelectedFile(new File(cur.getAbsolutePath() + fs + graph.name + "." + ((FileNameExtensionFilter) graphSave.getFileFilter()).getExtensions()[0]));
+						if (graphSave.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
+							File file = graphSave.getSelectedFile();
+
+							if (!graphSave.getFileFilter().accept(file)) {
+								file = new File(file.getAbsolutePath() + ".graph");
+							}
+
+							GraphTabbedPane.pane.getSelectedGraph().save(file.toPath(), (FileNameExtensionFilter) graphSave.getFileFilter());
 						}
 					}
 				}
 			} else if (e.getSource() == importFunctions) {
-				fileChooser.setFileFilter(graphFilter);
-				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+				File dir = graphOpen.getCurrentDirectory();
+				graphOpen.setSelectedFile(new File(""));
+				graphOpen.setCurrentDirectory(dir);
 
-				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
+				if (graphOpen.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
 					Graph graph = null;
 					try {
-						graph = JSON.parseGraph(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath())));// Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+						graph = JSON.parseGraph(new String(Files.readAllBytes(graphOpen.getSelectedFile().toPath())));
 					} catch (IOException exception) {}
 
 					if (graph == null) {
-						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(window, "<html>" + graphOpen.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
 						GraphTabbedPane.pane.getSelectedGraph().functions.addAll(graph.functions);
 						functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
@@ -566,57 +596,65 @@ public class Main {
 					GraphTabbedPane.pane.renameGraphAtIndex(GraphTabbedPane.pane.getSelectedIndex(), newGraphName);
 				}
 			} else if (e.getSource() == closeGraph) {
-				// TODO Prompt to save
-				if (JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do close \"" + GraphTabbedPane.pane.getSelectedGraph().name + "\"?", "Close graph", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
+				if (JOptionPane.showConfirmDialog(Main.window, "Are you sure you want to close \"" + GraphTabbedPane.pane.getSelectedGraph().name + "\"?", "Close graph", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION)
 					GraphTabbedPane.pane.removeAtIndex(GraphTabbedPane.pane.getSelectedIndex());
 			} else if (e.getSource() == closeAllGraphs) {
-				// TODO Prompt to save
-				if (JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do close all your graphs?", "Close all graphs", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+				if (JOptionPane.showConfirmDialog(Main.window, "Are you sure you want do close all graphs?", "Close All Graphs", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					while (!GraphTabbedPane.pane.graphs.isEmpty()) {
 						GraphTabbedPane.pane.removeAtIndex(0);
 					}
 				}
 			} else if (e.getSource() == newWorkspace) {
-				// TODO Prompt to save, then close all graphs.
+				// TODO Prompt to save, then close all graphs and reset workspace.
 			} else if (e.getSource() == loadWorkspace) {
-				fileChooser.setFileFilter(workspaceFilter);
-				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
-				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {					
+				File dir = workspaceOpen.getCurrentDirectory();
+				workspaceOpen.setSelectedFile(new File(""));
+				workspaceOpen.setCurrentDirectory(dir);
+
+				if (workspaceOpen.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
 					try {
 						window.remove(GraphTabbedPane.pane);
-						
-						GraphTabbedPane.pane = JSON.parsePane(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath())));
-						
+
+						GraphTabbedPane.pane = JSON.parsePane(new String(Files.readAllBytes(workspaceOpen.getSelectedFile().toPath())));
+
 						window.add(GraphTabbedPane.pane, BorderLayout.CENTER);
 						GraphTabbedPane.pane.revalidate();
 						GraphTabbedPane.pane.repaint();
 					} catch (IOException exception) {
-						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(window, "<html>" + workspaceOpen.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			} else if ((e.getSource() == saveWorkspace && !GraphTabbedPane.pane.save()) || e.getSource() == saveWorkspaceAs) {
-				fileChooser.setFileFilter(workspaceFilter);
-				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+				if (GraphTabbedPane.pane.currentSaveLocation == null) {
+					File dir = workspaceOpen.getCurrentDirectory();
+					workspaceOpen.setSelectedFile(new File(""));
+					workspaceOpen.setCurrentDirectory(dir);
+				} else {
+					workspaceSave.setSelectedFile(GraphTabbedPane.pane.currentSaveLocation.toFile());
+				}
 
-				if (fileChooser.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
-					File file = fileChooser.getSelectedFile();
-					if (!hasExtension(file.getName()))
+				if (workspaceSave.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
+					File file = workspaceSave.getSelectedFile();
+
+					if (!workspaceFilter.accept(file)) {
 						file = new File(file.getPath() + ".wksp");
+					}
+
 					GraphTabbedPane.pane.save(file.toPath());
 				}
 			} else if (e.getSource() == importWorkspace) {
-				// TODO Open workspace, read all graphs, and add each one to GraphTabbedPane
-				fileChooser.setFileFilter(workspaceFilter);
-				fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+				File dir = workspaceOpen.getCurrentDirectory();
+				workspaceOpen.setSelectedFile(new File(""));
+				workspaceOpen.setCurrentDirectory(dir);
 
-				if (fileChooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
+				if (workspaceOpen.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
 					GraphTabbedPane pane = null;
 					try {
-						pane = JSON.parsePane(new String(Files.readAllBytes(fileChooser.getSelectedFile().toPath())));// Graph.readFromPath(fileChooser.getSelectedFile().toPath());
+						pane = JSON.parsePane(new String(Files.readAllBytes(workspaceOpen.getSelectedFile().toPath())));
 					} catch (IOException exception) {}
 
 					if (pane == null) {
-						JOptionPane.showMessageDialog(window, "<html>" + fileChooser.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(window, "<html>" + workspaceOpen.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
 						for (Graph graph : pane.graphs)
 							GraphTabbedPane.pane.addGraph(graph);
@@ -639,14 +677,14 @@ public class Main {
 					}
 				}
 			} else if (e.getSource() == trace) {
-				
+
 			} else if (e.getSource() == minimum) {
 				if (functionList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
-					JOptionPaneMulti("Left Bound:", "Right Bound:", "Enter shit", "Shit");
+					showMultiInputDialog("Left Bound:", "Right Bound:", "Enter shit", "Shit");
 				}
 			} else if (e.getSource() == maximum) {
 				if (functionList.getSelectedIndex() < 0) {
@@ -654,17 +692,17 @@ public class Main {
 				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
-					
+
 				}
 			} else if (e.getSource() == intersect) {
-				
+
 			} else if (e.getSource() == zeroes) {
 				if (functionList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
-					
+
 				}
 			} else if (e.getSource() == derivative) {
 				if (functionList.getSelectedIndex() < 0) {
@@ -672,7 +710,7 @@ public class Main {
 				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
-					
+
 				}
 			} else if (e.getSource() == integral) {
 				if (functionList.getSelectedIndex() < 0) {
@@ -680,7 +718,7 @@ public class Main {
 				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().string == null || functionList.getSelectedValue().string.isEmpty()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
-					
+
 				}
 			} else if (e.getSource() == help) {
 				// TODO Help
@@ -692,7 +730,7 @@ public class Main {
 		}
 	}
 
-	public static double[] JOptionPaneMulti(String leftLabel, String rightLabel, String message, String title) {
+	public static double[] showMultiInputDialog(String leftLabel, String rightLabel, String message, String title) {
 		double[] inputs = new double[2];
 		JLabel label = new JLabel(message);
 		JTextField leftField = new JTextField(10);
@@ -716,10 +754,10 @@ public class Main {
 	}
 
 	public static class ActionListeners implements ActionListener {
-		
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == functionUp)	 {	
+			if (e.getSource() == functionUp) {
 				int i = functionList.getSelectedIndex();
 				if (i > 0) {
 					functionList.setValueIsAdjusting(true);
