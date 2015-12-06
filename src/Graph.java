@@ -62,10 +62,10 @@ public class Graph {
 			save();
 		} else {
 			Dimension dim = GraphTabbedPane.pane.getGraphSize();
-			BufferedImage img = new BufferedImage(dim.width, dim.height, format.getDescription().startsWith("Bit") ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB); 
-			
+			BufferedImage img = new BufferedImage(dim.width, dim.height, format.getDescription().startsWith("Bit") ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB);
+
 			GraphTabbedPane.pane.graphPane.paint(img.createGraphics());
-			
+
 			try {
 				ImageIO.write(img, format.getExtensions()[0], path.toFile());
 			} catch (IOException e) {}

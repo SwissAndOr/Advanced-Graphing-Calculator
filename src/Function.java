@@ -43,8 +43,6 @@ public class Function extends Relation {
 
 	private Stack<Object> rpn;
 	private String function;
-	public Color color;
-	public int thickness = 2;
 
 	public double getTMin() {
 		return tMin;
@@ -77,24 +75,13 @@ public class Function extends Relation {
 		}
 	}
 
-	public Color getColor() {
-		return color;
-	}
-
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	public int getThickness() {
-		return thickness;
-	}
-
-	public void setThickness(int thickness) {
-		this.thickness = thickness;
-	}
-
 	@Override
 	public void setPolar(boolean polar) {
+		if (getPanel() == null) {
+			super.setPolar(polar);
+			return;
+		}
+		
 		if (!polar && isPolar()) {
 			getPanel().setPreferredSize(new Dimension(190, 150));
 			getPanel().remove(tMinLabel);
@@ -133,6 +120,8 @@ public class Function extends Relation {
 		getPanel().setPreferredSize(new Dimension(190, 150));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		getPanel().add(Main.relationPropertiesType);
+		
+		polarCB.setSelected(polar);
 		polarCB.addItemListener(new ItemListener() {
 			
 			public void itemStateChanged(ItemEvent e) {
@@ -167,6 +156,14 @@ public class Function extends Relation {
 		this(name, false);
 	}
 	
+	public Function(Relation relation) {
+		this(relation.getName(), relation.isPolar());
+		setColor(relation.getColor());
+		selectedColor = getColor();
+		colorChooserButton.setBackground(selectedColor);
+		setThickness(relation.getThickness());
+	}
+	
 	public double evaluate(double x) {
 		return Evaluator.evaluate(rpn, x);
 	}
@@ -183,8 +180,8 @@ public class Function extends Relation {
 			Graphics2D g = getImage().createGraphics();
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-			g.setColor(this.color);
-			g.setStroke(new BasicStroke(this.thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g.setColor(getColor());
+			g.setStroke(new BasicStroke(this.getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
 			if (!isPolar()) {
 				double previousValue = dim.height - ((evaluate(graph.xMin) - graph.yMin) / (graph.yMax - graph.yMin) * dim.height);
@@ -290,8 +287,8 @@ public class Function extends Relation {
 	@Override
 	public void applyValues() {
 		setFunction(functionTextField.getText());
-		color = selectedColor;
-		thickness = thicknessSlider.getValue();
+		setColor(selectedColor);
+		setThickness(thicknessSlider.getValue());
 		tMin = Double.parseDouble(tMinTextField.getText());
 		tMax = Double.parseDouble(tMaxTextField.getText());
 	}
@@ -302,12 +299,12 @@ public class Function extends Relation {
 
 		Graphics2D g = image.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g.setColor(color);
-		g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		g.setColor(getColor());
+		g.setStroke(new BasicStroke(getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 		if (isPolar())
-			g.drawOval(thickness / 2, thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness, Main.MAX_THICKNESS * 2 + 1 - thickness);
+			g.drawOval(getThickness() / 2, getThickness() / 2, Main.MAX_THICKNESS * 2 + 1 - getThickness(), Main.MAX_THICKNESS * 2 + 1 - getThickness());
 		else
-			g.drawLine(thickness / 2, thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2);
+			g.drawLine(getThickness() / 2, getThickness() / 2, Main.MAX_THICKNESS * 2 + 1 - getThickness() / 2, Main.MAX_THICKNESS * 2 + 1 - getThickness() / 2);
 
 		g.dispose();
 
@@ -316,7 +313,7 @@ public class Function extends Relation {
 
 	@Override
 	public String writeJSON() {
-		return String.format("{\"type\":\"function\",\"polar\":%b,\"name\":\"%s\",\"function\":\"%s\",\"color\":%d,\"thickness\":%d,\"tMin\":%f,\"tMax\":%f,\"enabled\":%b}", isPolar(), getName().replaceAll("[\"\\\\]", "\\\\$0"), function.replaceAll("[\"\\\\]", "\\\\$0"), color.getRGB(), thickness, tMin, tMax, enabled);
+		return String.format("{\"type\":\"function\",\"polar\":%b,\"name\":\"%s\",\"function\":\"%s\",\"color\":%d,\"thickness\":%d,\"tMin\":%f,\"tMax\":%f,\"enabled\":%b}", isPolar(), getName().replaceAll("[\"\\\\]", "\\\\$0"), function.replaceAll("[\"\\\\]", "\\\\$0"), getColor().getRGB(), getThickness(), tMin, tMax, enabled);
 	}
 
 }

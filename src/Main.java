@@ -74,9 +74,9 @@ public class Main {
 	private static JPanel relationPropertiesPanel;
 
 	private static JPanel windowPanel = new JPanel();
-	
+
 	private static JTabbedPane viewSettings = new JTabbedPane();
-	
+
 	private static JPanel minMax = new JPanel();
 	private static JLabel xMinLabel = new JLabel("X Min");
 	private static JFormattedTextField xMin = new JFormattedTextField(numbers);
@@ -86,7 +86,7 @@ public class Main {
 	private static JFormattedTextField yMin = new JFormattedTextField(numbers);
 	private static JLabel yMaxLabel = new JLabel("Y Max");
 	private static JFormattedTextField yMax = new JFormattedTextField(numbers);
-	
+
 	private static JPanel xy = new JPanel();
 	private static JLabel xLabel = new JLabel("X");
 	private static JFormattedTextField xView = new JFormattedTextField(numbers);
@@ -110,28 +110,39 @@ public class Main {
 			});
 		}
 	};
-	
+
 	private static final FocusListener formattedFocusListener = new FocusAdapter() {
-		
-		public void focusGained(FocusEvent e) {
-			
-		}
-		
-		public void focusLost(FocusEvent e) {		
+
+		public void focusLost(FocusEvent e) {
 			if (e.getSource() == xMin || e.getSource() == xMax || e.getSource() == yMin || e.getSource() == yMax) {
-				xView.setText(numbers.format((Double.parseDouble(xMin.getText()) + Double.parseDouble(xMax.getText())) / 2));
-				widthView.setText(numbers.format(Double.parseDouble(xMax.getText()) - Double.parseDouble(xMin.getText())));
-				yView.setText(numbers.format((Double.parseDouble(yMin.getText()) + Double.parseDouble(yMax.getText())) / 2));
-				heightView.setText(numbers.format(Double.parseDouble(yMax.getText()) - Double.parseDouble(yMin.getText())));
+				try {
+					xView.setText(numbers.format((Double.parseDouble(xMin.getText()) + Double.parseDouble(xMax.getText())) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					widthView.setText(numbers.format(Double.parseDouble(xMax.getText()) - Double.parseDouble(xMin.getText())));
+				} catch (NumberFormatException exception) {}
+				try {
+					yView.setText(numbers.format((Double.parseDouble(yMin.getText()) + Double.parseDouble(yMax.getText())) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					heightView.setText(numbers.format(Double.parseDouble(yMax.getText()) - Double.parseDouble(yMin.getText())));
+				} catch (NumberFormatException exception) {}
 			} else {
-				xMin.setText(numbers.format(Double.parseDouble(xView.getText()) - Double.parseDouble(widthView.getText()) / 2));
-				xMax.setText(numbers.format(Double.parseDouble(xView.getText()) + Double.parseDouble(widthView.getText()) / 2));
-				yMin.setText(numbers.format(Double.parseDouble(yView.getText()) - Double.parseDouble(heightView.getText()) / 2));
-				yMax.setText(numbers.format(Double.parseDouble(yView.getText()) + Double.parseDouble(heightView.getText()) / 2));
+				try {
+					xMin.setText(numbers.format(Double.parseDouble(xView.getText()) - Double.parseDouble(widthView.getText()) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					xMax.setText(numbers.format(Double.parseDouble(xView.getText()) + Double.parseDouble(widthView.getText()) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					yMin.setText(numbers.format(Double.parseDouble(yView.getText()) - Double.parseDouble(heightView.getText()) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					yMax.setText(numbers.format(Double.parseDouble(yView.getText()) + Double.parseDouble(heightView.getText()) / 2));
+				} catch (NumberFormatException exception) {}
 			}
 		}
 	};
-
 
 	private static JLabel gridLineIntervalXLabel = new JLabel("Grid Line Interval X");
 	private static JFormattedTextField gridLineIntervalX = new JFormattedTextField(numbers);
@@ -212,7 +223,6 @@ public class Main {
 
 		// These can be set to something else if 340 is too many. Do not go over 340. Do not build the seventh row.
 		numbers.setMaximumFractionDigits(340);
-		Scatterplot.numberFormat.setMaximumFractionDigits(340);
 
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 
@@ -375,7 +385,7 @@ public class Main {
 		yView.setColumns(5);
 		heightView.setValue(20);
 		heightView.setColumns(5);
-		
+
 		xView.addMouseListener(formattedListener);
 		widthView.addMouseListener(formattedListener);
 		yView.addMouseListener(formattedListener);
@@ -384,7 +394,7 @@ public class Main {
 		widthView.addFocusListener(formattedFocusListener);
 		yView.addFocusListener(formattedFocusListener);
 		heightView.addFocusListener(formattedFocusListener);
-		
+
 		GraphTabbedPane.pane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
 		GraphTabbedPane.pane.getSelectedGraph().relations.add(new Function("Function"));
 
@@ -393,16 +403,16 @@ public class Main {
 
 			public void valueChanged(ListSelectionEvent e) {
 				if (!relationList.getValueIsAdjusting()) {
-					if (relationList.getSelectedIndex() != -1 && relationPropertiesPanel != null) {			
+					if (relationList.getSelectedIndex() != -1 && relationPropertiesPanel != null) {
 						sidebar.remove(4);
 						relationPropertiesPanel = relationList.getSelectedValue().getPanel();
 						sidebar.add(relationPropertiesPanel, 4);
 						relationPropertiesPanel.add(relationPropertiesType, 0);
 						relationPropertiesPanel.revalidate();
 						relationPropertiesPanel.repaint();
-						
+
 						relationPropertiesType.setSelectedIndex(Arrays.asList(relationTypes).indexOf(relationList.getSelectedValue().getClass().getSimpleName()));
-						
+
 						if (relationList.getSelectedIndex() == 0)
 							relationUp.setEnabled(false);
 						else
@@ -477,20 +487,21 @@ public class Main {
 		sidebar.add(relationRename);
 
 		relationPropertiesType.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {	
+
+			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					int index = relationList.getSelectedIndex();
-					
+
 					switch ((String) relationPropertiesType.getSelectedItem()) {
-					case "Function":
-						GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Function(relationList.getSelectedValue().getName()));
-						break;
-					case "Parametric":
-						GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Parametric(relationList.getSelectedValue().getName()));
-						break;
-					case "Scatterplot":
-						GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Scatterplot(relationList.getSelectedValue().getName()));
-						break;
+						case "Function":
+							GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Function(relationList.getSelectedValue()));
+							break;
+						case "Parametric":
+							GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Parametric(relationList.getSelectedValue()));
+							break;
+						case "Scatterplot":
+							GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Scatterplot(relationList.getSelectedValue()));
+							break;
 					}
 
 					relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
@@ -503,7 +514,7 @@ public class Main {
 		sidebar.add(relationPropertiesPanel);
 
 		windowPanel.setPreferredSize(new Dimension(190, 160));
-		
+
 		minMax.setPreferredSize(new Dimension(185, 50));
 		minMax.add(xMinLabel);
 		minMax.add(xMin);
@@ -513,7 +524,7 @@ public class Main {
 		minMax.add(yMin);
 		minMax.add(yMaxLabel);
 		minMax.add(yMax);
-		
+
 		xy.setPreferredSize(new Dimension(185, 50));
 		xy.add(xLabel);
 		xy.add(xView);
@@ -523,7 +534,7 @@ public class Main {
 		xy.add(yView);
 		xy.add(heightLabel);
 		xy.add(heightView);
-		
+
 		viewSettings.addTab(" Min and Max  ", minMax);
 		viewSettings.addTab("   X and Y   ", xy);
 		windowPanel.add(viewSettings);
@@ -560,7 +571,7 @@ public class Main {
 			double newXMax = GraphTabbedPane.pane.getSelectedGraph().xMax;
 			double newYMin = GraphTabbedPane.pane.getSelectedGraph().yMin;
 			double newYMax = GraphTabbedPane.pane.getSelectedGraph().yMax;
-			
+
 			xMin.setText(numbers.format(newXMin));
 			xMax.setText(numbers.format(newXMax));
 			yMin.setText(numbers.format(newYMin));
@@ -633,7 +644,7 @@ public class Main {
 				}
 
 				Graph graph = GraphTabbedPane.pane.getSelectedGraph();
-				
+
 				File cur = graphSave.getCurrentDirectory();
 				graphSave.setSelectedFile(graph.currentSaveLocation == null ? new File(cur.getAbsolutePath() + fs + graph.name + "." + ((FileNameExtensionFilter) graphSave.getFileFilter()).getExtensions()[0]) : graph.currentSaveLocation.toFile());
 				if (graphSave.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
@@ -642,7 +653,7 @@ public class Main {
 					if (!graphSave.getFileFilter().accept(file)) {
 						file = new File(file.getAbsolutePath() + "." + ((FileNameExtensionFilter) graphSave.getFileFilter()).getExtensions()[0]);
 					}
-					
+
 					graph.save(file.toPath(), (FileNameExtensionFilter) graphSave.getFileFilter());
 				}
 			} else if (e.getSource() == saveAllGraphs) {

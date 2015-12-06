@@ -10,7 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,8 +32,6 @@ import javax.swing.table.TableColumnModel;
 
 public class Scatterplot extends Relation {
 
-	public static final DecimalFormat numberFormat = new DecimalFormat("0");
-
 	private JCheckBox polarCB = new JCheckBox("Polar", false);
 	private JTable pointTable = new JTable(new Object[][] {{"", ""}}, new String[] {"x", "y"});
 	private List<Double> xTableData = new ArrayList<Double>();
@@ -48,8 +45,6 @@ public class Scatterplot extends Relation {
 
 	// TODO Regressions
 	private Double[][] points = new Double[2][0];
-	public Color color;
-	public int thickness = 2;
 
 	public Scatterplot(String name, boolean polar) {
 		setColor(new Color((int) (Math.random() * 16777216)));
@@ -60,6 +55,8 @@ public class Scatterplot extends Relation {
 		setPanel(new JPanel());
 		getPanel().setPreferredSize(new Dimension(190, 220));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		
+		polarCB.setSelected(polar);
 		getPanel().add(polarCB);
 		polarCB.addItemListener(new ItemListener() {
 
@@ -139,8 +136,8 @@ public class Scatterplot extends Relation {
 
 					try {
 						double d = Double.parseDouble(label.getText());
-						label.setText(numberFormat.format(d));
-						label.setToolTipText(numberFormat.format(d));
+						label.setText(Main.numbers.format(d));
+						label.setToolTipText(Main.numbers.format(d));
 					} catch (NumberFormatException e) {}
 				}
 				return comp;
@@ -177,9 +174,22 @@ public class Scatterplot extends Relation {
 	public Scatterplot(String name) {
 		this(name, false);
 	}
+	
+	public Scatterplot(Relation relation) {
+		this(relation.getName(), relation.isPolar());
+		setColor(relation.getColor());
+		selectedColor = getColor();
+		colorChooserButton.setBackground(selectedColor);
+		setThickness(relation.getThickness());
+	}
 
 	@Override
 	public void setPolar(boolean polar) {
+		if (getPanel() == null) {
+			super.setPolar(polar);
+			return;
+		}
+		
 		if (!polar && isPolar()) {
 			TableColumnModel tcm = pointTable.getTableHeader().getColumnModel();
 			tcm.getColumn(0).setHeaderValue("x");
@@ -199,14 +209,6 @@ public class Scatterplot extends Relation {
 		}
 	}
 
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-
 	@Override
 	public boolean isInvalid() {
 		return false;
@@ -224,8 +226,8 @@ public class Scatterplot extends Relation {
 			Graphics2D g = getImage().createGraphics();
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-			g.setColor(this.color);
-			g.setStroke(new BasicStroke(this.thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g.setColor(this.getColor());
+			g.setStroke(new BasicStroke(this.getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			
 			for (int i = 0; i < points[0].length; i++) {
 				double x = dim.width * ((isPolar() ? (Math.cos(points[0][i]) * points[1][i]) : points[0][i]) - graph.xMin) / (graph.xMax - graph.xMin);
@@ -243,8 +245,8 @@ public class Scatterplot extends Relation {
 		points = new Double[2][xTableData.size()];
 		xTableData.toArray(points[0]);
 		yTableData.toArray(points[1]);
-		color = selectedColor;
-		thickness = thicknessSlider.getValue();
+		setColor(selectedColor);
+		setThickness(thicknessSlider.getValue());
 	}
 
 	@Override
@@ -253,8 +255,8 @@ public class Scatterplot extends Relation {
 
 		Graphics2D g = image.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g.setColor(color);
-		g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		g.setColor(getColor());
+		g.setStroke(new BasicStroke(getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 		g.draw(new Polygon(new int[] {Main.MAX_THICKNESS / 2}, new int[] {5 * Main.MAX_THICKNESS / 4}, 1));
 		g.draw(new Polygon(new int[] {3 * Main.MAX_THICKNESS / 2}, new int[] {3 * Main.MAX_THICKNESS / 4}, 1));
 
@@ -265,7 +267,7 @@ public class Scatterplot extends Relation {
 
 	@Override
 	public String writeJSON() {
-		return String.format("{\"type\":\"scatterplot\",\"polar\":%b,\"name\":\"%s\",\"points\":{\"x\":%s,\"y\":%s},\"color\":%d,\"thickness\":%d,\"enabled\":%b}", isPolar(), getName().replaceAll("[\"\\\\]", "\\\\$0"), Arrays.toString(points[0]), Arrays.toString(points[1]), color.getRGB(), thickness, enabled);
+		return String.format("{\"type\":\"scatterplot\",\"polar\":%b,\"name\":\"%s\",\"points\":{\"x\":%s,\"y\":%s},\"color\":%d,\"thickness\":%d,\"enabled\":%b}", isPolar(), getName().replaceAll("[\"\\\\]", "\\\\$0"), Arrays.toString(points[0]), Arrays.toString(points[1]), getColor().getRGB(), getThickness(), enabled);
 	}
 
 }
