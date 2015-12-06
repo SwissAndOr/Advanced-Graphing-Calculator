@@ -15,6 +15,10 @@ import javax.swing.JTable;
 
 public class Scatterplot extends Relation {
 	
+	public Scatterplot(String name) {
+		setName(name);
+	}
+
 	private JTable pointTable = new JTable();
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
@@ -23,7 +27,6 @@ public class Scatterplot extends Relation {
 	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, 15, 2);
 	// Point shape?
 	
-	private boolean polar;
 	// TODO Regressions
 	private int[][] points;
 	public Color color;
@@ -58,7 +61,7 @@ public class Scatterplot extends Relation {
 
 	@Override
 	public String writeJSON() {
-		return String.format("{\"type\":\"scatterplot\",\"polar\":%b,\"name\":\"%s\",\"points\":{\"x\":%s,\"y\":%s},\"color\":%d,\"thickness\":%d,\"enabled\":%b}", polar, getName().replaceAll("[\"\\\\]", "\\\\$0"), Arrays.toString(points[0]), Arrays.toString(points[1]), color.getRGB(), thickness, enabled);
+		return String.format("{\"type\":\"scatterplot\",\"polar\":%b,\"name\":\"%s\",\"points\":{\"x\":%s,\"y\":%s},\"color\":%d,\"thickness\":%d,\"enabled\":%b}", isPolar(), getName().replaceAll("[\"\\\\]", "\\\\$0"), Arrays.toString(points[0]), Arrays.toString(points[1]), color.getRGB(), thickness, enabled);
 	}
 	
 }

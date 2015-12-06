@@ -16,6 +16,10 @@ import javax.swing.JTextField;
 
 public class Parametric extends Relation {
 
+	public Parametric(String name) {
+		setName(name);
+	}
+
 	private JTextField xTextField = new JTextField(16);
 	private JTextField yTextField = new JTextField(16);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
@@ -30,7 +34,6 @@ public class Parametric extends Relation {
 
 	private double tMin = 0, tMax = 6.28318530717958623199592693709;
 
-	private boolean polar;
 	private Stack<Object> xRpn, yRpn;
 	private String xEquation, yEquation;
 	public Color color;
@@ -63,7 +66,7 @@ public class Parametric extends Relation {
 
 	@Override
 	public String writeJSON() {
-		return String.format("\"type\":\"parametric\",\"polar\":%b,\"name\":\"%s\",\"xEquation\":\"%s\",\"yEquation\":\"%s\",\"color\":%d,\"thickness\":%d,\"tMin\":%f,\"tMax\":%f,\"enabled\":%b", polar, getName().replaceAll("[\"\\\\]", "\\\\$0"), xEquation.replaceAll("[\"\\\\]", "\\\\$0"), yEquation.replaceAll("[\"\\\\]", "\\\\$0"), color.getRGB(), thickness, tMin, tMax, enabled);
+		return String.format("\"type\":\"parametric\",\"polar\":%b,\"name\":\"%s\",\"xEquation\":\"%s\",\"yEquation\":\"%s\",\"color\":%d,\"thickness\":%d,\"tMin\":%f,\"tMax\":%f,\"enabled\":%b", isPolar(), getName().replaceAll("[\"\\\\]", "\\\\$0"), xEquation.replaceAll("[\"\\\\]", "\\\\$0"), yEquation.replaceAll("[\"\\\\]", "\\\\$0"), color.getRGB(), thickness, tMin, tMax, enabled);
 	}
 
 }

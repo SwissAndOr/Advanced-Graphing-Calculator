@@ -1,5 +1,4 @@
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -7,6 +6,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -16,12 +17,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -45,6 +47,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class Main {
 
 	public static JFrame window = new JFrame();
+	public static final int MAX_THICKNESS = 20;
 
 	/**
 	 * The file separator character
@@ -62,7 +65,8 @@ public class Main {
 	private static JButton functionDelete = new JButton("Delete");
 	private static JButton functionRename = new JButton("Rename");
 
-	private static JPanel relationPropertiesBox = new JPanel();
+	private static String[] relationTypes = {"Function", "Parametric", "Scatterplot"};
+	public static JComboBox<String> relationPropertiesType = new JComboBox<>(relationTypes);
 	private static JPanel relationPropertiesPanel;
 
 	private static JPanel windowPanel = new JPanel();
@@ -330,14 +334,14 @@ public class Main {
 
 			public void valueChanged(ListSelectionEvent e) {
 				if (!functionList.getValueIsAdjusting()) {
-					if (functionList.getSelectedIndex() != -1) {
-						
-//						functionTextField.setText(GraphTabbedPane.pane.getSelectedGraph().relations.get(functionList.getSelectedIndex()).getFunction());
-//						selectedColor = GraphTabbedPane.pane.getSelectedGraph().relations.get(functionList.getSelectedIndex()).getColor();
-//						colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
-//						thicknessSlider.setValue(GraphTabbedPane.pane.getSelectedGraph().relations.get(functionList.getSelectedIndex()).getThickness());
-
+					if (functionList.getSelectedIndex() != -1 && relationPropertiesPanel != null) {					
+						int index = Arrays.asList(sidebar.getComponents()).indexOf(relationPropertiesPanel);
+						sidebar.remove(relationPropertiesPanel);
 						relationPropertiesPanel = functionList.getSelectedValue().getPanel();
+						sidebar.add(relationPropertiesPanel, index);
+						relationPropertiesPanel.add(relationPropertiesType, 0);
+						relationPropertiesPanel.revalidate();
+						relationPropertiesPanel.repaint();
 						
 						if (functionList.getSelectedIndex() == 0)
 							functionUp.setEnabled(false);
@@ -412,10 +416,29 @@ public class Main {
 		functionRename.addActionListener(actionListeners);
 		sidebar.add(functionRename);
 
-		relationPropertiesBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		relationPropertiesType.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {	
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					System.out.println(functionList.getSelectedValue());
+
+					switch ((String) relationPropertiesType.getSelectedItem()) {
+					case "Function":
+						GraphTabbedPane.pane.getSelectedGraph().relations.set(functionList.getSelectedIndex(), new Function(functionList.getSelectedValue().getName()));
+						break;
+					case "Parametric":
+						GraphTabbedPane.pane.getSelectedGraph().relations.set(functionList.getSelectedIndex(), new Parametric(functionList.getSelectedValue().getName()));
+						break;
+					case "Scatterplot":
+						GraphTabbedPane.pane.getSelectedGraph().relations.set(functionList.getSelectedIndex(), new Scatterplot(functionList.getSelectedValue().getName()));
+						break;
+					}
+
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+				}
+			}
+		});
 		relationPropertiesPanel = functionList.getSelectedValue().getPanel();
-		relationPropertiesBox.add(relationPropertiesPanel);
-		sidebar.add(relationPropertiesBox);
+		sidebar.add(relationPropertiesPanel);
 
 		windowPanel.setPreferredSize(new Dimension(190, 140));
 		windowPanel.add(xMinLabel);
@@ -532,7 +555,7 @@ public class Main {
 					if (!graphSave.getFileFilter().accept(file)) {
 						file = new File(file.getAbsolutePath() + "." + ((FileNameExtensionFilter) graphSave.getFileFilter()).getExtensions()[0]);
 					}
-
+					
 					graph.save(file.toPath(), (FileNameExtensionFilter) graphSave.getFileFilter());
 				}
 			} else if (e.getSource() == saveAllGraphs) {
