@@ -1,32 +1,40 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.util.Stack;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 public class Parametric extends Relation {
 
-	public Parametric(String name) {
-		setName(name);
-	}
-
-	private JTextField xTextField = new JTextField(16);
-	private JTextField yTextField = new JTextField(16);
+	private JCheckBox polarCB = new JCheckBox("Polar   ", false);
+	private JLabel xLabel = new JLabel("x = ");
+	private JTextField xTextField = new JTextField(13);
+	private JLabel yLabel = new JLabel("y = ");
+	private JTextField yTextField = new JTextField(13);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
 	private Color selectedColor = Color.BLUE;
 	private JLabel thicknessLabel = new JLabel("Line Thickness");
-	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, 15, 2);
+	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, Main.MAX_THICKNESS, 2);
 	private JLabel tMinLabel = new JLabel("t Min");
 	private JFormattedTextField tMinTextField = new JFormattedTextField(Main.numbers);
 	private JLabel tMaxLabel = new JLabel("t Max");
@@ -39,6 +47,81 @@ public class Parametric extends Relation {
 	public Color color;
 	public int thickness = 2;
 
+	public Parametric(String name, boolean polar) {
+		setName(name);
+		color = new Color((int) (Math.random() * 16777216));
+		selectedColor = color;
+		setPolar(polar);
+
+		tMinTextField.setColumns(4);
+		tMinTextField.setText(Double.toString(tMin));
+		tMaxTextField.setColumns(4);
+		tMaxTextField.setText(Double.toString(tMax));
+		
+		setPanel(new JPanel());
+		getPanel().setPreferredSize(new Dimension(190, 170));
+		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		getPanel().add(Main.relationPropertiesType);
+		polarCB.addItemListener(new ItemListener() {
+			
+			public void itemStateChanged(ItemEvent e) {
+				setPolar(polarCB.isSelected());
+			}
+		});
+		getPanel().add(polarCB);
+		getPanel().add(yLabel);
+		getPanel().add(yTextField);
+		getPanel().add(xLabel);
+		getPanel().add(xTextField);
+		getPanel().add(colorChooserLabel);
+		colorChooserButton.setPreferredSize(new Dimension(85, 20));
+		colorChooserButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				selectedColor = JColorChooser.showDialog(null, "Color Chooser", color);
+				if (selectedColor == null)
+					selectedColor = color;
+				else
+					colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
+			}
+		});
+		colorChooserButton.setBackground(selectedColor);
+		getPanel().add(colorChooserButton);
+		getPanel().add(thicknessLabel);
+		thicknessSlider.setPaintTicks(true);
+		thicknessSlider.setMinorTickSpacing(1);
+		thicknessSlider.setPreferredSize(new Dimension(180, thicknessSlider.getPreferredSize().height));
+		getPanel().add(thicknessSlider);
+	}
+	
+	public Parametric(String name) {
+		this(name, false);
+	}
+	
+	@Override
+	public void setPolar(boolean polar) {
+		if (!polar && isPolar()) {
+			getPanel().setPreferredSize(new Dimension(190, 170));
+			getPanel().remove(tMinLabel);
+			getPanel().remove(tMinTextField);
+			getPanel().remove(tMaxLabel);
+			getPanel().remove(tMaxTextField);
+			getPanel().revalidate();
+			getPanel().repaint();
+			Main.relationList.repaint();
+			super.setPolar(polar);
+		} else if (polar && !isPolar()) {
+			getPanel().setPreferredSize(new Dimension(190, 190));
+			getPanel().add(tMinLabel);
+			getPanel().add(tMinTextField);
+			getPanel().add(tMaxLabel);
+			getPanel().add(tMaxTextField);
+			getPanel().revalidate();
+			getPanel().repaint();
+			Main.relationList.repaint();
+			super.setPolar(polar);
+		}
+	}
+	
 	@Override
 	public void createImage() {
 
@@ -46,18 +129,23 @@ public class Parametric extends Relation {
 
 	@Override
 	public void applyValues() {
-
+		//setXFunction(xTextField.getText());
+		//setYFunction(yTextField.getText());
+		color = selectedColor;
+		thickness = thicknessSlider.getValue();
+		tMin = Double.parseDouble(tMinTextField.getText());
+		tMax = Double.parseDouble(tMaxTextField.getText());
 	}
 
 	@Override
 	public Icon getIcon() {
-		BufferedImage image = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage image = new BufferedImage(Main.MAX_THICKNESS * 2 + 2, Main.MAX_THICKNESS * 2 + 2, BufferedImage.TYPE_INT_ARGB);
 
 		Graphics2D g = image.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setColor(color);
 		g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		g.draw(new Polygon(new int[] {thickness / 2, 31 - thickness / 2, 31 - thickness / 2}, new int[] {15, thickness / 2, 31 - thickness / 2}, 3));
+		g.draw(new Polygon(new int[] {thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2}, new int[] {Main.MAX_THICKNESS, thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2}, 3));
 		
 		g.dispose();
 

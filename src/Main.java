@@ -57,13 +57,13 @@ public class Main {
 	public static final NumberFormat numbers = new DecimalFormat("0");
 
 	private static JPanel relationPanel = new JPanel(new GridBagLayout());
-	public static JList<Relation> functionList;
-	private static JButton functionUp = new JButton("/\\");
-	private static JButton functionDown = new JButton("\\/");
+	public static JList<Relation> relationList;
+	private static JButton relationUp = new JButton("/\\");
+	private static JButton relationDown = new JButton("\\/");
 
-	private static JButton functionNew = new JButton("New");
-	private static JButton functionDelete = new JButton("Delete");
-	private static JButton functionRename = new JButton("Rename");
+	private static JButton relationNew = new JButton("New");
+	private static JButton relationDelete = new JButton("Delete");
+	private static JButton relationRename = new JButton("Rename");
 
 	private static String[] relationTypes = {"Function", "Parametric", "Scatterplot"};
 	public static JComboBox<String> relationPropertiesType = new JComboBox<>(relationTypes);
@@ -114,7 +114,7 @@ public class Main {
 	private static JMenuItem saveGraph = new JMenuItem("Save Graph");
 	private static JMenuItem saveGraphAs = new JMenuItem("Save Graph As...");
 	private static JMenuItem saveAllGraphs = new JMenuItem("Save All");
-	private static JMenuItem importFunctions = new JMenuItem("Import Functions...");
+	private static JMenuItem importRelations = new JMenuItem("Import Relations...");
 	private static JMenuItem renameGraph = new JMenuItem("Rename Graph...");
 	private static JMenuItem closeGraph = new JMenuItem("Close Graph");
 	private static JMenuItem closeAllGraphs = new JMenuItem("Close All Graphs");
@@ -198,10 +198,10 @@ public class Main {
 		saveAllGraphs.addActionListener(menuListener);
 		fileMenu.add(saveAllGraphs);
 
-		importFunctions.setMnemonic(KeyEvent.VK_I);
-		importFunctions.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
-		importFunctions.addActionListener(menuListener);
-		fileMenu.add(importFunctions);
+		importRelations.setMnemonic(KeyEvent.VK_I);
+		importRelations.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_DOWN_MASK));
+		importRelations.addActionListener(menuListener);
+		fileMenu.add(importRelations);
 
 		renameGraph.setMnemonic(KeyEvent.VK_R);
 		renameGraph.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK));
@@ -329,29 +329,30 @@ public class Main {
 		GraphTabbedPane.pane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
 		GraphTabbedPane.pane.getSelectedGraph().relations.add(new Function("Function"));
 
-		functionList = new JList<>(GraphTabbedPane.pane.getSelectedGraph().relations);
-		functionList.addListSelectionListener(new ListSelectionListener() {
+		relationList = new JList<>(GraphTabbedPane.pane.getSelectedGraph().relations);
+		relationList.addListSelectionListener(new ListSelectionListener() {
 
 			public void valueChanged(ListSelectionEvent e) {
-				if (!functionList.getValueIsAdjusting()) {
-					if (functionList.getSelectedIndex() != -1 && relationPropertiesPanel != null) {					
-						int index = Arrays.asList(sidebar.getComponents()).indexOf(relationPropertiesPanel);
-						sidebar.remove(relationPropertiesPanel);
-						relationPropertiesPanel = functionList.getSelectedValue().getPanel();
-						sidebar.add(relationPropertiesPanel, index);
+				if (!relationList.getValueIsAdjusting()) {
+					if (relationList.getSelectedIndex() != -1 && relationPropertiesPanel != null) {			
+						sidebar.remove(4);
+						relationPropertiesPanel = relationList.getSelectedValue().getPanel();
+						sidebar.add(relationPropertiesPanel, 4);
 						relationPropertiesPanel.add(relationPropertiesType, 0);
 						relationPropertiesPanel.revalidate();
 						relationPropertiesPanel.repaint();
 						
-						if (functionList.getSelectedIndex() == 0)
-							functionUp.setEnabled(false);
+						relationPropertiesType.setSelectedIndex(Arrays.asList(relationTypes).indexOf(relationList.getSelectedValue().getClass().getSimpleName()));
+						
+						if (relationList.getSelectedIndex() == 0)
+							relationUp.setEnabled(false);
 						else
-							functionUp.setEnabled(true);
+							relationUp.setEnabled(true);
 
-						if (functionList.getSelectedIndex() == GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1)
-							functionDown.setEnabled(false);
+						if (relationList.getSelectedIndex() == GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1)
+							relationDown.setEnabled(false);
 						else
-							functionDown.setEnabled(true);
+							relationDown.setEnabled(true);
 
 						for (Component component : relationPropertiesPanel.getComponents()) {
 							component.setEnabled(true);
@@ -359,8 +360,8 @@ public class Main {
 					} else {
 						relationPropertiesPanel = new JPanel();
 
-						functionUp.setEnabled(false);
-						functionDown.setEnabled(false);
+						relationUp.setEnabled(false);
+						relationDown.setEnabled(false);
 						for (Component component : relationPropertiesPanel.getComponents()) {
 							component.setEnabled(false);
 						}
@@ -368,76 +369,78 @@ public class Main {
 				}
 			}
 		});
-		functionList.addMouseListener(new MouseAdapter() {
+		relationList.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getX() > 140) {
 					e.consume();
 					GraphTabbedPane.pane.getSelectedGraph().relations.get(e.getY() / 30).enabled ^= true;
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+					relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
 				}
 			}
 		});
-		functionList.setFixedCellWidth(160);
-		functionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		functionList.setVisibleRowCount(4);
-		functionList.setSelectedIndex(0);
-		functionList.setCellRenderer(new FunctionListCellRenderer());
+		relationList.setFixedCellWidth(160);
+		relationList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		relationList.setVisibleRowCount(4);
+		relationList.setSelectedIndex(0);
+		relationList.setCellRenderer(new RelationListCellRenderer());
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridheight = 2;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
-		relationPanel.add(new JScrollPane(functionList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), c);
+		relationPanel.add(new JScrollPane(relationList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), c);
 
-		functionUp.setMargin(new Insets(functionUp.getMargin().top, 5, functionUp.getMargin().bottom, 5));
+		relationUp.setMargin(new Insets(relationUp.getMargin().top, 5, relationUp.getMargin().bottom, 5));
 		c.gridheight = 1;
 		c.weightx = 0;
 		c.weighty = 0.5;
 		c.gridx = 1;
-		functionUp.addActionListener(actionListeners);
-		relationPanel.add(functionUp, c);
+		relationUp.addActionListener(actionListeners);
+		relationPanel.add(relationUp, c);
 
-		functionDown.setMargin(new Insets(functionDown.getMargin().top, 5, functionDown.getMargin().bottom, 5));
+		relationDown.setMargin(new Insets(relationDown.getMargin().top, 5, relationDown.getMargin().bottom, 5));
 		c.gridy = 1;
-		functionDown.addActionListener(actionListeners);
-		relationPanel.add(functionDown, c);
+		relationDown.addActionListener(actionListeners);
+		relationPanel.add(relationDown, c);
 		sidebar.add(relationPanel);
 
-		functionNew.setMargin(new Insets(functionNew.getMargin().top, 8, functionNew.getMargin().bottom, 8));
-		functionNew.addActionListener(actionListeners);
-		sidebar.add(functionNew);
+		relationNew.setMargin(new Insets(relationNew.getMargin().top, 8, relationNew.getMargin().bottom, 8));
+		relationNew.addActionListener(actionListeners);
+		sidebar.add(relationNew);
 
-		functionDelete.setMargin(new Insets(functionDelete.getMargin().top, 8, functionDelete.getMargin().bottom, 8));
-		functionDelete.addActionListener(actionListeners);
-		sidebar.add(functionDelete);
+		relationDelete.setMargin(new Insets(relationDelete.getMargin().top, 8, relationDelete.getMargin().bottom, 8));
+		relationDelete.addActionListener(actionListeners);
+		sidebar.add(relationDelete);
 
-		functionRename.setMargin(new Insets(functionRename.getMargin().top, 8, functionRename.getMargin().bottom, 8));
-		functionRename.addActionListener(actionListeners);
-		sidebar.add(functionRename);
+		relationRename.setMargin(new Insets(relationRename.getMargin().top, 8, relationRename.getMargin().bottom, 8));
+		relationRename.addActionListener(actionListeners);
+		sidebar.add(relationRename);
 
 		relationPropertiesType.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {	
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					System.out.println(functionList.getSelectedValue());
-
+					int index = relationList.getSelectedIndex();
+					
 					switch ((String) relationPropertiesType.getSelectedItem()) {
 					case "Function":
-						GraphTabbedPane.pane.getSelectedGraph().relations.set(functionList.getSelectedIndex(), new Function(functionList.getSelectedValue().getName()));
+						GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Function(relationList.getSelectedValue().getName()));
 						break;
 					case "Parametric":
-						GraphTabbedPane.pane.getSelectedGraph().relations.set(functionList.getSelectedIndex(), new Parametric(functionList.getSelectedValue().getName()));
+						GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Parametric(relationList.getSelectedValue().getName()));
 						break;
 					case "Scatterplot":
-						GraphTabbedPane.pane.getSelectedGraph().relations.set(functionList.getSelectedIndex(), new Scatterplot(functionList.getSelectedValue().getName()));
+						GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Scatterplot(relationList.getSelectedValue().getName()));
 						break;
 					}
 
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+					relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+					relationList.setVisibleRowCount(4);
+					relationList.setSelectedIndex(index);
 				}
 			}
 		});
-		relationPropertiesPanel = functionList.getSelectedValue().getPanel();
+		relationPropertiesPanel = relationList.getSelectedValue().getPanel();
 		sidebar.add(relationPropertiesPanel);
 
 		windowPanel.setPreferredSize(new Dimension(190, 140));
@@ -490,9 +493,9 @@ public class Main {
 			for (Component component : windowPanel.getComponents()) {
 				component.setEnabled(true);
 			}
-			functionNew.setEnabled(true);
-			functionDelete.setEnabled(true);
-			functionRename.setEnabled(true);
+			relationNew.setEnabled(true);
+			relationDelete.setEnabled(true);
+			relationRename.setEnabled(true);
 			applyButton.setEnabled(true);
 		} catch (IndexOutOfBoundsException e) {
 			xMin.setText(null);
@@ -507,9 +510,9 @@ public class Main {
 			for (Component component : windowPanel.getComponents()) {
 				component.setEnabled(false);
 			}
-			functionNew.setEnabled(false);
-			functionDelete.setEnabled(false);
-			functionRename.setEnabled(false);
+			relationNew.setEnabled(false);
+			relationDelete.setEnabled(false);
+			relationRename.setEnabled(false);
 			applyButton.setEnabled(false);
 		}
 	}
@@ -577,7 +580,7 @@ public class Main {
 						}
 					}
 				}
-			} else if (e.getSource() == importFunctions) {
+			} else if (e.getSource() == importRelations) {
 				File dir = graphOpen.getCurrentDirectory();
 				graphOpen.setSelectedFile(new File(""));
 				graphOpen.setCurrentDirectory(dir);
@@ -592,7 +595,7 @@ public class Main {
 						JOptionPane.showMessageDialog(window, "<html>" + graphOpen.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
 						GraphTabbedPane.pane.getSelectedGraph().relations.addAll(graph.relations);
-						functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+						relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
 						GraphTabbedPane.pane.graphPane.repaint();
 					}
 				}
@@ -672,33 +675,33 @@ public class Main {
 					System.exit(0);
 				}
 			} else if (e.getSource() == calculateY) {
-				if (functionList.getSelectedIndex() < 0) {
+				if (relationList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+				} else if (relationList.getSelectedValue() == null || relationList.getSelectedValue().isInvalid()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() instanceof Function) {
+				} else if (relationList.getSelectedValue() instanceof Function) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is not a function.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 					String xValue = JOptionPane.showInputDialog(Main.window, "Please input an X value:", "Calculate Y", JOptionPane.PLAIN_MESSAGE);
 					if (xValue != null && !xValue.isEmpty()) {
-						Function function = (Function) functionList.getSelectedValue();
+						Function function = (Function) relationList.getSelectedValue();
 						JOptionPane.showMessageDialog(window, function.evaluate(Double.parseDouble(xValue)), "Calculate Y", JOptionPane.PLAIN_MESSAGE);
 					}
 				}
 			} else if (e.getSource() == trace) {
 
 			} else if (e.getSource() == minimum) {
-				if (functionList.getSelectedIndex() < 0) {
+				if (relationList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+				} else if (relationList.getSelectedValue() == null || relationList.getSelectedValue().isInvalid()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 					showMultiInputDialog("Left Bound:", "Right Bound:", "Enter shit", "Shit");
 				}
 			} else if (e.getSource() == maximum) {
-				if (functionList.getSelectedIndex() < 0) {
+				if (relationList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+				} else if (relationList.getSelectedValue() == null || relationList.getSelectedValue().isInvalid()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
@@ -706,25 +709,25 @@ public class Main {
 			} else if (e.getSource() == intersect) {
 
 			} else if (e.getSource() == zeroes) {
-				if (functionList.getSelectedIndex() < 0) {
+				if (relationList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+				} else if (relationList.getSelectedValue() == null || relationList.getSelectedValue().isInvalid()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
 				}
 			} else if (e.getSource() == derivative) {
-				if (functionList.getSelectedIndex() < 0) {
+				if (relationList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+				} else if (relationList.getSelectedValue() == null || relationList.getSelectedValue().isInvalid()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
 				}
 			} else if (e.getSource() == integral) {
-				if (functionList.getSelectedIndex() < 0) {
+				if (relationList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+				} else if (relationList.getSelectedValue() == null || relationList.getSelectedValue().isInvalid()) {
 					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
@@ -766,37 +769,37 @@ public class Main {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == functionUp) {
-				int i = functionList.getSelectedIndex();
+			if (e.getSource() == relationUp) {
+				int i = relationList.getSelectedIndex();
 				if (i > 0) {
-					functionList.setValueIsAdjusting(true);
+					relationList.setValueIsAdjusting(true);
 					GraphTabbedPane.pane.getSelectedGraph().relations.add(i - 1, GraphTabbedPane.pane.getSelectedGraph().relations.get(i));
 					GraphTabbedPane.pane.getSelectedGraph().relations.remove(i + 1);
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
-					functionList.setSelectedIndex(i - 1);
-					functionList.setValueIsAdjusting(false);
+					relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+					relationList.setSelectedIndex(i - 1);
+					relationList.setValueIsAdjusting(false);
 
-					if (functionList.getSelectedIndex() != 0)
-						functionDown.setEnabled(true);
+					if (relationList.getSelectedIndex() != 0)
+						relationDown.setEnabled(true);
 					else
-						functionUp.setEnabled(false);
+						relationUp.setEnabled(false);
 				}
-			} else if (e.getSource() == functionDown) {
-				int i = functionList.getSelectedIndex();
+			} else if (e.getSource() == relationDown) {
+				int i = relationList.getSelectedIndex();
 				if (i < GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1) {
-					functionList.setValueIsAdjusting(true);
+					relationList.setValueIsAdjusting(true);
 					GraphTabbedPane.pane.getSelectedGraph().relations.add(i + 2, GraphTabbedPane.pane.getSelectedGraph().relations.get(i));
 					GraphTabbedPane.pane.getSelectedGraph().relations.remove(i);
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
-					functionList.setSelectedIndex(i + 1);
-					functionList.setValueIsAdjusting(false);
+					relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+					relationList.setSelectedIndex(i + 1);
+					relationList.setValueIsAdjusting(false);
 
-					if (functionList.getSelectedIndex() != GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1)
-						functionUp.setEnabled(true);
+					if (relationList.getSelectedIndex() != GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1)
+						relationUp.setEnabled(true);
 					else
-						functionDown.setEnabled(false);
+						relationDown.setEnabled(false);
 				}
-			} else if (e.getSource() == functionNew) {
+			} else if (e.getSource() == relationNew) {
 				int high = 0;
 
 				for (Relation relation : GraphTabbedPane.pane.getSelectedGraph().relations) {
@@ -809,38 +812,38 @@ public class Main {
 					}
 				}
 
-				functionList.setValueIsAdjusting(true);
+				relationList.setValueIsAdjusting(true);
 				GraphTabbedPane.pane.getSelectedGraph().relations.add(new Function("Untitled " + (high + 1)));
-				functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
-				functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1);
-				functionList.setValueIsAdjusting(false);
+				relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+				relationList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1);
+				relationList.setValueIsAdjusting(false);
 
-				functionList.getListSelectionListeners()[0].valueChanged(null);
-			} else if (e.getSource() == functionDelete) {
-				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete \"" + functionList.getSelectedValue().getName() + "\"?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-					functionList.setValueIsAdjusting(true);
-					int i = functionList.getSelectedIndex();
+				relationList.getListSelectionListeners()[0].valueChanged(null);
+			} else if (e.getSource() == relationDelete) {
+				if (relationList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete \"" + relationList.getSelectedValue().getName() + "\"?", "Delete Relation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+					relationList.setValueIsAdjusting(true);
+					int i = relationList.getSelectedIndex();
 					GraphTabbedPane.pane.getSelectedGraph().relations.remove(i);
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
-					functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().relations.size() > 0 ? Math.max(i - 1, 0) : -1);
-					functionList.setValueIsAdjusting(false);
+					relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+					relationList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().relations.size() > 0 ? Math.max(i - 1, 0) : -1);
+					relationList.setValueIsAdjusting(false);
 
-					functionList.getListSelectionListeners()[0].valueChanged(null);
+					relationList.getListSelectionListeners()[0].valueChanged(null);
 				}
-			} else if (e.getSource() == functionRename) {
-				if (functionList.getSelectedIndex() >= 0) {
-					String newRelationName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + functionList.getSelectedValue().getName() + "\":", "Rename Function", JOptionPane.PLAIN_MESSAGE);
+			} else if (e.getSource() == relationRename) {
+				if (relationList.getSelectedIndex() >= 0) {
+					String newRelationName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + relationList.getSelectedValue().getName() + "\":", "Rename Relation", JOptionPane.PLAIN_MESSAGE);
 					if (newRelationName != null && !newRelationName.isEmpty()) {
 						newRelationName = newRelationName.replaceAll("\\<\\/?html\\>", "");
-						functionList.getSelectedValue().setName(newRelationName);
-						functionList.repaint();
+						relationList.getSelectedValue().setName(newRelationName);
+						relationList.repaint();
 					}
 				}
 			} else if (e.getSource() == applyButton) {
 				gridLineIntervalX.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
 				gridLineIntervalY.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
 
-				functionList.repaint();
+				relationList.repaint();
 
 				for (Relation relation : GraphTabbedPane.pane.getSelectedGraph().relations)
 					relation.applyValues();

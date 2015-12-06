@@ -243,7 +243,7 @@ public class GraphTabbedPane extends JPanel {
 
 		selectedGraph = index;
 
-		if (Main.functionList != null) Main.functionList.setListData(selectedGraph >= 0 ? graphs.get(selectedGraph).relations : new Vector<Relation>());
+		if (Main.relationList != null) Main.relationList.setListData(selectedGraph >= 0 ? graphs.get(selectedGraph).relations : new Vector<Relation>());
 	}
 
 	public Graph getSelectedGraph() {

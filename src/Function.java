@@ -2,6 +2,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,7 +26,9 @@ import javax.swing.JTextField;
 public class Function extends Relation {
 	
 	private JCheckBox polarCB = new JCheckBox("Polar", false);
-	private JTextField functionTextField = new JTextField(16);
+	private boolean xEquals = true;
+	private JButton equals = new JButton("x = ");
+	private JTextField functionTextField = new JTextField(12);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
 	private Color selectedColor = Color.BLUE;
@@ -100,7 +103,7 @@ public class Function extends Relation {
 			getPanel().remove(tMaxTextField);
 			getPanel().revalidate();
 			getPanel().repaint();
-			Main.functionList.repaint();
+			Main.relationList.repaint();
 			super.setPolar(polar);
 		} else if (polar && !isPolar()) {
 			getPanel().setPreferredSize(new Dimension(190, 170));
@@ -110,7 +113,7 @@ public class Function extends Relation {
 			getPanel().add(tMaxTextField);
 			getPanel().revalidate();
 			getPanel().repaint();
-			Main.functionList.repaint();
+			Main.relationList.repaint();
 			super.setPolar(polar);
 		}
 	}
@@ -137,6 +140,8 @@ public class Function extends Relation {
 			}
 		});
 		getPanel().add(polarCB);
+		equals.setMargin(new Insets(equals.getMargin().top - 3, 3, equals.getMargin().bottom - 3, 3));
+		getPanel().add(equals);
 		getPanel().add(functionTextField);
 		getPanel().add(colorChooserLabel);
 		colorChooserButton.setPreferredSize(new Dimension(85, 20));

@@ -9,7 +9,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-public class FunctionListCellRenderer extends DefaultListCellRenderer {
+public class RelationListCellRenderer extends DefaultListCellRenderer {
 
 	private static final long serialVersionUID = -5112234230892455719L;
 
