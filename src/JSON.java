@@ -1,6 +1,4 @@
-import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,31 +41,13 @@ public final class JSON {
 	public static String writeGraph(Graph graph) {
 		String ret = String.format("{\"name\":\"%s\",\"xMin\":%f,\"xMax\":%f,\"yMin\":%f,\"yMax\":%f,\"gridLineIntervalX\":%f,\"gridLineIntervalY\":%f,\"axisX\":%b,\"axisY\":%b,\"functions\":[", graph.name.replaceAll("[\"\\\\]", "\\\\$0"), graph.xMin, graph.xMax, graph.yMin, graph.yMax, graph.gridLineIntervalX, graph.gridLineIntervalY, graph.axisX, graph.axisY);
 
-		for (Function function : graph.functions) {
-			ret += writeFunction(function) + ",";
+		for (Relation relation : graph.relations) {
+			ret += relation.writeJSON() + ",";
 		}
 
 		ret.replaceAll("\\,$", "");
 		
 		return ret.replaceAll("\\,$", "") + "]}";
-	}
-
-	/**
-	 * <ul>
-	 * <li><b><i>write</i></b><br>
-	 * <br>
-	 * {@code protected static String write(Function function)}<br>
-	 * <br>
-	 * @param function The function to write
-	 * @return The given function as a string
-	 *         </ul>
-	 */
-	protected static String writeFunction(Function function) {
-		if (function.functionType == Function.FunctionType.SCATTERPLOT) {
-			return String.format("{\"type\":%d,\"name\":\"%s\",\"points\":%s,\"color\":%d,\"thickness\":%d,\"enabled\":%b}", function.functionType.ordinal(), function.name.replaceAll("[\"\\\\]", "\\\\$0"), Arrays.deepToString(function.points).replaceAll("\\s+", ""), function.color.getRGB(), function.thickness, function.enabled);
-		} else {
-			return String.format("{\"type\":%d,\"name\":\"%s\",\"yString\":\"%s\",\"xString\":\"%s\",\"color\":%d,\"thickness\":%d,\"enabled\":%b}", function.functionType.ordinal(), function.name.replaceAll("[\"\\\\]", "\\\\$0"), function.yString.replaceAll("[\"\\\\]", "\\\\$0"), function.xString.replaceAll("[\"\\\\]", "\\\\$0"), function.color.getRGB(), function.thickness, function.enabled);
-		}
 	}
 
 	public static GraphTabbedPane parsePane(String string) {
@@ -102,6 +82,7 @@ public final class JSON {
 		return parseGraph((Map<?, ?>) parse(string).get(0));
 	}
 
+	// TODO Fix
 	public static Graph parseGraph(Map<?, ?> graph) {
 		String name = graph.get("name") instanceof String ? (String) graph.get("name") : "";
 
@@ -114,35 +95,38 @@ public final class JSON {
 		boolean axisX = graph.get("axisx") instanceof Boolean ? (Boolean) graph.get("axisx") : true;
 		boolean axisY = graph.get("axisy") instanceof Boolean ? (Boolean) graph.get("axisy") : true;
 
-		Vector<Function> functions = new Vector<>();
+		Vector<Relation> relations = new Vector<>();
 		try {
-			List<?> functionArray = (List<?>) graph.get("functions");
-			for (Object obj : functionArray) {
+			List<?> relationArray = (List<?>) graph.get("relations");
+			for (Object obj : relationArray) {
 				if (!(obj instanceof Map<?, ?>)) continue;
 
-				functions.addElement(parseFunction((Map<?, ?>) obj));
+				relations.addElement(parseRelation((Map<?, ?>) obj));
 			}
 		} catch (ClassCastException | NullPointerException e) {}
 
 		Graph ret = new Graph(name, xMin, xMax, yMin, yMax, gridLineIntervalX, gridLineIntervalY, axisX, axisY);
-		ret.functions.addAll(functions);
+		ret.relations.addAll(relations);
 		return ret;
 	}
 
-	protected static Function parseFunction(Map<?, ?> map) {
-		// TODO Rename from untitiled function to appropriate name?
-		String name = map.get("name") instanceof String ? (String) map.get("name") : "Untitled Function";
-		String string = map.get("string") instanceof String ? (String) map.get("string") : "";
-		Color color = map.get("color") instanceof Number ? new Color(((Number) map.get("color")).intValue()) : Color.BLUE;
-		int thickness = map.get("thickness") instanceof Number ? ((Number) map.get("thickness")).intValue() : 2;
-		boolean enabled = map.get("enabled") instanceof Boolean ? (Boolean) map.get("enabled") : true;
-
-		Function ret = new Function(name);
-		ret.color = color;
-		ret.enabled = enabled;
-		ret.setYString(string);
-		ret.thickness = thickness;
-		return ret;
+	protected static Relation parseRelation(Map<?, ?> map) {
+		// TODO
+		return null;
+		
+//		// TODO Rename from untitiled function to appropriate name?
+//		String name = map.get("name") instanceof String ? (String) map.get("name") : "Untitled Function";
+//		String string = map.get("string") instanceof String ? (String) map.get("string") : "";
+//		Color color = map.get("color") instanceof Number ? new Color(((Number) map.get("color")).intValue()) : Color.BLUE;
+//		int thickness = map.get("thickness") instanceof Number ? ((Number) map.get("thickness")).intValue() : 2;
+//		boolean enabled = map.get("enabled") instanceof Boolean ? (Boolean) map.get("enabled") : true;
+//
+//		Function ret = new Function(name);
+//		ret.color = color;
+//		ret.enabled = enabled;
+//		ret.setYString(string);
+//		ret.thickness = thickness;
+//		return ret;
 	}
 
 	public static ArrayList<Object> parse(String string) {

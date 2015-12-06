@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Stack;
 
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JFormattedTextField;
@@ -238,6 +239,18 @@ public class Function extends Relation {
 		thickness = thicknessSlider.getValue();
 		tMin = Double.parseDouble(tMinTextField.getText());
 		tMax = Double.parseDouble(tMaxTextField.getText());
+	}
+	
+	@Override
+	public Icon getIcon() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public String writeJSON() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 		
 }
