@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.util.Stack;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JFormattedTextField;
@@ -19,7 +20,7 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 public class Function extends Relation {
-	
+
 	private JTextField functionTextField = new JTextField(16);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
@@ -30,31 +31,38 @@ public class Function extends Relation {
 	private JFormattedTextField tMinTextField = new JFormattedTextField(Main.numbers);
 	private JLabel tMaxLabel = new JLabel("\u0398 Max");
 	private JFormattedTextField tMaxTextField = new JFormattedTextField(Main.numbers);
-	
-	private double tMin = 0, tMax = 2 * Math.PI;
+
+	private double tMin = 0, tMax = 6.28318530717958623199592693709;
+
+	private boolean polar;
+	private Stack<Object> rpn;
+	private String function;
+	public Color color;
+	public int thickness = 2;
+
 	public double getTMin() {
 		return tMin;
 	}
+
 	public void setTMin(double tMin) {
 		this.tMin = tMin;
 	}
+
 	public double getTMax() {
 		return tMax;
 	}
+
 	public void setTMax(double tMax) {
 		this.tMax = tMax;
 	}
-	
-	private boolean polar;
+
 	public boolean isPolar() {
 		return polar;
 	}
+
 	public void setPolar(boolean polar) {
 		this.polar = polar;
 	}
-	private Stack<Object> rpn;
-
-	private String function;
 
 	public String getFunction() {
 		return function;
@@ -71,8 +79,6 @@ public class Function extends Relation {
 		}
 	}
 
-	public Color color;
-
 	public Color getColor() {
 		return color;
 	}
@@ -81,10 +87,14 @@ public class Function extends Relation {
 		this.color = color;
 	}
 
-	public int thickness = 2;
-	public int getThickness() { return thickness; }
-	public void setThickness(int thickness) { this.thickness = thickness; }
-	
+	public int getThickness() {
+		return thickness;
+	}
+
+	public void setThickness(int thickness) {
+		this.thickness = thickness;
+	}
+
 	public Function(String name) {
 		setColor(new Color((int) (Math.random() * 16777216)));
 		setName(name);
@@ -95,6 +105,7 @@ public class Function extends Relation {
 		getPanel().add(colorChooserLabel);
 		colorChooserButton.setPreferredSize(new Dimension(85, 20));
 		colorChooserButton.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				selectedColor = JColorChooser.showDialog(null, "Color Chooser", getColor());
 				if (selectedColor == null)
@@ -111,15 +122,15 @@ public class Function extends Relation {
 		thicknessSlider.setPreferredSize(new Dimension(180, thicknessSlider.getPreferredSize().height));
 		getPanel().add(thicknessSlider);
 	}
-	
+
 	public double evaluate(double x) {
 		return Evaluator.evaluate(rpn, x);
 	}
-	
+
 	@Override
 	public void createImage() {
 		Dimension dim = GraphTabbedPane.pane.getGraphSize();
-		
+
 		setImage(new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB));
 
 		if (!isInvalid() && isEnabled()) {
@@ -172,15 +183,15 @@ public class Function extends Relation {
 				}
 			} else {
 				double step = 0.000244140625 * (tMax - tMin);
-				
+
 				double previousValue = evaluate(tMin), currentValue;
 				double previousX = dim.width * ((Math.cos(tMin) * previousValue) - graph.xMin) / (graph.xMax - graph.xMin), currentX;
 				double previousY = dim.height - ((Math.sin(tMin) * previousValue - graph.yMin) / (graph.yMax - graph.yMin) * dim.height), currentY;
 				for (double t = tMin; t < tMax; t += step) {
 					currentValue = evaluate(t);
-                    currentX = dim.width * ((Math.cos(t) * currentValue) - graph.xMin) / (graph.xMax - graph.xMin);
+					currentX = dim.width * ((Math.cos(t) * currentValue) - graph.xMin) / (graph.xMax - graph.xMin);
 					currentY = dim.height - ((Math.sin(t) * currentValue - graph.yMin) / (graph.yMax - graph.yMin) * dim.height);
-					
+
 					// TODO: Make it so that it only graphs functions when absolutely needed, and improve binary search
 					if (Double.isFinite(currentValue) && Double.isFinite(previousValue)) {
 						g.drawLine((int) previousX, (int) previousY, (int) currentX, (int) currentY);
@@ -213,11 +224,11 @@ public class Function extends Relation {
 							}
 						}
 
-						double lastFiniteX = dim.width * ((lastFiniteGuess * Math.cos(lastFiniteGuessT)) - graph.xMin) / (graph.xMax - graph.xMin);              
+						double lastFiniteX = dim.width * ((lastFiniteGuess * Math.cos(lastFiniteGuessT)) - graph.xMin) / (graph.xMax - graph.xMin);
 						double lastFiniteY = dim.height - ((lastFiniteGuess * Math.sin(lastFiniteGuessT) - graph.yMin) / (graph.yMax - graph.yMin) * dim.height);
-						
+
 						if (finiteOnRight) {
-							g.drawLine((int) lastFiniteX, (int) lastFiniteY, (int) currentX, (int) currentY); 
+							g.drawLine((int) lastFiniteX, (int) lastFiniteY, (int) currentX, (int) currentY);
 						} else {
 							g.drawLine((int) previousX, (int) previousY, (int) lastFiniteX, (int) lastFiniteY);
 						}
@@ -227,11 +238,11 @@ public class Function extends Relation {
 					previousY = currentY;
 				}
 			}
-			
+
 			g.dispose();
 		}
 	}
-	
+
 	@Override
 	public void applyValues() {
 		setFunction(functionTextField.getText());
@@ -240,17 +251,28 @@ public class Function extends Relation {
 		tMin = Double.parseDouble(tMinTextField.getText());
 		tMax = Double.parseDouble(tMaxTextField.getText());
 	}
-	
+
 	@Override
 	public Icon getIcon() {
-		// TODO Auto-generated method stub
-		return null;
+		BufferedImage image = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
+
+		Graphics2D g = image.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setColor(color);
+		g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		if (polar)
+			g.drawOval(thickness / 2, thickness / 2, 32 - thickness, 32 - thickness);
+		else
+			g.drawLine(thickness / 2, thickness / 2, 31 - thickness / 2, 31 - thickness / 2);
+
+		g.dispose();
+
+		return new ImageIcon(image);
 	}
-	
+
 	@Override
 	public String writeJSON() {
-		// TODO Auto-generated method stub
-		return null;
+		return String.format("{\"type\":\"function\",\"polar\":%b,\"name\":\"%s\",\"function\":\"%s\",\"color\":%d,\"thickness\":%d,\"tMin\":%f,\"tMax\":%f,\"enabled\":%b}", polar, getName().replaceAll("[\"\\\\]", "\\\\$0"), function.replaceAll("[\"\\\\]", "\\\\$0"), color.getRGB(), thickness, tMin, tMax, enabled);
 	}
-		
+
 }
