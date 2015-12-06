@@ -367,13 +367,13 @@ public class Main {
 		yMax.addFocusListener(formattedFocusListener);
 
 		xView.setValue(0);
-		xView.setColumns(4);
+		xView.setColumns(5);
 		widthView.setValue(20);
-		widthView.setColumns(4);
+		widthView.setColumns(5);
 		yView.setValue(0);
-		yView.setColumns(4);
+		yView.setColumns(5);
 		heightView.setValue(20);
-		heightView.setColumns(4);
+		heightView.setColumns(5);
 		
 		xView.addMouseListener(formattedListener);
 		widthView.addMouseListener(formattedListener);
