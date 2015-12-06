@@ -35,9 +35,9 @@ public class Parametric extends Relation {
 	private Color selectedColor = Color.BLUE;
 	private JLabel thicknessLabel = new JLabel("Line Thickness");
 	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, Main.MAX_THICKNESS, 2);
-	private JLabel tMinLabel = new JLabel("t Min");
+	private JLabel tMinLabel = new JLabel("\u0398 Min");
 	private JFormattedTextField tMinTextField = new JFormattedTextField(Main.numbers);
-	private JLabel tMaxLabel = new JLabel("t Max");
+	private JLabel tMaxLabel = new JLabel("\u0398 Max");
 	private JFormattedTextField tMaxTextField = new JFormattedTextField(Main.numbers);
 
 	private double tMin = 0, tMax = 6.28318530717958623199592693709;

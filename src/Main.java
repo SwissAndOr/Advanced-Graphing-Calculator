@@ -6,6 +6,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -36,6 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
@@ -70,6 +74,10 @@ public class Main {
 	private static JPanel relationPropertiesPanel;
 
 	private static JPanel windowPanel = new JPanel();
+	
+	private static JTabbedPane viewSettings = new JTabbedPane();
+	
+	private static JPanel minMax = new JPanel();
 	private static JLabel xMinLabel = new JLabel("X Min");
 	private static JFormattedTextField xMin = new JFormattedTextField(numbers);
 	private static JLabel xMaxLabel = new JLabel("X Max");
@@ -78,6 +86,16 @@ public class Main {
 	private static JFormattedTextField yMin = new JFormattedTextField(numbers);
 	private static JLabel yMaxLabel = new JLabel("Y Max");
 	private static JFormattedTextField yMax = new JFormattedTextField(numbers);
+	
+	private static JPanel xy = new JPanel();
+	private static JLabel xLabel = new JLabel("X");
+	private static JFormattedTextField xView = new JFormattedTextField(numbers);
+	private static JLabel widthLabel = new JLabel("Width");
+	private static JFormattedTextField widthView = new JFormattedTextField(numbers);
+	private static JLabel yLabel = new JLabel("Y");
+	private static JFormattedTextField yView = new JFormattedTextField(numbers);
+	private static JLabel heightLabel = new JLabel("Height");
+	private static JFormattedTextField heightView = new JFormattedTextField(numbers);
 
 	private static final MouseListener formattedListener = new MouseAdapter() {
 
@@ -92,6 +110,28 @@ public class Main {
 			});
 		}
 	};
+	
+	private static final FocusListener formattedFocusListener = new FocusAdapter() {
+		
+		public void focusGained(FocusEvent e) {
+			
+		}
+		
+		public void focusLost(FocusEvent e) {		
+			if (e.getSource() == xMin || e.getSource() == xMax || e.getSource() == yMin || e.getSource() == yMax) {
+				xView.setText(numbers.format((Double.parseDouble(xMin.getText()) + Double.parseDouble(xMax.getText())) / 2));
+				widthView.setText(numbers.format(Double.parseDouble(xMax.getText()) - Double.parseDouble(xMin.getText())));
+				yView.setText(numbers.format((Double.parseDouble(yMin.getText()) + Double.parseDouble(yMax.getText())) / 2));
+				heightView.setText(numbers.format(Double.parseDouble(yMax.getText()) - Double.parseDouble(yMin.getText())));
+			} else {
+				xMin.setText(numbers.format(Double.parseDouble(xView.getText()) - Double.parseDouble(widthView.getText()) / 2));
+				xMax.setText(numbers.format(Double.parseDouble(xView.getText()) + Double.parseDouble(widthView.getText()) / 2));
+				yMin.setText(numbers.format(Double.parseDouble(yView.getText()) - Double.parseDouble(heightView.getText()) / 2));
+				yMax.setText(numbers.format(Double.parseDouble(yView.getText()) + Double.parseDouble(heightView.getText()) / 2));
+			}
+		}
+	};
+
 
 	private static JLabel gridLineIntervalXLabel = new JLabel("Grid Line Interval X");
 	private static JFormattedTextField gridLineIntervalX = new JFormattedTextField(numbers);
@@ -318,14 +358,32 @@ public class Main {
 		yMax.setColumns(4);
 
 		xMin.addMouseListener(formattedListener);
-		xMin.addMouseListener(formattedListener);
-		xMax.addMouseListener(formattedListener);
 		xMax.addMouseListener(formattedListener);
 		yMin.addMouseListener(formattedListener);
-		yMin.addMouseListener(formattedListener);
 		yMax.addMouseListener(formattedListener);
-		yMax.addMouseListener(formattedListener);
+		xMin.addFocusListener(formattedFocusListener);
+		xMax.addFocusListener(formattedFocusListener);
+		yMin.addFocusListener(formattedFocusListener);
+		yMax.addFocusListener(formattedFocusListener);
 
+		xView.setValue(0);
+		xView.setColumns(4);
+		widthView.setValue(20);
+		widthView.setColumns(4);
+		yView.setValue(0);
+		yView.setColumns(4);
+		heightView.setValue(20);
+		heightView.setColumns(4);
+		
+		xView.addMouseListener(formattedListener);
+		widthView.addMouseListener(formattedListener);
+		yView.addMouseListener(formattedListener);
+		heightView.addMouseListener(formattedListener);
+		xView.addFocusListener(formattedFocusListener);
+		widthView.addFocusListener(formattedFocusListener);
+		yView.addFocusListener(formattedFocusListener);
+		heightView.addFocusListener(formattedFocusListener);
+		
 		GraphTabbedPane.pane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
 		GraphTabbedPane.pane.getSelectedGraph().relations.add(new Function("Function"));
 
@@ -443,15 +501,31 @@ public class Main {
 		relationPropertiesPanel = relationList.getSelectedValue().getPanel();
 		sidebar.add(relationPropertiesPanel);
 
-		windowPanel.setPreferredSize(new Dimension(190, 140));
-		windowPanel.add(xMinLabel);
-		windowPanel.add(xMin);
-		windowPanel.add(xMaxLabel);
-		windowPanel.add(xMax);
-		windowPanel.add(yMinLabel);
-		windowPanel.add(yMin);
-		windowPanel.add(yMaxLabel);
-		windowPanel.add(yMax);
+		windowPanel.setPreferredSize(new Dimension(190, 160));
+		
+		minMax.setPreferredSize(new Dimension(185, 50));
+		minMax.add(xMinLabel);
+		minMax.add(xMin);
+		minMax.add(xMaxLabel);
+		minMax.add(xMax);
+		minMax.add(yMinLabel);
+		minMax.add(yMin);
+		minMax.add(yMaxLabel);
+		minMax.add(yMax);
+		
+		xy.setPreferredSize(new Dimension(185, 50));
+		xy.add(xLabel);
+		xy.add(xView);
+		xy.add(widthLabel);
+		xy.add(widthView);
+		xy.add(yLabel);
+		xy.add(yView);
+		xy.add(heightLabel);
+		xy.add(heightView);
+		
+		viewSettings.addTab(" Min and Max  ", minMax);
+		viewSettings.addTab("   X and Y   ", xy);
+		windowPanel.add(viewSettings);
 
 		gridLineIntervalX.setValue(1);
 		gridLineIntervalX.setColumns(6);
@@ -481,10 +555,19 @@ public class Main {
 
 	public static void refreshWindowSettings() {
 		try {
-			xMin.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().xMin));
-			xMax.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().xMax));
-			yMin.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().yMin));
-			yMax.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().yMax));
+			double newXMin = GraphTabbedPane.pane.getSelectedGraph().xMin;
+			double newXMax = GraphTabbedPane.pane.getSelectedGraph().xMax;
+			double newYMin = GraphTabbedPane.pane.getSelectedGraph().yMin;
+			double newYMax = GraphTabbedPane.pane.getSelectedGraph().yMax;
+			
+			xMin.setText(numbers.format(newXMin));
+			xMax.setText(numbers.format(newXMax));
+			yMin.setText(numbers.format(newYMin));
+			yMax.setText(numbers.format(newYMax));
+			xView.setText(numbers.format((newXMin + newXMax) / 2));
+			widthView.setText(numbers.format(newXMax - newXMin));
+			yView.setText(numbers.format((newYMin + newYMax) / 2));
+			heightView.setText(numbers.format(newYMax - newYMin));
 			gridLineIntervalX.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalX));
 			gridLineIntervalY.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalY));
 			axisX.setSelected(GraphTabbedPane.pane.getSelectedGraph().axisX);

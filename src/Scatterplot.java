@@ -1,24 +1,25 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTable;
 
 public class Scatterplot extends Relation {
-	
-	public Scatterplot(String name) {
-		setName(name);
-	}
 
+	private JCheckBox polarCB = new JCheckBox("Polar", false);
 	private JTable pointTable = new JTable();
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
@@ -31,6 +32,20 @@ public class Scatterplot extends Relation {
 	private int[][] points;
 	public Color color;
 	public int thickness = 2;
+	
+	public Scatterplot(String name, boolean polar) {
+		setName(name);
+		setPolar(polar);
+		
+		setPanel(new JPanel());
+		getPanel().setPreferredSize(new Dimension(190, 140));
+		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		getPanel().add(polarCB);
+	}
+	
+	public Scatterplot(String name) {
+		this(name, false);
+	}
 	
 	@Override
 	public void createImage() {

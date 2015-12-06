@@ -39,7 +39,7 @@ public class Function extends Relation {
 	private JLabel tMaxLabel = new JLabel("\u03B8 Max");
 	private JFormattedTextField tMaxTextField = new JFormattedTextField(Main.numbers);
 
-	private double tMin = 0, tMax = 2 * Math.PI;
+	private double tMin = 0, tMax = 6.28318530717958623199592693709;
 
 	private Stack<Object> rpn;
 	private String function;
