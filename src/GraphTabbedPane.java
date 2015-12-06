@@ -243,7 +243,7 @@ public class GraphTabbedPane extends JPanel {
 
 		selectedGraph = index;
 
-		if (Main.functionList != null) Main.functionList.setListData(selectedGraph >= 0 ? graphs.get(selectedGraph).functions : new Vector<Function>());
+		if (Main.functionList != null) Main.functionList.setListData(selectedGraph >= 0 ? graphs.get(selectedGraph).relations : new Vector<Relation>());
 	}
 
 	public Graph getSelectedGraph() {
@@ -291,9 +291,9 @@ public class GraphTabbedPane extends JPanel {
 			if (currentGraph.axisY)
 				g.fillRect(zeroX - 1, 0, 3, height); // Draw vertical 0 line
 
-			for (Function func : currentGraph.functions) {
-				func.createImage();
-				g.drawImage(func.image, 0, 0, null);
+			for (Relation relation : currentGraph.relations) {
+				relation.createImage();
+				g.drawImage(relation.getImage(), 0, 0, null);
 			}
 		}
 

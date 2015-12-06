@@ -11,7 +11,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class Graph {
 
 	public String name = null;
-	public Vector<Function> functions = new Vector<>();
+	public Vector<Relation> relations = new Vector<>();
 
 	public double xMin = -5, xMax = 5, yMin = -5, yMax = 5;
 	public double gridLineIntervalX = 1, gridLineIntervalY = 1;

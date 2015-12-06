@@ -29,19 +29,24 @@ public class FunctionListCellRenderer extends DefaultListCellRenderer {
 		JCheckBox cb = new JCheckBox();
 		
 		BufferedImage image = new BufferedImage(25, 25, BufferedImage.TYPE_INT_ARGB);
-		if (value instanceof Function) {
-			Function func = (Function) value;
-			Graphics2D g = image.createGraphics();
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g.setColor(func.color);
-			g.setStroke(new BasicStroke(func.thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			g.drawLine(func.thickness / 2, func.thickness / 2, 24 - func.thickness / 2, 24 - func.thickness / 2);
-			g.dispose();
+		if (value instanceof Relation) {
+			Relation relation = (Relation) value;
+			
+			if (relation instanceof CartesianFunction || relation instanceof CartesianParametric || relation instanceof PolarFunction || relation instanceof PolarParametric) {
+				
+				
+				Graphics2D g = image.createGraphics();
+				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g.setColor(relation.getColor());
+				g.setStroke(new BasicStroke(relation.getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g.drawLine(relation.getThickness() / 2, relation.getThickness() / 2, 24 - relation.getThickness() / 2, 24 - relation.getThickness() / 2);
+				g.dispose();
+			}
 
-			cb.setSelected(func.enabled);
+			cb.setSelected(relation.enabled);
 
 			JLabel newLabel = new JLabel(label.getText(), new ImageIcon(image), SwingConstants.LEFT);
-			if (func.invalid) newLabel.setForeground(Color.RED);
+			if (relation.isInvalid()) newLabel.setForeground(Color.RED);
 			panel.add(newLabel);
 		}
 

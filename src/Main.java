@@ -2,7 +2,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -23,7 +22,6 @@ import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -36,7 +34,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
@@ -56,8 +53,8 @@ public class Main {
 
 	public static final NumberFormat numbers = new DecimalFormat("0");
 
-	private static JPanel functionPanel = new JPanel(new GridBagLayout());
-	public static JList<Function> functionList;
+	private static JPanel relationPanel = new JPanel(new GridBagLayout());
+	public static JList<Relation> functionList;
 	private static JButton functionUp = new JButton("/\\");
 	private static JButton functionDown = new JButton("\\/");
 
@@ -65,13 +62,8 @@ public class Main {
 	private static JButton functionDelete = new JButton("Delete");
 	private static JButton functionRename = new JButton("Rename");
 
-	private static JPanel functionPropertiesPanel = new JPanel(new FlowLayout());
-	private static JTextField functionTextField = new JTextField(16);
-	private static JLabel colorChooserLabel = new JLabel("Color Chooser");
-	private static JButton colorChooserButton = new JButton();
-	private static Color selectedColor = Color.BLUE;
-	private static JLabel thicknessLabel = new JLabel("Line Thickness");
-	private static JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, 15, 2);
+	private static JPanel relationPropertiesBox = new JPanel();
+	private static JPanel relationPropertiesPanel;
 
 	private static JPanel windowPanel = new JPanel();
 	private static JLabel xMinLabel = new JLabel("X Min");
@@ -331,40 +323,41 @@ public class Main {
 		yMax.addMouseListener(formattedListener);
 
 		GraphTabbedPane.pane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
-		GraphTabbedPane.pane.getSelectedGraph().functions.add(new Function("Function"));
+		GraphTabbedPane.pane.getSelectedGraph().relations.add(new Function("Function"));
 
-		functionList = new JList<>(GraphTabbedPane.pane.getSelectedGraph().functions);
+		functionList = new JList<>(GraphTabbedPane.pane.getSelectedGraph().relations);
 		functionList.addListSelectionListener(new ListSelectionListener() {
 
 			public void valueChanged(ListSelectionEvent e) {
 				if (!functionList.getValueIsAdjusting()) {
 					if (functionList.getSelectedIndex() != -1) {
-						functionTextField.setText(GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).yString);
-						selectedColor = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color;
-						colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
-						thicknessSlider.setValue(GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).thickness);
+						
+//						functionTextField.setText(GraphTabbedPane.pane.getSelectedGraph().relations.get(functionList.getSelectedIndex()).getFunction());
+//						selectedColor = GraphTabbedPane.pane.getSelectedGraph().relations.get(functionList.getSelectedIndex()).getColor();
+//						colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
+//						thicknessSlider.setValue(GraphTabbedPane.pane.getSelectedGraph().relations.get(functionList.getSelectedIndex()).getThickness());
 
+						relationPropertiesPanel = functionList.getSelectedValue().getPanel();
+						
 						if (functionList.getSelectedIndex() == 0)
 							functionUp.setEnabled(false);
 						else
 							functionUp.setEnabled(true);
 
-						if (functionList.getSelectedIndex() == GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1)
+						if (functionList.getSelectedIndex() == GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1)
 							functionDown.setEnabled(false);
 						else
 							functionDown.setEnabled(true);
 
-						for (Component component : functionPropertiesPanel.getComponents()) {
+						for (Component component : relationPropertiesPanel.getComponents()) {
 							component.setEnabled(true);
 						}
 					} else {
-						functionTextField.setText(null);
-						colorChooserButton.setBackground(null);
-						thicknessSlider.setValue(2);
+						relationPropertiesPanel = new JPanel();
 
 						functionUp.setEnabled(false);
 						functionDown.setEnabled(false);
-						for (Component component : functionPropertiesPanel.getComponents()) {
+						for (Component component : relationPropertiesPanel.getComponents()) {
 							component.setEnabled(false);
 						}
 					}
@@ -377,8 +370,8 @@ public class Main {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getX() > 140) {
 					e.consume();
-					GraphTabbedPane.pane.getSelectedGraph().functions.get(e.getY() / 30).enabled ^= true;
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+					GraphTabbedPane.pane.getSelectedGraph().relations.get(e.getY() / 30).enabled ^= true;
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
 				}
 			}
 		});
@@ -391,7 +384,7 @@ public class Main {
 		c.gridheight = 2;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
-		functionPanel.add(new JScrollPane(functionList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), c);
+		relationPanel.add(new JScrollPane(functionList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), c);
 
 		functionUp.setMargin(new Insets(functionUp.getMargin().top, 5, functionUp.getMargin().bottom, 5));
 		c.gridheight = 1;
@@ -399,13 +392,13 @@ public class Main {
 		c.weighty = 0.5;
 		c.gridx = 1;
 		functionUp.addActionListener(actionListeners);
-		functionPanel.add(functionUp, c);
+		relationPanel.add(functionUp, c);
 
 		functionDown.setMargin(new Insets(functionDown.getMargin().top, 5, functionDown.getMargin().bottom, 5));
 		c.gridy = 1;
 		functionDown.addActionListener(actionListeners);
-		functionPanel.add(functionDown, c);
-		sidebar.add(functionPanel);
+		relationPanel.add(functionDown, c);
+		sidebar.add(relationPanel);
 
 		functionNew.setMargin(new Insets(functionNew.getMargin().top, 8, functionNew.getMargin().bottom, 8));
 		functionNew.addActionListener(actionListeners);
@@ -419,20 +412,10 @@ public class Main {
 		functionRename.addActionListener(actionListeners);
 		sidebar.add(functionRename);
 
-		functionPropertiesPanel.setPreferredSize(new Dimension(190, 120));
-		functionPropertiesPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		functionPropertiesPanel.add(functionTextField);
-		functionPropertiesPanel.add(colorChooserLabel);
-		colorChooserButton.setPreferredSize(new Dimension(85, 20));
-		colorChooserButton.addActionListener(actionListeners);
-		colorChooserButton.setBackground(selectedColor);
-		functionPropertiesPanel.add(colorChooserButton);
-		functionPropertiesPanel.add(thicknessLabel);
-		thicknessSlider.setPaintTicks(true);
-		thicknessSlider.setMinorTickSpacing(1);
-		thicknessSlider.setPreferredSize(new Dimension(180, thicknessSlider.getPreferredSize().height));
-		functionPropertiesPanel.add(thicknessSlider);
-		sidebar.add(functionPropertiesPanel);
+		relationPropertiesBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		relationPropertiesPanel = functionList.getSelectedValue().getPanel();
+		relationPropertiesBox.add(relationPropertiesPanel);
+		sidebar.add(relationPropertiesBox);
 
 		windowPanel.setPreferredSize(new Dimension(190, 140));
 		windowPanel.add(xMinLabel);
@@ -585,8 +568,8 @@ public class Main {
 					if (graph == null) {
 						JOptionPane.showMessageDialog(window, "<html>" + graphOpen.getSelectedFile().getAbsolutePath() + "<br>Could not read this file.<br>This is not a valid graph file, or its format is not currently supported.</html>", "Error Reading File", JOptionPane.ERROR_MESSAGE);
 					} else {
-						GraphTabbedPane.pane.getSelectedGraph().functions.addAll(graph.functions);
-						functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+						GraphTabbedPane.pane.getSelectedGraph().relations.addAll(graph.relations);
+						functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
 						GraphTabbedPane.pane.graphPane.repaint();
 					}
 				}
@@ -667,30 +650,33 @@ public class Main {
 				}
 			} else if (e.getSource() == calculateY) {
 				if (functionList.getSelectedIndex() < 0) {
-					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
-					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() instanceof Function) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is not a function.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 					String xValue = JOptionPane.showInputDialog(Main.window, "Please input an X value:", "Calculate Y", JOptionPane.PLAIN_MESSAGE);
 					if (xValue != null && !xValue.isEmpty()) {
-						JOptionPane.showMessageDialog(window, functionList.getSelectedValue().evaluateY(Double.parseDouble(xValue)), "Calculate Y", JOptionPane.PLAIN_MESSAGE);
+						Function function = (Function) functionList.getSelectedValue();
+						JOptionPane.showMessageDialog(window, function.evaluate(Double.parseDouble(xValue)), "Calculate Y", JOptionPane.PLAIN_MESSAGE);
 					}
 				}
 			} else if (e.getSource() == trace) {
 
 			} else if (e.getSource() == minimum) {
 				if (functionList.getSelectedIndex() < 0) {
-					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
-					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 					showMultiInputDialog("Left Bound:", "Right Bound:", "Enter shit", "Shit");
 				}
 			} else if (e.getSource() == maximum) {
 				if (functionList.getSelectedIndex() < 0) {
-					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
-					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
 				}
@@ -698,25 +684,25 @@ public class Main {
 
 			} else if (e.getSource() == zeroes) {
 				if (functionList.getSelectedIndex() < 0) {
-					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
-					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
 				}
 			} else if (e.getSource() == derivative) {
 				if (functionList.getSelectedIndex() < 0) {
-					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
-					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
 				}
 			} else if (e.getSource() == integral) {
 				if (functionList.getSelectedIndex() < 0) {
-					JOptionPane.showMessageDialog(Main.window, "There is no currently selected function.", "Error", JOptionPane.ERROR_MESSAGE);
-				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().invalid) {
-					JOptionPane.showMessageDialog(Main.window, "The currently selected function is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (functionList.getSelectedValue() == null || functionList.getSelectedValue().isInvalid()) {
+					JOptionPane.showMessageDialog(Main.window, "The currently selected relation is invalid.", "Error", JOptionPane.ERROR_MESSAGE);
 				} else {
 
 				}
@@ -761,9 +747,9 @@ public class Main {
 				int i = functionList.getSelectedIndex();
 				if (i > 0) {
 					functionList.setValueIsAdjusting(true);
-					GraphTabbedPane.pane.getSelectedGraph().functions.add(i - 1, GraphTabbedPane.pane.getSelectedGraph().functions.get(i));
-					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i + 1);
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+					GraphTabbedPane.pane.getSelectedGraph().relations.add(i - 1, GraphTabbedPane.pane.getSelectedGraph().relations.get(i));
+					GraphTabbedPane.pane.getSelectedGraph().relations.remove(i + 1);
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
 					functionList.setSelectedIndex(i - 1);
 					functionList.setValueIsAdjusting(false);
 
@@ -774,15 +760,15 @@ public class Main {
 				}
 			} else if (e.getSource() == functionDown) {
 				int i = functionList.getSelectedIndex();
-				if (i < GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1) {
+				if (i < GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1) {
 					functionList.setValueIsAdjusting(true);
-					GraphTabbedPane.pane.getSelectedGraph().functions.add(i + 2, GraphTabbedPane.pane.getSelectedGraph().functions.get(i));
-					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i);
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
+					GraphTabbedPane.pane.getSelectedGraph().relations.add(i + 2, GraphTabbedPane.pane.getSelectedGraph().relations.get(i));
+					GraphTabbedPane.pane.getSelectedGraph().relations.remove(i);
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
 					functionList.setSelectedIndex(i + 1);
 					functionList.setValueIsAdjusting(false);
 
-					if (functionList.getSelectedIndex() != GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1)
+					if (functionList.getSelectedIndex() != GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1)
 						functionUp.setEnabled(true);
 					else
 						functionDown.setEnabled(false);
@@ -790,8 +776,8 @@ public class Main {
 			} else if (e.getSource() == functionNew) {
 				int high = 0;
 
-				for (Function function : GraphTabbedPane.pane.getSelectedGraph().functions) {
-					Matcher m = p.matcher(function.name);
+				for (Relation relation : GraphTabbedPane.pane.getSelectedGraph().relations) {
+					Matcher m = p.matcher(relation.getName());
 					if (m.find()) {
 						try {
 							int i = Integer.parseInt(m.group(1));
@@ -801,50 +787,40 @@ public class Main {
 				}
 
 				functionList.setValueIsAdjusting(true);
-				GraphTabbedPane.pane.getSelectedGraph().functions.add(new Function("Untitled " + (high + 1)));
-				functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
-				functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().functions.size() - 1);
+				GraphTabbedPane.pane.getSelectedGraph().relations.add(new Function("Untitled " + (high + 1)));
+				functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+				functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().relations.size() - 1);
 				functionList.setValueIsAdjusting(false);
 
 				functionList.getListSelectionListeners()[0].valueChanged(null);
 			} else if (e.getSource() == functionDelete) {
-				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete \"" + functionList.getSelectedValue().name + "\"?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+				if (functionList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete \"" + functionList.getSelectedValue().getName() + "\"?", "Delete Function", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					functionList.setValueIsAdjusting(true);
 					int i = functionList.getSelectedIndex();
-					GraphTabbedPane.pane.getSelectedGraph().functions.remove(i);
-					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().functions);
-					functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().functions.size() > 0 ? Math.max(i - 1, 0) : -1);
+					GraphTabbedPane.pane.getSelectedGraph().relations.remove(i);
+					functionList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
+					functionList.setSelectedIndex(GraphTabbedPane.pane.getSelectedGraph().relations.size() > 0 ? Math.max(i - 1, 0) : -1);
 					functionList.setValueIsAdjusting(false);
 
 					functionList.getListSelectionListeners()[0].valueChanged(null);
 				}
 			} else if (e.getSource() == functionRename) {
 				if (functionList.getSelectedIndex() >= 0) {
-					String newFunctionName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + functionList.getSelectedValue().name + "\":", "Rename Function", JOptionPane.PLAIN_MESSAGE);
-					if (newFunctionName != null && !newFunctionName.isEmpty()) {
-						newFunctionName = newFunctionName.replaceAll("\\<\\/?html\\>", "");
-						functionList.getSelectedValue().name = newFunctionName;
+					String newRelationName = JOptionPane.showInputDialog(window, "Please input a new name for \"" + functionList.getSelectedValue().getName() + "\":", "Rename Function", JOptionPane.PLAIN_MESSAGE);
+					if (newRelationName != null && !newRelationName.isEmpty()) {
+						newRelationName = newRelationName.replaceAll("\\<\\/?html\\>", "");
+						functionList.getSelectedValue().setName(newRelationName);
 						functionList.repaint();
 					}
 				}
-			} else if (e.getSource() == colorChooserButton) {
-				selectedColor = JColorChooser.showDialog(null, "Color Chooser", GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color);
-				if (selectedColor == null)
-					selectedColor = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex()).color;
-				else
-					colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
 			} else if (e.getSource() == applyButton) {
 				gridLineIntervalX.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
 				gridLineIntervalY.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
 
 				functionList.repaint();
 
-				if (functionList.getSelectedIndex() >= 0) {
-					Function currentFunc = GraphTabbedPane.pane.getSelectedGraph().functions.get(functionList.getSelectedIndex());
-					currentFunc.setYString(functionTextField.getText());
-					currentFunc.color = selectedColor;
-					currentFunc.thickness = thicknessSlider.getValue();
-				}
+				for (Relation relation : GraphTabbedPane.pane.getSelectedGraph().relations)
+					relation.applyValues();
 
 				GraphTabbedPane.pane.getSelectedGraph().xMin = Double.parseDouble(xMin.getText());
 				GraphTabbedPane.pane.getSelectedGraph().xMax = Double.parseDouble(xMax.getText());
