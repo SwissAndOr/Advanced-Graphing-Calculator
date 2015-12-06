@@ -210,8 +210,9 @@ public class Main {
 		workspaceOpen.setFileFilter(workspaceFilter);
 		workspaceSave.setFileFilter(workspaceFilter);
 
-		// This can be set to something else if 340 is too many. Do not go over 340. Do not build the seventh row.
+		// These can be set to something else if 340 is too many. Do not go over 340. Do not build the seventh row.
 		numbers.setMaximumFractionDigits(340);
+		Scatterplot.numberFormat.setMaximumFractionDigits(340);
 
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 
