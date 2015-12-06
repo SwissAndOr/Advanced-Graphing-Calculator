@@ -2,15 +2,19 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.GridBagLayout;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.util.Stack;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -20,41 +24,40 @@ import javax.swing.JTextField;
 
 public class Function extends Relation {
 	
+	private JCheckBox polarCB = new JCheckBox("Polar", false);
 	private JTextField functionTextField = new JTextField(16);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
 	private Color selectedColor = Color.BLUE;
 	private JLabel thicknessLabel = new JLabel("Line Thickness");
-	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, 15, 2);
+	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, Main.MAX_THICKNESS, 2);
 	private JLabel tMinLabel = new JLabel("\u0398 Min");
 	private JFormattedTextField tMinTextField = new JFormattedTextField(Main.numbers);
 	private JLabel tMaxLabel = new JLabel("\u0398 Max");
 	private JFormattedTextField tMaxTextField = new JFormattedTextField(Main.numbers);
-	
+
 	private double tMin = 0, tMax = 2 * Math.PI;
+
+	private Stack<Object> rpn;
+	private String function;
+	public Color color;
+	public int thickness = 2;
+
 	public double getTMin() {
 		return tMin;
 	}
+
 	public void setTMin(double tMin) {
 		this.tMin = tMin;
 	}
+
 	public double getTMax() {
 		return tMax;
 	}
+
 	public void setTMax(double tMax) {
 		this.tMax = tMax;
 	}
-	
-	private boolean polar;
-	public boolean isPolar() {
-		return polar;
-	}
-	public void setPolar(boolean polar) {
-		this.polar = polar;
-	}
-	private Stack<Object> rpn;
-
-	private String function;
 
 	public String getFunction() {
 		return function;
@@ -71,8 +74,6 @@ public class Function extends Relation {
 		}
 	}
 
-	public Color color;
-
 	public Color getColor() {
 		return color;
 	}
@@ -81,16 +82,61 @@ public class Function extends Relation {
 		this.color = color;
 	}
 
-	public int thickness = 2;
-	public int getThickness() { return thickness; }
-	public void setThickness(int thickness) { this.thickness = thickness; }
-	
-	public Function(String name) {
-		setColor(new Color((int) (Math.random() * 16777216)));
-		setName(name);
+	public int getThickness() {
+		return thickness;
+	}
 
-		setPanel(new JPanel(new GridBagLayout()));
-		getPanel().setPreferredSize(new Dimension(190, 120));
+	public void setThickness(int thickness) {
+		this.thickness = thickness;
+	}
+
+	@Override
+	public void setPolar(boolean polar) {
+		if (!polar && isPolar()) {
+			getPanel().setPreferredSize(new Dimension(190, 150));
+			getPanel().remove(tMinLabel);
+			getPanel().remove(tMinTextField);
+			getPanel().remove(tMaxLabel);
+			getPanel().remove(tMaxTextField);
+			getPanel().revalidate();
+			getPanel().repaint();
+			Main.functionList.repaint();
+			super.setPolar(polar);
+		} else if (polar && !isPolar()) {
+			getPanel().setPreferredSize(new Dimension(190, 170));
+			getPanel().add(tMinLabel);
+			getPanel().add(tMinTextField);
+			getPanel().add(tMaxLabel);
+			getPanel().add(tMaxTextField);
+			getPanel().revalidate();
+			getPanel().repaint();
+			Main.functionList.repaint();
+			super.setPolar(polar);
+		}
+	}
+	
+	public Function(String name, boolean polar) {
+		setName(name);
+		setColor(new Color((int) (Math.random() * 16777216)));
+		selectedColor = getColor();
+		setPolar(polar);
+
+		tMinTextField.setColumns(4);
+		tMinTextField.setText(Double.toString(tMin));
+		tMaxTextField.setColumns(4);
+		tMaxTextField.setText(Double.toString(tMax));
+		
+		setPanel(new JPanel());
+		getPanel().setPreferredSize(new Dimension(190, 150));
+		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		getPanel().add(Main.relationPropertiesType);
+		polarCB.addItemListener(new ItemListener() {
+			
+			public void itemStateChanged(ItemEvent e) {
+				setPolar(polarCB.isSelected());
+			}
+		});
+		getPanel().add(polarCB);
 		getPanel().add(functionTextField);
 		getPanel().add(colorChooserLabel);
 		colorChooserButton.setPreferredSize(new Dimension(85, 20));
@@ -112,14 +158,18 @@ public class Function extends Relation {
 		getPanel().add(thicknessSlider);
 	}
 	
+	public Function(String name) {
+		this(name, false);
+	}
+	
 	public double evaluate(double x) {
 		return Evaluator.evaluate(rpn, x);
 	}
-	
+
 	@Override
 	public void createImage() {
 		Dimension dim = GraphTabbedPane.pane.getGraphSize();
-		
+
 		setImage(new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB));
 
 		if (!isInvalid() && isEnabled()) {
@@ -129,9 +179,9 @@ public class Function extends Relation {
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 			g.setColor(this.color);
-			g.setStroke(new BasicStroke(this.thickness));
+			g.setStroke(new BasicStroke(this.thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
-			if (!polar) {
+			if (!isPolar()) {
 				double previousValue = dim.height - ((evaluate(graph.xMin) - graph.yMin) / (graph.yMax - graph.yMin) * dim.height);
 				for (double x = 0; x < dim.width; x++) {
 					double currentValue = dim.height - ((evaluate(((x + 1) / dim.width) * (graph.xMax - graph.xMin) + graph.xMin) - graph.yMin) / (graph.yMax - graph.yMin) * dim.height);
@@ -172,15 +222,15 @@ public class Function extends Relation {
 				}
 			} else {
 				double step = 0.000244140625 * (tMax - tMin);
-				
+
 				double previousValue = evaluate(tMin), currentValue;
 				double previousX = dim.width * ((Math.cos(tMin) * previousValue) - graph.xMin) / (graph.xMax - graph.xMin), currentX;
 				double previousY = dim.height - ((Math.sin(tMin) * previousValue - graph.yMin) / (graph.yMax - graph.yMin) * dim.height), currentY;
 				for (double t = tMin; t < tMax; t += step) {
 					currentValue = evaluate(t);
-                    currentX = dim.width * ((Math.cos(t) * currentValue) - graph.xMin) / (graph.xMax - graph.xMin);
+					currentX = dim.width * ((Math.cos(t) * currentValue) - graph.xMin) / (graph.xMax - graph.xMin);
 					currentY = dim.height - ((Math.sin(t) * currentValue - graph.yMin) / (graph.yMax - graph.yMin) * dim.height);
-					
+
 					// TODO: Make it so that it only graphs functions when absolutely needed, and improve binary search
 					if (Double.isFinite(currentValue) && Double.isFinite(previousValue)) {
 						g.drawLine((int) previousX, (int) previousY, (int) currentX, (int) currentY);
@@ -213,11 +263,11 @@ public class Function extends Relation {
 							}
 						}
 
-						double lastFiniteX = dim.width * ((lastFiniteGuess * Math.cos(lastFiniteGuessT)) - graph.xMin) / (graph.xMax - graph.xMin);              
+						double lastFiniteX = dim.width * ((lastFiniteGuess * Math.cos(lastFiniteGuessT)) - graph.xMin) / (graph.xMax - graph.xMin);
 						double lastFiniteY = dim.height - ((lastFiniteGuess * Math.sin(lastFiniteGuessT) - graph.yMin) / (graph.yMax - graph.yMin) * dim.height);
-						
+
 						if (finiteOnRight) {
-							g.drawLine((int) lastFiniteX, (int) lastFiniteY, (int) currentX, (int) currentY); 
+							g.drawLine((int) lastFiniteX, (int) lastFiniteY, (int) currentX, (int) currentY);
 						} else {
 							g.drawLine((int) previousX, (int) previousY, (int) lastFiniteX, (int) lastFiniteY);
 						}
@@ -227,11 +277,11 @@ public class Function extends Relation {
 					previousY = currentY;
 				}
 			}
-			
+
 			g.dispose();
 		}
 	}
-	
+
 	@Override
 	public void applyValues() {
 		setFunction(functionTextField.getText());
@@ -240,17 +290,29 @@ public class Function extends Relation {
 		tMin = Double.parseDouble(tMinTextField.getText());
 		tMax = Double.parseDouble(tMaxTextField.getText());
 	}
-	
+
 	@Override
 	public Icon getIcon() {
-		// TODO Auto-generated method stub
-		return null;
+		BufferedImage image = new BufferedImage(Main.MAX_THICKNESS * 2 + 2, Main.MAX_THICKNESS * 2 + 2, BufferedImage.TYPE_INT_ARGB);
+
+		Graphics2D g = image.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setColor(color);
+		g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		if (isPolar())
+			g.drawOval(thickness / 2, thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness, Main.MAX_THICKNESS * 2 + 1 - thickness);
+		else
+			g.drawLine(thickness / 2, thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2);
+
+		g.dispose();
+
+		return new ImageIcon(image);
 	}
-	
+
 	@Override
 	public String writeJSON() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-		
+
 }

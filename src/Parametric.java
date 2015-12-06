@@ -2,6 +2,10 @@ import javax.swing.Icon;
 
 public class Parametric extends Relation {
 	
+	public Parametric(String name) {
+		setName(name);
+	}
+	
 	@Override
 	public void createImage() {
 		

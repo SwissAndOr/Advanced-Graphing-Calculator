@@ -4,10 +4,11 @@ import javax.swing.Icon;
 import javax.swing.JPanel;
 
 public abstract class Relation {
-
+	
 	private String name = null;
 	public boolean enabled = true;
 	private boolean invalid = true;
+	private boolean polar;
 	private BufferedImage image;
 	private JPanel panel;
 
@@ -41,6 +42,14 @@ public abstract class Relation {
 		this.invalid = invalid;
 	}
 
+	public boolean isPolar() {
+		return polar;
+	}
+
+	public void setPolar(boolean polar) {
+		this.polar = polar;
+	}
+	
 	public BufferedImage getImage() {
 		return image;
 	}
