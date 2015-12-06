@@ -34,9 +34,9 @@ public class Function extends Relation {
 	private Color selectedColor = Color.BLUE;
 	private JLabel thicknessLabel = new JLabel("Line Thickness");
 	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, Main.MAX_THICKNESS, 2);
-	private JLabel tMinLabel = new JLabel("\u0398 Min");
+	private JLabel tMinLabel = new JLabel("\u03B8 Min");
 	private JFormattedTextField tMinTextField = new JFormattedTextField(Main.numbers);
-	private JLabel tMaxLabel = new JLabel("\u0398 Max");
+	private JLabel tMaxLabel = new JLabel("\u03B8 Max");
 	private JFormattedTextField tMaxTextField = new JFormattedTextField(Main.numbers);
 
 	private double tMin = 0, tMax = 2 * Math.PI;
@@ -226,7 +226,7 @@ public class Function extends Relation {
 					previousValue = currentValue;
 				}
 			} else {
-				double step = 0.000244140625 * (tMax - tMin);
+				final double step = 0.000244140625 * (tMax - tMin);
 
 				double previousValue = evaluate(tMin), currentValue;
 				double previousX = dim.width * ((Math.cos(tMin) * previousValue) - graph.xMin) / (graph.xMax - graph.xMin), currentX;
@@ -316,7 +316,6 @@ public class Function extends Relation {
 
 	@Override
 	public String writeJSON() {
-		// TODO Auto-generated method stub
 		return String.format("{\"type\":\"function\",\"polar\":%b,\"name\":\"%s\",\"function\":\"%s\",\"color\":%d,\"thickness\":%d,\"tMin\":%f,\"tMax\":%f,\"enabled\":%b}", isPolar(), getName().replaceAll("[\"\\\\]", "\\\\$0"), function.replaceAll("[\"\\\\]", "\\\\$0"), color.getRGB(), thickness, tMin, tMax, enabled);
 	}
 

@@ -57,25 +57,26 @@ public class Parametric extends Relation {
 		tMinTextField.setText(Double.toString(tMin));
 		tMaxTextField.setColumns(4);
 		tMaxTextField.setText(Double.toString(tMax));
-		
+
 		setPanel(new JPanel());
-		getPanel().setPreferredSize(new Dimension(190, 170));
+		getPanel().setPreferredSize(new Dimension(190, 190));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		getPanel().add(Main.relationPropertiesType);
 		polarCB.addItemListener(new ItemListener() {
-			
+
 			public void itemStateChanged(ItemEvent e) {
 				setPolar(polarCB.isSelected());
 			}
 		});
 		getPanel().add(polarCB);
-		getPanel().add(yLabel);
-		getPanel().add(yTextField);
 		getPanel().add(xLabel);
 		getPanel().add(xTextField);
+		getPanel().add(yLabel);
+		getPanel().add(yTextField);
 		getPanel().add(colorChooserLabel);
 		colorChooserButton.setPreferredSize(new Dimension(85, 20));
 		colorChooserButton.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				selectedColor = JColorChooser.showDialog(null, "Color Chooser", color);
 				if (selectedColor == null)
@@ -91,46 +92,116 @@ public class Parametric extends Relation {
 		thicknessSlider.setMinorTickSpacing(1);
 		thicknessSlider.setPreferredSize(new Dimension(180, thicknessSlider.getPreferredSize().height));
 		getPanel().add(thicknessSlider);
+
+		getPanel().add(tMinLabel);
+		getPanel().add(tMinTextField);
+		getPanel().add(tMaxLabel);
+		getPanel().add(tMaxTextField);
 	}
-	
+
 	public Parametric(String name) {
 		this(name, false);
 	}
-	
+
 	@Override
 	public void setPolar(boolean polar) {
-		if (!polar && isPolar()) {
-			getPanel().setPreferredSize(new Dimension(190, 170));
-			getPanel().remove(tMinLabel);
-			getPanel().remove(tMinTextField);
-			getPanel().remove(tMaxLabel);
-			getPanel().remove(tMaxTextField);
+		if (polar && !isPolar()) {
+			xLabel.setText("\u03B8 = ");
+			yLabel.setText("r = ");
 			getPanel().revalidate();
 			getPanel().repaint();
 			Main.relationList.repaint();
 			super.setPolar(polar);
-		} else if (polar && !isPolar()) {
-			getPanel().setPreferredSize(new Dimension(190, 190));
-			getPanel().add(tMinLabel);
-			getPanel().add(tMinTextField);
-			getPanel().add(tMaxLabel);
-			getPanel().add(tMaxTextField);
+		} else if (!polar && isPolar()) {
+			xLabel.setText("x = ");
+			yLabel.setText("y = ");
 			getPanel().revalidate();
 			getPanel().repaint();
 			Main.relationList.repaint();
 			super.setPolar(polar);
 		}
 	}
-	
+
+	public void setXEquation(String xEquation) {
+		this.xEquation = xEquation;
+		try {
+			xRpn = Evaluator.simplify(Evaluator.toRPN(this.xEquation));
+			Evaluator.evaluate(xRpn, 0);
+			setInvalid(false);
+		} catch (Exception e) {
+			setInvalid(true);
+		}
+	}
+
+	public void setYEquation(String yEquation) {
+		this.yEquation = yEquation;
+		try {
+			yRpn = Evaluator.simplify(Evaluator.toRPN(this.yEquation));
+			Evaluator.evaluate(yRpn, 0);
+			setInvalid(false);
+		} catch (Exception e) {
+			setInvalid(true);
+		}
+	}
+
+	/**
+	 * <ul>
+	 * <li><b><i>evaluate</i></b><br>
+	 * <br>
+	 * {@code public double[] evaluate(double t)}<br>
+	 * <br>
+	 * Evaluates the current function at a given t value.<br>
+	 * @param t The t value to evaluate for
+	 * @return a <code>double</code> array, containing the x/theta and y/r values respectively.
+	 *         </ul>
+	 */
+	public double[] evaluate(double t) {
+		return new double[] {Evaluator.evaluate(xRpn, t), Evaluator.evaluate(yRpn, t)};
+	}
+
 	@Override
 	public void createImage() {
+		Dimension dim = GraphTabbedPane.pane.getGraphSize();
 
+		setImage(new BufferedImage(dim.width, dim.height, BufferedImage.TYPE_INT_ARGB));
+
+		if (!isInvalid() && isEnabled()) {
+			Graph graph = GraphTabbedPane.pane.getSelectedGraph();
+			Graphics2D g = getImage().createGraphics();
+
+			g.setColor(color);
+			g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+			double[] previousValues = evaluate(tMin), currentValues;
+			double previousX, previousY, currentX, currentY;
+			previousX = dim.width * ((isPolar() ? (Math.cos(previousValues[0]) * previousValues[1]) : previousValues[0]) - graph.xMin) / (graph.xMax - graph.xMin);
+			previousY = dim.height - (dim.height * ((isPolar() ? (Math.sin(previousValues[0]) * previousValues[1]) : previousValues[1]) - graph.yMin) / (graph.yMax - graph.yMin));
+
+			final double step = 0.000244140625 * (tMax - tMin);
+
+			for (double t = tMin; t < tMax; t += step) {
+				currentValues = evaluate(t);
+				currentX = dim.width * ((isPolar() ? (Math.cos(currentValues[0]) * currentValues[1]) : currentValues[0]) - graph.xMin) / (graph.xMax - graph.xMin);
+				currentY = dim.height - (dim.height * ((isPolar() ? (Math.sin(currentValues[0]) * currentValues[1]) : currentValues[1]) - graph.yMin) / (graph.yMax - graph.yMin));
+
+				if (Double.isFinite(currentX) && Double.isFinite(currentY) && Double.isFinite(previousX) && Double.isFinite(previousY)) {
+					g.drawLine((int) previousX, (int) previousY, (int) currentX, (int) currentY);
+				} else {
+					// TODO Binary search for point of infinity
+				}
+
+				previousValues = new double[] {currentValues[0], currentValues[1]};
+				previousX = currentX;
+				previousY = currentY;
+			}
+			g.dispose();
+		}
 	}
 
 	@Override
 	public void applyValues() {
-		//setXFunction(xTextField.getText());
-		//setYFunction(yTextField.getText());
+		setXEquation(xTextField.getText());
+		setYEquation(yTextField.getText());
 		color = selectedColor;
 		thickness = thicknessSlider.getValue();
 		tMin = Double.parseDouble(tMinTextField.getText());
@@ -145,8 +216,8 @@ public class Parametric extends Relation {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setColor(color);
 		g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		g.draw(new Polygon(new int[] {thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2}, new int[] {Main.MAX_THICKNESS, thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2}, 3));
-		
+		g.draw(new Polygon(new int[] {Main.MAX_THICKNESS, thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2}, new int[] {Main.MAX_THICKNESS * 2 + 1 - thickness / 2, thickness / 2, thickness / 2}, 3));
+
 		g.dispose();
 
 		return new ImageIcon(image);
