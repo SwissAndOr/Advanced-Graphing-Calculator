@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -37,6 +38,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
@@ -221,7 +223,7 @@ public class Main {
 		workspaceOpen.setFileFilter(workspaceFilter);
 		workspaceSave.setFileFilter(workspaceFilter);
 
-		// These can be set to something else if 340 is too many. Do not go over 340. Do not build the seventh row.
+		// This can be set to something else if 340 is too many. Do not go over 340. Do not build the seventh row.
 		numbers.setMaximumFractionDigits(340);
 
 		fileMenu.setMnemonic(KeyEvent.VK_F);
@@ -360,13 +362,13 @@ public class Main {
 		window.setJMenuBar(menuBar);
 
 		xMin.setValue(-5);
-		xMin.setColumns(4);
+		xMin.setColumns(5);
 		xMax.setValue(5);
-		xMax.setColumns(4);
+		xMax.setColumns(5);
 		yMin.setValue(-5);
-		yMin.setColumns(4);
+		yMin.setColumns(5);
 		yMax.setValue(5);
-		yMax.setColumns(4);
+		yMax.setColumns(5);
 
 		xMin.addMouseListener(formattedListener);
 		xMax.addMouseListener(formattedListener);
@@ -442,14 +444,18 @@ public class Main {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getX() > 140) {
+				int index = e.getY() / (MAX_THICKNESS * 2 + 4);
+				System.out.println(e.getY());
+				System.out.println(e.getY() / 42);
+				System.out.println(index);
+				if (index < GraphTabbedPane.pane.getSelectedGraph().relations.size() && e.getX() > 160 && Math.abs(index * (MAX_THICKNESS * 2 + 4) + MAX_THICKNESS + 2 - e.getY()) < 9) {
 					e.consume();
-					GraphTabbedPane.pane.getSelectedGraph().relations.get(e.getY() / 30).enabled ^= true;
+					GraphTabbedPane.pane.getSelectedGraph().relations.get(index).enabled ^= true;
 					relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
 				}
 			}
 		});
-		relationList.setFixedCellWidth(160);
+		relationList.setFixedCellWidth(178);
 		relationList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		relationList.setVisibleRowCount(4);
 		relationList.setSelectedIndex(0);
@@ -458,9 +464,12 @@ public class Main {
 		c.gridheight = 2;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
-		relationPanel.add(new JScrollPane(relationList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), c);
+		JScrollPane relListScrollPane = new JScrollPane(relationList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollBar bar = relListScrollPane.getVerticalScrollBar();
+		bar.setPreferredSize(new Dimension(12, bar.getPreferredSize().height));
+		relationPanel.add(relListScrollPane, c);
 
-		relationUp.setMargin(new Insets(relationUp.getMargin().top, 5, relationUp.getMargin().bottom, 5));
+		relationUp.setMargin(new Insets(relationUp.getMargin().top, 4, relationUp.getMargin().bottom, 4));
 		c.gridheight = 1;
 		c.weightx = 0;
 		c.weighty = 0.5;
@@ -468,7 +477,7 @@ public class Main {
 		relationUp.addActionListener(actionListeners);
 		relationPanel.add(relationUp, c);
 
-		relationDown.setMargin(new Insets(relationDown.getMargin().top, 5, relationDown.getMargin().bottom, 5));
+		relationDown.setMargin(new Insets(relationDown.getMargin().top, 4, relationDown.getMargin().bottom, 4));
 		c.gridy = 1;
 		relationDown.addActionListener(actionListeners);
 		relationPanel.add(relationDown, c);
@@ -485,6 +494,8 @@ public class Main {
 		relationRename.setMargin(new Insets(relationRename.getMargin().top, 8, relationRename.getMargin().bottom, 8));
 		relationRename.addActionListener(actionListeners);
 		sidebar.add(relationRename);
+
+		relationPropertiesType.setPreferredSize(new Dimension(relationPropertiesType.getPreferredSize().width + 20, relationPropertiesType.getPreferredSize().height));
 
 		relationPropertiesType.addItemListener(new ItemListener() {
 
@@ -513,9 +524,9 @@ public class Main {
 		relationPropertiesPanel = relationList.getSelectedValue().getPanel();
 		sidebar.add(relationPropertiesPanel);
 
-		windowPanel.setPreferredSize(new Dimension(190, 160));
+		windowPanel.setPreferredSize(new Dimension(210, 160));
 
-		minMax.setPreferredSize(new Dimension(185, 50));
+		minMax.setPreferredSize(new Dimension(205, 50));
 		minMax.add(xMinLabel);
 		minMax.add(xMin);
 		minMax.add(xMaxLabel);
@@ -525,7 +536,8 @@ public class Main {
 		minMax.add(yMaxLabel);
 		minMax.add(yMax);
 
-		xy.setPreferredSize(new Dimension(185, 50));
+		xy.setPreferredSize(new Dimension(205, 50));
+		xy.setLayout(new FlowLayout(FlowLayout.CENTER, 8, 5));
 		xy.add(xLabel);
 		xy.add(xView);
 		xy.add(widthLabel);
@@ -536,13 +548,13 @@ public class Main {
 		xy.add(heightView);
 
 		viewSettings.addTab(" Min and Max  ", minMax);
-		viewSettings.addTab("   X and Y   ", xy);
+		viewSettings.addTab("      X and Y      ", xy);
 		windowPanel.add(viewSettings);
 
 		gridLineIntervalX.setValue(1);
-		gridLineIntervalX.setColumns(6);
+		gridLineIntervalX.setColumns(8);
 		gridLineIntervalY.setValue(1);
-		gridLineIntervalY.setColumns(6);
+		gridLineIntervalY.setColumns(8);
 
 		windowPanel.add(gridLineIntervalXLabel);
 		windowPanel.add(gridLineIntervalX);
@@ -557,7 +569,7 @@ public class Main {
 		applyButton.addActionListener(actionListeners);
 		sidebar.add(applyButton);
 
-		sidebar.setPreferredSize(new Dimension(200, Integer.MAX_VALUE));
+		sidebar.setPreferredSize(new Dimension(220, Integer.MAX_VALUE));
 		window.add(sidebar, BorderLayout.LINE_START);
 
 		window.add(GraphTabbedPane.pane, BorderLayout.CENTER);

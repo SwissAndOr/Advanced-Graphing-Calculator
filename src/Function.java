@@ -25,10 +25,10 @@ import javax.swing.JTextField;
 
 public class Function extends Relation {
 	
-	private JCheckBox polarCB = new JCheckBox("Polar", false);
+	private JCheckBox polarCB = new JCheckBox("Polar  ", false);
 	private boolean xEquals = true;
 	private JButton equals = new JButton("x = ");
-	private JTextField functionTextField = new JTextField(12);
+	private JTextField functionTextField = new JTextField(14);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
 	private Color selectedColor = Color.BLUE;
@@ -83,7 +83,7 @@ public class Function extends Relation {
 		}
 		
 		if (!polar && isPolar()) {
-			getPanel().setPreferredSize(new Dimension(190, 150));
+			getPanel().setPreferredSize(new Dimension(210, 150));
 			getPanel().remove(tMinLabel);
 			getPanel().remove(tMinTextField);
 			getPanel().remove(tMaxLabel);
@@ -93,7 +93,7 @@ public class Function extends Relation {
 			Main.relationList.repaint();
 			super.setPolar(polar);
 		} else if (polar && !isPolar()) {
-			getPanel().setPreferredSize(new Dimension(190, 170));
+			getPanel().setPreferredSize(new Dimension(210, 170));
 			getPanel().add(tMinLabel);
 			getPanel().add(tMinTextField);
 			getPanel().add(tMaxLabel);
@@ -117,7 +117,7 @@ public class Function extends Relation {
 		tMaxTextField.setText(Double.toString(tMax));
 		
 		setPanel(new JPanel());
-		getPanel().setPreferredSize(new Dimension(190, 150));
+		getPanel().setPreferredSize(new Dimension(210, 150));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		getPanel().add(Main.relationPropertiesType);
 		
@@ -148,7 +148,7 @@ public class Function extends Relation {
 		getPanel().add(thicknessLabel);
 		thicknessSlider.setPaintTicks(true);
 		thicknessSlider.setMinorTickSpacing(1);
-		thicknessSlider.setPreferredSize(new Dimension(180, thicknessSlider.getPreferredSize().height));
+		thicknessSlider.setPreferredSize(new Dimension(200, thicknessSlider.getPreferredSize().height));
 		getPanel().add(thicknessSlider);
 	}
 	

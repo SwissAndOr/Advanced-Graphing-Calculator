@@ -1,13 +1,16 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Insets;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.JTextArea;
 
 public class RelationListCellRenderer extends DefaultListCellRenderer {
 
@@ -26,22 +29,44 @@ public class RelationListCellRenderer extends DefaultListCellRenderer {
 		if (value instanceof Relation) {
 			Relation rel = (Relation) value;
 			
-//				Graphics2D g = image.createGraphics();
-//				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//				g.setColor(relation.getColor());
-//				g.setStroke(new BasicStroke(relation.getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-//				g.drawLine(relation.getThickness() / 2, relation.getThickness() / 2, 24 - relation.getThickness() / 2, 24 - relation.getThickness() / 2);
-//				g.dispose();
-
 			cb.setSelected(rel.enabled);
 
-			JLabel newLabel = new JLabel(label.getText(), rel.getIcon(), SwingConstants.LEFT);
-			if (rel.isInvalid()) newLabel.setForeground(Color.RED);
-			panel.add(newLabel);
+			JLabel newLabel = new JLabel(rel.getIcon());
+//			newLabel.setPreferredSize(new Dimension(list.getFixedCellWidth() - 20, Main.MAX_THICKNESS * 2 + 2));
+//			newLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+//			if (rel.isInvalid()) newLabel.setForeground(Color.RED);
+			panel.add(newLabel, BorderLayout.LINE_START);
+			
+			JTextArea textArea = new JTextArea(label.getText());
+			textArea.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+			textArea.setWrapStyleWord(true);
+			textArea.setLineWrap(true);
+			textArea.setOpaque(false);
+			textArea.setBackground(new Color(0, 0, 0, 0));
+			
+			FontMetrics fm = textArea.getFontMetrics(textArea.getFont());
+			
+			int lines = 1 + fm.stringWidth(label.getText()) / (list.getFixedCellWidth() - 20 - Main.MAX_THICKNESS * 2 + 2);
+			
+//			textArea.setPreferredSize(new Dimension(list.getFixedCellWidth() - 20 - Main.MAX_THICKNESS * 2 + 2, textArea.getPreferredSize().height * 2));
+			
+//			textArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+			
+			textArea.setMargin(new Insets(Math.max(0, Main.MAX_THICKNESS - lines * fm.getHeight() / 2), 1, 0, 1));
+			
+			if (rel.isInvalid()) textArea.setForeground(Color.RED);
+			
+//			JPanel textPanel = new JPanel(new GridBagLayout());
+//			GridBagConstraints c = new GridBagConstraints();
+//			c.fill = GridBagConstraints.HORIZONTAL;
+//			textPanel.add(textArea, c);
+			
+			panel.add(textArea);
 		}
 
 		cb.setBackground(new Color(0, 0, 0, 0));
-		panel.add(cb, BorderLayout.EAST);
+		cb.setMargin(new Insets(0, 0, 0, 0));
+		panel.add(cb, BorderLayout.LINE_END);
 
 		return panel;
 	}

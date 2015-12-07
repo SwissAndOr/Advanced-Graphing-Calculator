@@ -25,11 +25,11 @@ import javax.swing.JTextField;
 
 public class Parametric extends Relation {
 
-	private JCheckBox polarCB = new JCheckBox("Polar   ", false);
+	private JCheckBox polarCB = new JCheckBox("Polar  ", false);
 	private JLabel xLabel = new JLabel("x = ");
-	private JTextField xTextField = new JTextField(13);
+	private JTextField xTextField = new JTextField(14);
 	private JLabel yLabel = new JLabel("y = ");
-	private JTextField yTextField = new JTextField(13);
+	private JTextField yTextField = new JTextField(14);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
 	private Color selectedColor = Color.BLUE;
@@ -57,7 +57,7 @@ public class Parametric extends Relation {
 		tMaxTextField.setText(Double.toString(tMax));
 
 		setPanel(new JPanel());
-		getPanel().setPreferredSize(new Dimension(190, 190));
+		getPanel().setPreferredSize(new Dimension(210, 190));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		getPanel().add(Main.relationPropertiesType);
 		
@@ -90,7 +90,7 @@ public class Parametric extends Relation {
 		getPanel().add(thicknessLabel);
 		thicknessSlider.setPaintTicks(true);
 		thicknessSlider.setMinorTickSpacing(1);
-		thicknessSlider.setPreferredSize(new Dimension(180, thicknessSlider.getPreferredSize().height));
+		thicknessSlider.setPreferredSize(new Dimension(200, thicknessSlider.getPreferredSize().height));
 		getPanel().add(thicknessSlider);
 
 		getPanel().add(tMinLabel);

@@ -32,7 +32,7 @@ import javax.swing.table.TableColumnModel;
 
 public class Scatterplot extends Relation {
 
-	private JCheckBox polarCB = new JCheckBox("Polar", false);
+	private JCheckBox polarCB = new JCheckBox("Polar  ", false);
 	private JTable pointTable = new JTable(new Object[][] {{"", ""}}, new String[] {"x", "y"});
 	private List<Double> xTableData = new ArrayList<Double>();
 	private List<Double> yTableData = new ArrayList<Double>();
@@ -53,7 +53,7 @@ public class Scatterplot extends Relation {
 		setPolar(polar);
 
 		setPanel(new JPanel());
-		getPanel().setPreferredSize(new Dimension(190, 220));
+		getPanel().setPreferredSize(new Dimension(210, 220));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		
 		polarCB.setSelected(polar);
@@ -147,7 +147,7 @@ public class Scatterplot extends Relation {
 		pointTable.getTableHeader().setReorderingAllowed(false);
 		pointTable.getTableHeader().setResizingAllowed(false);
 		JScrollPane scrollPane = new JScrollPane(pointTable);
-		scrollPane.setPreferredSize(new Dimension(180, 100));
+		scrollPane.setPreferredSize(new Dimension(200, 100));
 		getPanel().add(scrollPane);
 
 		getPanel().add(colorChooserLabel);
@@ -167,7 +167,7 @@ public class Scatterplot extends Relation {
 		getPanel().add(thicknessLabel);
 		thicknessSlider.setPaintTicks(true);
 		thicknessSlider.setMinorTickSpacing(1);
-		thicknessSlider.setPreferredSize(new Dimension(180, thicknessSlider.getPreferredSize().height));
+		thicknessSlider.setPreferredSize(new Dimension(200, thicknessSlider.getPreferredSize().height));
 		getPanel().add(thicknessSlider);
 	}
 
