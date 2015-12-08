@@ -81,7 +81,7 @@ public class GraphTabbedPane extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				addGraph(new Graph(getNameForNewGraph(), -5, 5, -5, 5, 1, 1, true, true));
+				addGraph(new Graph(getNameForNewGraph()));
 			}
 
 		});
@@ -271,21 +271,37 @@ public class GraphTabbedPane extends JPanel {
 			int height = this.getHeight();
 
 			g.setColor(Color.LIGHT_GRAY);
-			if (currentGraph.gridLineIntervalX > 0) {
-				for (double x = currentGraph.gridLineIntervalX * Math.floor((currentGraph.xMax - currentGraph.xMin > 0 ? currentGraph.xMin : currentGraph.xMax) / currentGraph.gridLineIntervalX); x < width; x += currentGraph.gridLineIntervalX) {
-					g.drawLine((int) ((x - currentGraph.xMin) / (currentGraph.xMax - currentGraph.xMin) * width), 0, (int) ((x - currentGraph.xMin) / (currentGraph.xMax - currentGraph.xMin) * width), height);
+			if (currentGraph.cartesian) {
+				if (currentGraph.gridLineIntervalX > 0) {
+					for (double x = currentGraph.gridLineIntervalX * Math.floor((currentGraph.xMax - currentGraph.xMin > 0 ? currentGraph.xMin : currentGraph.xMax) / currentGraph.gridLineIntervalX); x < width; x += currentGraph.gridLineIntervalX) {
+						int gridX = (int) ((x - currentGraph.xMin) / (currentGraph.xMax - currentGraph.xMin) * width);
+						g.drawLine(gridX, 0, gridX, height);
+					}
+				}
+
+				if (currentGraph.gridLineIntervalY > 0) {
+					for (double y = currentGraph.gridLineIntervalY * Math.floor((currentGraph.yMax - currentGraph.yMin > 0 ? currentGraph.yMin : currentGraph.yMax) / currentGraph.gridLineIntervalY); y < height; y += currentGraph.gridLineIntervalY) {
+						int gridY = (int) (height - (y - currentGraph.yMin) / (currentGraph.yMax - currentGraph.yMin) * height);
+						g.drawLine(0, gridY, width, gridY);
+					}
 				}
 			}
 
-			if (currentGraph.gridLineIntervalY > 0) {
-				for (double y = currentGraph.gridLineIntervalY * Math.floor((currentGraph.yMax - currentGraph.yMin > 0 ? currentGraph.yMin : currentGraph.yMax) / currentGraph.gridLineIntervalY); y < height; y += currentGraph.gridLineIntervalY) {
-					g.drawLine(0, (int) (height - (y - currentGraph.yMin) / (currentGraph.yMax - currentGraph.yMin) * height), width, (int) (height - (y - currentGraph.yMin) / (currentGraph.yMax - currentGraph.yMin) * height));
+			double maxDist = Math.hypot(Math.max(Math.abs(currentGraph.xMin), Math.abs(currentGraph.xMin)), Math.max(Math.abs(currentGraph.yMin), Math.abs(currentGraph.yMin)));
+			int zeroX = (int) (-currentGraph.xMin / (currentGraph.xMax - currentGraph.xMin) * width);
+			int zeroY = (int) (height + (currentGraph.yMin / (currentGraph.yMax - currentGraph.yMin) * height));
+
+			if (currentGraph.polar) {
+				for (double r = 0; r <= maxDist; r += currentGraph.gridLineIntervalR) {
+					g.drawOval((int) ((-r - currentGraph.xMin) / (currentGraph.xMax - currentGraph.xMin) * width), (int) (height - (r - currentGraph.yMin) / (currentGraph.yMax - currentGraph.yMin) * height), (int) (2 * width * r / (currentGraph.xMax - currentGraph.xMin)), (int) (2 * height * r / (currentGraph.yMax - currentGraph.yMin)));
+				}
+
+				for (double t = 0; t < 6.28318530717958623199592693709; t += currentGraph.gridLineIntervalTheta) {
+					g.drawLine(zeroX, zeroY, (int) ((maxDist * Math.cos(t) - currentGraph.xMin) / (currentGraph.xMax - currentGraph.xMin) * width), (int) (height - (maxDist * Math.sin(t) - currentGraph.yMin) / (currentGraph.yMax - currentGraph.yMin) * height));
 				}
 			}
 
 			g.setColor(Color.BLACK);
-			int zeroX = (int) ((double) -currentGraph.xMin / (currentGraph.xMax - currentGraph.xMin) * width);
-			int zeroY = (int) (height - ((double) -currentGraph.yMin / (currentGraph.yMax - currentGraph.yMin) * height));
 			if (currentGraph.axisX)
 				g.fillRect(0, zeroY - 1, width, 3); // Draw horizontal 0 line
 			if (currentGraph.axisY)

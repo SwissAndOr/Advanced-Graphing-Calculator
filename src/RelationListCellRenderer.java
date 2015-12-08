@@ -32,9 +32,6 @@ public class RelationListCellRenderer extends DefaultListCellRenderer {
 			cb.setSelected(rel.enabled);
 
 			JLabel newLabel = new JLabel(rel.getIcon());
-//			newLabel.setPreferredSize(new Dimension(list.getFixedCellWidth() - 20, Main.MAX_THICKNESS * 2 + 2));
-//			newLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-//			if (rel.isInvalid()) newLabel.setForeground(Color.RED);
 			panel.add(newLabel, BorderLayout.LINE_START);
 			
 			JTextArea textArea = new JTextArea(label.getText());
@@ -48,18 +45,9 @@ public class RelationListCellRenderer extends DefaultListCellRenderer {
 			
 			int lines = 1 + fm.stringWidth(label.getText()) / (list.getFixedCellWidth() - 20 - Main.MAX_THICKNESS * 2 + 2);
 			
-//			textArea.setPreferredSize(new Dimension(list.getFixedCellWidth() - 20 - Main.MAX_THICKNESS * 2 + 2, textArea.getPreferredSize().height * 2));
-			
-//			textArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-			
 			textArea.setMargin(new Insets(Math.max(0, Main.MAX_THICKNESS - lines * fm.getHeight() / 2), 1, 0, 1));
 			
 			if (rel.isInvalid()) textArea.setForeground(Color.RED);
-			
-//			JPanel textPanel = new JPanel(new GridBagLayout());
-//			GridBagConstraints c = new GridBagConstraints();
-//			c.fill = GridBagConstraints.HORIZONTAL;
-//			textPanel.add(textArea, c);
 			
 			panel.add(textArea);
 		}

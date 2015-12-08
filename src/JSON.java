@@ -84,30 +84,31 @@ public final class JSON {
 
 	// TODO Fix
 	public static Graph parseGraph(Map<?, ?> graph) {
-		String name = graph.get("name") instanceof String ? (String) graph.get("name") : "";
-
-		double xMin = graph.get("xmin") instanceof Number ? ((Number) graph.get("xmin")).doubleValue() : -5;
-		double xMax = graph.get("xmax") instanceof Number ? ((Number) graph.get("xmax")).doubleValue() : 5;
-		double yMin = graph.get("ymin") instanceof Number ? ((Number) graph.get("ymin")).doubleValue() : -5;
-		double yMax = graph.get("ymax") instanceof Number ? ((Number) graph.get("ymax")).doubleValue() : 5;
-		double gridLineIntervalX = graph.get("gridlineintervalx") instanceof Number ? ((Number) graph.get("gridlineintervalx")).doubleValue() : 1;
-		double gridLineIntervalY = graph.get("gridlineintervaly") instanceof Number ? ((Number) graph.get("gridlineintervaly")).doubleValue() : 1;
-		boolean axisX = graph.get("axisx") instanceof Boolean ? (Boolean) graph.get("axisx") : true;
-		boolean axisY = graph.get("axisy") instanceof Boolean ? (Boolean) graph.get("axisy") : true;
-
-		Vector<Relation> relations = new Vector<>();
-		try {
-			List<?> relationArray = (List<?>) graph.get("relations");
-			for (Object obj : relationArray) {
-				if (!(obj instanceof Map<?, ?>)) continue;
-
-				relations.addElement(parseRelation((Map<?, ?>) obj));
-			}
-		} catch (ClassCastException | NullPointerException e) {}
-
-		Graph ret = new Graph(name, xMin, xMax, yMin, yMax, gridLineIntervalX, gridLineIntervalY, axisX, axisY);
-		ret.relations.addAll(relations);
-		return ret;
+//		String name = graph.get("name") instanceof String ? (String) graph.get("name") : "";
+//
+//		double xMin = graph.get("xmin") instanceof Number ? ((Number) graph.get("xmin")).doubleValue() : -5;
+//		double xMax = graph.get("xmax") instanceof Number ? ((Number) graph.get("xmax")).doubleValue() : 5;
+//		double yMin = graph.get("ymin") instanceof Number ? ((Number) graph.get("ymin")).doubleValue() : -5;
+//		double yMax = graph.get("ymax") instanceof Number ? ((Number) graph.get("ymax")).doubleValue() : 5;
+//		double gridLineIntervalX = graph.get("gridlineintervalx") instanceof Number ? ((Number) graph.get("gridlineintervalx")).doubleValue() : 1;
+//		double gridLineIntervalY = graph.get("gridlineintervaly") instanceof Number ? ((Number) graph.get("gridlineintervaly")).doubleValue() : 1;
+//		boolean axisX = graph.get("axisx") instanceof Boolean ? (Boolean) graph.get("axisx") : true;
+//		boolean axisY = graph.get("axisy") instanceof Boolean ? (Boolean) graph.get("axisy") : true;
+//
+//		Vector<Relation> relations = new Vector<>();
+//		try {
+//			List<?> relationArray = (List<?>) graph.get("relations");
+//			for (Object obj : relationArray) {
+//				if (!(obj instanceof Map<?, ?>)) continue;
+//
+//				relations.addElement(parseRelation((Map<?, ?>) obj));
+//			}
+//		} catch (ClassCastException | NullPointerException e) {}
+//
+//		Graph ret = new Graph(name, xMin, xMax, yMin, yMax, gridLineIntervalX, gridLineIntervalY, axisX, axisY, true, false);
+//		ret.relations.addAll(relations);
+//		return ret;
+		return null;
 	}
 
 	protected static Relation parseRelation(Map<?, ?> map) {

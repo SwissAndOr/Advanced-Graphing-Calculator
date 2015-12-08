@@ -14,23 +14,31 @@ public class Graph {
 	public Vector<Relation> relations = new Vector<>();
 
 	public double xMin = -5, xMax = 5, yMin = -5, yMax = 5;
-	public double gridLineIntervalX = 1, gridLineIntervalY = 1;
-	public boolean axisX = true, axisY = true;
+	public double gridLineIntervalX = 1, gridLineIntervalY = 1, gridLineIntervalTheta = .392699081698724139499745433568, gridLineIntervalR = 1;
+	public boolean axisX = true, axisY = true, cartesian = true, polar = false;
 
 	protected Path currentSaveLocation = null;
 
 	public Graph() {}
+	
+	public Graph(String name) {
+		this.name = name;
+	}
 
-	public Graph(String newName, double newXMin, double newXMax, double newYMin, double newYMax, double newGridLineIntervalX, double newGridLineIntervalY, boolean newAxisX, boolean newAxisY) {
-		name = newName;
-		xMin = newXMin;
-		xMax = newXMax;
-		yMin = newYMin;
-		yMax = newYMax;
-		gridLineIntervalX = newGridLineIntervalX;
-		gridLineIntervalY = newGridLineIntervalY;
-		axisX = newAxisX;
-		axisY = newAxisY;
+	public Graph(String name, double xMin, double xMax, double yMin, double yMax, double gridLineIntervalX, double gridLineIntervalY, double gridLineIntervalR, double gridLineIntervalTheta, boolean axisX, boolean axisY, boolean cartesian, boolean polar) {
+		this.name = name;
+		this.xMin = xMin;
+		this.xMax = xMax;
+		this.yMin = yMin;
+		this.yMax = yMax;
+		this.gridLineIntervalX = gridLineIntervalX;
+		this.gridLineIntervalY = gridLineIntervalY;
+		this.gridLineIntervalR = gridLineIntervalR;
+		this.gridLineIntervalTheta = gridLineIntervalTheta;
+		this.axisX = axisX;
+		this.axisY = axisY;
+		this.cartesian = cartesian;
+		this.polar = polar;
 	}
 
 	/**

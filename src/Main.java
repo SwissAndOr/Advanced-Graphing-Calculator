@@ -146,10 +146,57 @@ public class Main {
 		}
 	};
 
+	private static JCheckBox cartesianGrid = new JCheckBox("Cartesian Grid", true);
+	private static JCheckBox polarGrid = new JCheckBox("Polar Grid", false);
+
+	private static final ItemListener gridChangeListener = new ItemListener() {
+		
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			if (e.getSource() == cartesianGrid) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					windowPanel.remove(gridLineIntervalXLabel);
+					windowPanel.remove(gridLineIntervalX);
+					windowPanel.remove(gridLineIntervalYLabel);
+					windowPanel.remove(gridLineIntervalY);
+				} else {
+					windowPanel.add(gridLineIntervalXLabel, 3);
+					windowPanel.add(gridLineIntervalX, 4);
+					windowPanel.add(gridLineIntervalYLabel, 5);
+					windowPanel.add(gridLineIntervalY, 6);
+				}
+			} else if (e.getSource() == polarGrid) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					windowPanel.remove(gridLineIntervalThetaLabel);
+					windowPanel.remove(gridLineIntervalTheta);
+					windowPanel.remove(gridLineIntervalRLabel);
+					windowPanel.remove(gridLineIntervalR);
+				} else {
+					windowPanel.remove(axisX);
+					windowPanel.remove(axisY);
+					windowPanel.add(gridLineIntervalThetaLabel);
+					windowPanel.add(gridLineIntervalTheta);
+					windowPanel.add(gridLineIntervalRLabel);
+					windowPanel.add(gridLineIntervalR);
+					windowPanel.add(axisX);
+					windowPanel.add(axisY);
+				}
+			}
+			
+			windowPanel.setPreferredSize(new Dimension(210, 160 + (cartesianGrid.isSelected() ? 50 : 0) + (polarGrid.isSelected() ? 50 : 0)));
+			sidebar.revalidate();
+			sidebar.repaint();
+		}
+	};
+	
 	private static JLabel gridLineIntervalXLabel = new JLabel("Grid Line Interval X");
 	private static JFormattedTextField gridLineIntervalX = new JFormattedTextField(numbers);
 	private static JLabel gridLineIntervalYLabel = new JLabel("Grid Line Interval Y");
 	private static JFormattedTextField gridLineIntervalY = new JFormattedTextField(numbers);
+	private static JLabel gridLineIntervalThetaLabel = new JLabel("Grid Line Interval \u03B8");
+	private static JFormattedTextField gridLineIntervalTheta = new JFormattedTextField(numbers);
+	private static JLabel gridLineIntervalRLabel = new JLabel("Grid Line Interval R");
+	private static JFormattedTextField gridLineIntervalR = new JFormattedTextField(numbers);
 
 	private static JCheckBox axisX = new JCheckBox("Axis X", true);
 	private static JCheckBox axisY = new JCheckBox("Axis Y", true);
@@ -397,7 +444,7 @@ public class Main {
 		yView.addFocusListener(formattedFocusListener);
 		heightView.addFocusListener(formattedFocusListener);
 
-		GraphTabbedPane.pane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
+		GraphTabbedPane.pane.addGraph(new Graph("Graph"));
 		GraphTabbedPane.pane.getSelectedGraph().relations.add(new Function("Function"));
 
 		relationList = new JList<>(GraphTabbedPane.pane.getSelectedGraph().relations);
@@ -524,7 +571,7 @@ public class Main {
 		relationPropertiesPanel = relationList.getSelectedValue().getPanel();
 		sidebar.add(relationPropertiesPanel);
 
-		windowPanel.setPreferredSize(new Dimension(210, 160));
+		windowPanel.setPreferredSize(new Dimension(210, 210));
 
 		minMax.setPreferredSize(new Dimension(205, 50));
 		minMax.add(xMinLabel);
@@ -551,10 +598,20 @@ public class Main {
 		viewSettings.addTab("      X and Y      ", xy);
 		windowPanel.add(viewSettings);
 
+		cartesianGrid.addItemListener(gridChangeListener);
+		polarGrid.addItemListener(gridChangeListener);
+		
+		windowPanel.add(cartesianGrid);
+		windowPanel.add(polarGrid);
+		
 		gridLineIntervalX.setValue(1);
 		gridLineIntervalX.setColumns(8);
 		gridLineIntervalY.setValue(1);
 		gridLineIntervalY.setColumns(8);
+		gridLineIntervalTheta.setValue(.392699081698724139499745433568);
+		gridLineIntervalTheta.setColumns(8);
+		gridLineIntervalR.setValue(1);
+		gridLineIntervalR.setColumns(8);
 
 		windowPanel.add(gridLineIntervalXLabel);
 		windowPanel.add(gridLineIntervalX);
@@ -629,7 +686,7 @@ public class Main {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == newGraph) {
-				GraphTabbedPane.pane.addGraph(new Graph(GraphTabbedPane.pane.getNameForNewGraph(), -5, 5, -5, 5, 1, 1, true, true));
+				GraphTabbedPane.pane.addGraph(new Graph(GraphTabbedPane.pane.getNameForNewGraph()));
 			} else if (e.getSource() == openGraph) {
 				File dir = graphOpen.getCurrentDirectory();
 				graphOpen.setSelectedFile(new File(""));
@@ -959,8 +1016,12 @@ public class Main {
 				GraphTabbedPane.pane.getSelectedGraph().xMax = Double.parseDouble(xMax.getText());
 				GraphTabbedPane.pane.getSelectedGraph().yMin = Double.parseDouble(yMin.getText());
 				GraphTabbedPane.pane.getSelectedGraph().yMax = Double.parseDouble(yMax.getText());
+				GraphTabbedPane.pane.getSelectedGraph().cartesian = cartesianGrid.isSelected();
+				GraphTabbedPane.pane.getSelectedGraph().polar = polarGrid.isSelected();
 				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
 				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
+				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalTheta = Double.parseDouble(gridLineIntervalTheta.getText());
+				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalR = Double.parseDouble(gridLineIntervalR.getText());
 				GraphTabbedPane.pane.getSelectedGraph().axisX = axisX.isSelected();
 				GraphTabbedPane.pane.getSelectedGraph().axisY = axisY.isSelected();
 
