@@ -8,7 +8,8 @@ import java.util.regex.Pattern;
 
 public final class JSON {
 
-	private JSON() {}	
+	private JSON() {}
+
 	/**
 	 * <ul>
 	 * <li><b><i>write</i></b><br>
@@ -19,8 +20,9 @@ public final class JSON {
 	 *         </ul>
 	 */
 	public static String writeWorkspace() {
-		String ret = "{graphs:[";// String.format("{\"selectedGraph\":%d", GraphTabbedPane.pane.GraphTabbedPane.pane.getSelectedIndex()
-		
+		String ret = "{graphs:[";// String.format("{\"selectedGraph\":%d",
+									// GraphTabbedPane.pane.GraphTabbedPane.pane.getSelectedIndex()
+
 		for (Graph graph : GraphTabbedPane.pane.graphs) {
 			ret += writeGraph(graph) + ",";
 		}
@@ -39,14 +41,15 @@ public final class JSON {
 	 *         </ul>
 	 */
 	public static String writeGraph(Graph graph) {
-		String ret = String.format("{\"name\":\"%s\",\"xMin\":%f,\"xMax\":%f,\"yMin\":%f,\"yMax\":%f,\"gridLineIntervalX\":%f,\"gridLineIntervalY\":%f,\"axisX\":%b,\"axisY\":%b,\"functions\":[", graph.name.replaceAll("[\"\\\\]", "\\\\$0"), graph.xMin, graph.xMax, graph.yMin, graph.yMax, graph.gridLineIntervalX, graph.gridLineIntervalY, graph.axisX, graph.axisY);
+		String ret = String.format("{\"name\":\"%s\",\"xMin\":%f,\"xMax\":%f,\"yMin\":%f,\"yMax\":%f,\"gridLineIntervalX\":%f,\"gridLineIntervalY\":%f,\"gridLineIntervalR\":%f,\"gridLineIntervalTheta\":%f,\"axisX\":%b,\"axisY\":%b,\"cartesian\":%b,\"polar\":%b,\"functions\":[",
+				graph.name.replaceAll("[\"\\\\]", "\\\\$0"), graph.xMin, graph.xMax, graph.yMin, graph.yMax, graph.gridLineIntervalX, graph.gridLineIntervalY, graph.gridLineIntervalR, graph.gridLineIntervalTheta, graph.axisX, graph.axisY, graph.cartesian, graph.polar);
 
 		for (Relation relation : graph.relations) {
 			ret += relation.writeJSON() + ",";
 		}
 
 		ret.replaceAll("\\,$", "");
-		
+
 		return ret.replaceAll("\\,$", "") + "]}";
 	}
 
@@ -71,77 +74,47 @@ public final class JSON {
 		}
 
 		GTPane.setSelectedIndex(selectedGraph);
-		
+
 		return GTPane;
 	}
 
 	public static Graph parseGraph(String string) {
-		// If the string parameter is changed to a path
-		// String string = Files.readAllBytes(path);
-
 		return parseGraph((Map<?, ?>) parse(string).get(0));
 	}
 
-	// TODO Fix
 	public static Graph parseGraph(Map<?, ?> graph) {
-//		String name = graph.get("name") instanceof String ? (String) graph.get("name") : "";
-//
-//		double xMin = graph.get("xmin") instanceof Number ? ((Number) graph.get("xmin")).doubleValue() : -5;
-//		double xMax = graph.get("xmax") instanceof Number ? ((Number) graph.get("xmax")).doubleValue() : 5;
-//		double yMin = graph.get("ymin") instanceof Number ? ((Number) graph.get("ymin")).doubleValue() : -5;
-//		double yMax = graph.get("ymax") instanceof Number ? ((Number) graph.get("ymax")).doubleValue() : 5;
-//		double gridLineIntervalX = graph.get("gridlineintervalx") instanceof Number ? ((Number) graph.get("gridlineintervalx")).doubleValue() : 1;
-//		double gridLineIntervalY = graph.get("gridlineintervaly") instanceof Number ? ((Number) graph.get("gridlineintervaly")).doubleValue() : 1;
-//		boolean axisX = graph.get("axisx") instanceof Boolean ? (Boolean) graph.get("axisx") : true;
-//		boolean axisY = graph.get("axisy") instanceof Boolean ? (Boolean) graph.get("axisy") : true;
-//
-//		Vector<Relation> relations = new Vector<>();
-//		try {
-//			List<?> relationArray = (List<?>) graph.get("relations");
-//			for (Object obj : relationArray) {
-//				if (!(obj instanceof Map<?, ?>)) continue;
-//
-//				relations.addElement(parseRelation((Map<?, ?>) obj));
-//			}
-//		} catch (ClassCastException | NullPointerException e) {}
-//
-//		Graph ret = new Graph(name, xMin, xMax, yMin, yMax, gridLineIntervalX, gridLineIntervalY, axisX, axisY, true, false);
-//		ret.relations.addAll(relations);
-//		return ret;
-		return null;
+		return new Graph(graph);
 	}
 
 	protected static Relation parseRelation(Map<?, ?> map) {
-		// TODO
-		return null;
-		
-//		// TODO Rename from untitiled function to appropriate name?
-//		String name = map.get("name") instanceof String ? (String) map.get("name") : "Untitled Function";
-//		String string = map.get("string") instanceof String ? (String) map.get("string") : "";
-//		Color color = map.get("color") instanceof Number ? new Color(((Number) map.get("color")).intValue()) : Color.BLUE;
-//		int thickness = map.get("thickness") instanceof Number ? ((Number) map.get("thickness")).intValue() : 2;
-//		boolean enabled = map.get("enabled") instanceof Boolean ? (Boolean) map.get("enabled") : true;
-//
-//		Function ret = new Function(name);
-//		ret.color = color;
-//		ret.enabled = enabled;
-//		ret.setYString(string);
-//		ret.thickness = thickness;
-//		return ret;
+		String typeName = (String) map.get("type");
+
+		if (typeName == null) return null;
+
+		switch (typeName) {
+			case "function":
+				return new Function(map);
+			case "parametric":
+				return new Parametric(map);
+			case "scatterplot":
+				return new Scatterplot(map);
+			default:
+				return null;
+		}
 	}
 
 	public static ArrayList<Object> parse(String string) {
 		HashMap<String, Object> braceObjs = new HashMap<>();
 
-		String s = string;// .replaceAll("[@\\s]+", "");
+		String s = string;
 
 		int lastAddress = (int) (System.currentTimeMillis() % 32768);
-		
-		Pattern quotes = Pattern.compile("\"((?:[^\"\\\\]|\\\\.)*)\"");//Pattern.compile("\"([^\"]*)\"");// Pattern.compile("\"((?:\\\"|[^\"])*)\"");
+
+		Pattern quotes = Pattern.compile("\"((?:[^\"\\\\]|\\\\.)*)\"");
 		Matcher m = quotes.matcher(s);
 		while (m.find()) {
 			String v = m.group(1);
-			String k = "@" + lastAddress++;//System.identityHashCode(v);
+			String k = "@" + lastAddress++;
 
 			braceObjs.put(k, v.replaceAll("\\\\(.)", "$1"));
 			s = s.replace(m.group(), k);
@@ -179,7 +152,6 @@ public final class JSON {
 					}
 				}
 
-//				int h = System.identityHashCode(termList);
 				String k = "@" + lastAddress++;
 
 				s = s.replace(g, k);
@@ -210,7 +182,6 @@ public final class JSON {
 					}
 				}
 
-//				int h = System.identityHashCode(termList);
 				String k = "@" + lastAddress++;
 
 				s = s.replace(g, k);

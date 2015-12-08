@@ -2,13 +2,13 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.Stack;
 
 import javax.swing.BorderFactory;
@@ -24,10 +24,9 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 public class Function extends Relation {
-	
+
 	private JCheckBox polarCB = new JCheckBox("Polar  ", false);
-	private boolean xEquals = true;
-	private JButton equals = new JButton("x = ");
+	private JLabel equals = new JLabel("y = ");
 	private JTextField functionTextField = new JTextField(14);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
@@ -81,7 +80,7 @@ public class Function extends Relation {
 			super.setPolar(polar);
 			return;
 		}
-		
+
 		if (!polar && isPolar()) {
 			getPanel().setPreferredSize(new Dimension(210, 150));
 			getPanel().remove(tMinLabel);
@@ -104,7 +103,7 @@ public class Function extends Relation {
 			super.setPolar(polar);
 		}
 	}
-	
+
 	public Function(String name, boolean polar) {
 		setName(name);
 		setColor(new Color((int) (Math.random() * 16777216)));
@@ -115,26 +114,26 @@ public class Function extends Relation {
 		tMinTextField.setText(Double.toString(tMin));
 		tMaxTextField.setColumns(4);
 		tMaxTextField.setText(Double.toString(tMax));
-		
+
 		setPanel(new JPanel());
 		getPanel().setPreferredSize(new Dimension(210, 150));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		getPanel().add(Main.relationPropertiesType);
-		
+
 		polarCB.setSelected(polar);
 		polarCB.addItemListener(new ItemListener() {
-			
+
 			public void itemStateChanged(ItemEvent e) {
 				setPolar(polarCB.isSelected());
 			}
 		});
 		getPanel().add(polarCB);
-		equals.setMargin(new Insets(equals.getMargin().top - 3, 3, equals.getMargin().bottom - 3, 3));
 		getPanel().add(equals);
 		getPanel().add(functionTextField);
 		getPanel().add(colorChooserLabel);
 		colorChooserButton.setPreferredSize(new Dimension(85, 20));
 		colorChooserButton.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				selectedColor = JColorChooser.showDialog(null, "Color Chooser", getColor());
 				if (selectedColor == null)
@@ -151,11 +150,11 @@ public class Function extends Relation {
 		thicknessSlider.setPreferredSize(new Dimension(200, thicknessSlider.getPreferredSize().height));
 		getPanel().add(thicknessSlider);
 	}
-	
+
 	public Function(String name) {
 		this(name, false);
 	}
-	
+
 	public Function(Relation relation) {
 		this(relation.getName(), relation.isPolar());
 		setColor(relation.getColor());
@@ -163,7 +162,23 @@ public class Function extends Relation {
 		colorChooserButton.setBackground(selectedColor);
 		setThickness(relation.getThickness());
 	}
-	
+
+	public Function(Map<?, ?> map) {
+		setName(map.get("name") == null ? "Untitled Function" : map.get("name").toString());
+		setFunction(map.get("function") == null ? "" : map.get("function").toString());
+		setPolar(map.get("polar") instanceof Boolean ? (Boolean) map.get("polar") : false);
+		polarCB.setSelected(isPolar());
+		setColor(new Color(map.get("color") instanceof Number ? ((Number) map.get("color")).intValue() : (int) (Math.random() * 16777216)));
+		selectedColor = getColor();
+		setThickness(map.get("thickness") instanceof Number ? ((Number) map.get("thickness")).intValue() : 2);
+		thicknessSlider.setValue(getThickness());
+		setTMin(map.get("tmin") instanceof Number ? ((Number) map.get("tmin")).doubleValue() : 0);
+		tMinTextField.setValue(getTMin());
+		setTMax(map.get("tmax") instanceof Number ? ((Number) map.get("tmax")).doubleValue() : Math.PI * 2);
+		tMaxTextField.setValue(getTMax());
+		setEnabled(map.get("enabled") instanceof Boolean ? (Boolean) map.get("enabled") : true);
+	}
+
 	public double evaluate(double x) {
 		return Evaluator.evaluate(rpn, x);
 	}

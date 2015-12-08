@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import javax.swing.BorderFactory;
@@ -55,7 +56,7 @@ public class Scatterplot extends Relation {
 		setPanel(new JPanel());
 		getPanel().setPreferredSize(new Dimension(210, 220));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		
+
 		polarCB.setSelected(polar);
 		getPanel().add(polarCB);
 		polarCB.addItemListener(new ItemListener() {
@@ -146,6 +147,9 @@ public class Scatterplot extends Relation {
 		});
 		pointTable.getTableHeader().setReorderingAllowed(false);
 		pointTable.getTableHeader().setResizingAllowed(false);
+		TableColumnModel tcm = pointTable.getTableHeader().getColumnModel();
+		tcm.getColumn(0).setHeaderValue("x");
+		tcm.getColumn(1).setHeaderValue("y");
 		JScrollPane scrollPane = new JScrollPane(pointTable);
 		scrollPane.setPreferredSize(new Dimension(200, 100));
 		getPanel().add(scrollPane);
@@ -174,7 +178,7 @@ public class Scatterplot extends Relation {
 	public Scatterplot(String name) {
 		this(name, false);
 	}
-	
+
 	public Scatterplot(Relation relation) {
 		this(relation.getName(), relation.isPolar());
 		setColor(relation.getColor());
@@ -183,13 +187,72 @@ public class Scatterplot extends Relation {
 		setThickness(relation.getThickness());
 	}
 
+	public Scatterplot(Map<?, ?> map) {
+		setName(map.get("name") == null ? "Untitled Scatterplot" : map.get("name").toString());
+		Map<?, ?> points = map.get("points") instanceof Map<?, ?> ? (Map<?, ?>) map.get("points") : null;
+		if (points == null) {
+			xTableData = new ArrayList<>(0);
+			yTableData = new ArrayList<>(0);
+		} else {
+			ArrayList<Double> newXs = new ArrayList<>();
+			ArrayList<Double> newYs = new ArrayList<>();
+
+			if (points.get("x") instanceof List<?>) {
+				List<?> xpts = (List<?>) points.get("x");
+				for (Object o : xpts) {
+					if (!(o instanceof Number)) {
+						newXs.add(0.0);
+					} else {
+						newXs.add(((Number) o).doubleValue());
+					}
+				}
+			}
+
+			if (points.get("y") instanceof List<?>) {
+				List<?> ypts = (List<?>) points.get("y");
+				for (Object o : ypts) {
+					if (!(o instanceof Number)) {
+						newYs.add(0.0);
+					} else {
+						newYs.add(((Number) o).doubleValue());
+					}
+				}
+			}
+
+			while (newXs.size() != newYs.size()) {
+				if (newXs.size() < newYs.size())
+					newXs.add(0.0);
+				else
+					newYs.add(0.0);
+			}
+
+			xTableData = new ArrayList<>(newXs);
+			yTableData = new ArrayList<>(newYs);
+		}
+
+		this.points = new Double[2][xTableData.size()];
+		xTableData.toArray(this.points[0]);
+		yTableData.toArray(this.points[1]);
+
+		setPolar(map.get("polar") instanceof Boolean ? (Boolean) map.get("polar") : false);
+		polarCB.setSelected(isPolar());
+
+		setColor(new Color(map.get("color") instanceof Number ? ((Number) map.get("color")).intValue() : (int) (Math.random() * 16777216)));
+		selectedColor = getColor();
+
+		setThickness(map.get("thickness") instanceof Number ? ((Number) map.get("thickness")).intValue() : 2);
+		thicknessSlider.setValue(getThickness());
+
+		setEnabled(map.get("enabled") instanceof Boolean ? (Boolean) map.get("enabled") : true);
+	}
+
 	@Override
 	public void setPolar(boolean polar) {
 		if (getPanel() == null) {
 			super.setPolar(polar);
 			return;
 		}
-		
+
 		if (!polar && isPolar()) {
 			TableColumnModel tcm = pointTable.getTableHeader().getColumnModel();
 			tcm.getColumn(0).setHeaderValue("x");
@@ -228,14 +291,14 @@ public class Scatterplot extends Relation {
 
 			g.setColor(this.getColor());
 			g.setStroke(new BasicStroke(this.getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			
+
 			for (int i = 0; i < points[0].length; i++) {
 				double x = dim.width * ((isPolar() ? (Math.cos(points[0][i]) * points[1][i]) : points[0][i]) - graph.xMin) / (graph.xMax - graph.xMin);
 				double y = dim.height - (dim.height * ((isPolar() ? (Math.sin(points[0][i]) * points[1][i]) : points[1][i]) - graph.yMin) / (graph.yMax - graph.yMin));
-				
+
 				g.draw(new Polygon(new int[] {(int) x}, new int[] {(int) y}, 1));
 			}
-			
+
 			g.dispose();
 		}
 	}

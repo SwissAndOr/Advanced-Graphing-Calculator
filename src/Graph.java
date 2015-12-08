@@ -3,6 +3,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
@@ -20,7 +22,7 @@ public class Graph {
 	protected Path currentSaveLocation = null;
 
 	public Graph() {}
-	
+
 	public Graph(String name) {
 		this.name = name;
 	}
@@ -39,6 +41,32 @@ public class Graph {
 		this.axisY = axisY;
 		this.cartesian = cartesian;
 		this.polar = polar;
+	}
+
+	public Graph(Map<?, ?> graph) {
+		this.name = graph.get("name") instanceof String ? (String) graph.get("name") : "Untitled Graph";
+		this.xMin = graph.get("xmin") instanceof Number ? ((Number) graph.get("xmin")).doubleValue() : -5;
+		this.xMax = graph.get("xmax") instanceof Number ? ((Number) graph.get("xmax")).doubleValue() : 5;
+		this.yMin = graph.get("ymin") instanceof Number ? ((Number) graph.get("ymin")).doubleValue() : -5;
+		this.yMax = graph.get("ymax") instanceof Number ? ((Number) graph.get("ymax")).doubleValue() : 5;
+		this.gridLineIntervalX = graph.get("gridlineintervalx") instanceof Number ? ((Number) graph.get("gridlineintervalx")).doubleValue() : 1;
+		this.gridLineIntervalY = graph.get("gridlineintervaly") instanceof Number ? ((Number) graph.get("gridlineintervaly")).doubleValue() : 1;
+		this.gridLineIntervalR = graph.get("gridlineintervalr") instanceof Number ? ((Number) graph.get("gridlineintervalr")).doubleValue() : 1;
+		this.gridLineIntervalTheta = graph.get("gridlineintervaltheta") instanceof Number ? ((Number) graph.get("gridlineintervaltheta")).doubleValue() : Math.PI * 2;
+		this.axisX = graph.get("axisx") instanceof Boolean ? (Boolean) graph.get("axisx") : true;
+		this.axisY = graph.get("axisy") instanceof Boolean ? (Boolean) graph.get("axisy") : true;
+		this.cartesian = graph.get("cartesian") instanceof Boolean ? (Boolean) graph.get("cartesian") : true;
+		this.polar = graph.get("polar") instanceof Boolean ? (Boolean) graph.get("polar") : false;
+
+		Vector<Relation> relations = new Vector<>();
+		try {
+			List<?> relationArray = (List<?>) graph.get("relations");
+			for (Object obj : relationArray) {
+				if (!(obj instanceof Map<?, ?>)) continue;
+
+				relations.addElement(JSON.parseRelation((Map<?, ?>) obj));
+			}
+		} catch (ClassCastException | NullPointerException e) {}
 	}
 
 	/**

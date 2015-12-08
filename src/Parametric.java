@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.Stack;
 
 import javax.swing.BorderFactory;
@@ -60,7 +61,7 @@ public class Parametric extends Relation {
 		getPanel().setPreferredSize(new Dimension(210, 190));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		getPanel().add(Main.relationPropertiesType);
-		
+
 		polarCB.setSelected(polar);
 		polarCB.addItemListener(new ItemListener() {
 
@@ -102,7 +103,7 @@ public class Parametric extends Relation {
 	public Parametric(String name) {
 		this(name, false);
 	}
-	
+
 	public Parametric(Relation relation) {
 		this(relation.getName(), relation.isPolar());
 		setColor(relation.getColor());
@@ -111,13 +112,30 @@ public class Parametric extends Relation {
 		setThickness(relation.getThickness());
 	}
 
+	public Parametric(Map<?, ?> map) {
+		setName(map.get("name") == null ? "Untitled Parametric" : map.get("name").toString());
+		setXEquation(map.get("xequation") == null ? "" : map.get("xequation").toString());
+		setYEquation(map.get("yequation") == null ? "" : map.get("yequation").toString());
+		setPolar(map.get("polar") instanceof Boolean ? (Boolean) map.get("polar") : false);
+		polarCB.setSelected(isPolar());
+		setColor(new Color(map.get("color") instanceof Number ? ((Number) map.get("color")).intValue() : (int) (Math.random() * 16777216)));
+		selectedColor = getColor();
+		setThickness(map.get("thickness") instanceof Number ? ((Number) map.get("thickness")).intValue() : 2);
+		thicknessSlider.setValue(getThickness());
+		this.tMin = map.get("tmin") instanceof Number ? ((Number) map.get("tmin")).doubleValue() : 0;
+		tMinTextField.setValue(this.tMin);
+		this.tMax = map.get("tmax") instanceof Number ? ((Number) map.get("tmax")).doubleValue() : Math.PI * 2;
+		tMaxTextField.setValue(this.tMax);
+		setEnabled(map.get("enabled") instanceof Boolean ? (Boolean) map.get("enabled") : true);
+	}
+
 	@Override
 	public void setPolar(boolean polar) {
 		if (getPanel() == null) {
 			super.setPolar(polar);
 			return;
 		}
-		
+
 		if (polar && !isPolar()) {
 			xLabel.setText("\u03B8 = ");
 			yLabel.setText("r = ");
