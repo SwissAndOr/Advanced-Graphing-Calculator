@@ -117,7 +117,7 @@ public class Main {
 			
 		}
 		
-		public void focusLost(FocusEvent e) {		
+		public void focusLost(FocusEvent e) {
 			if (e.getSource() == xMin || e.getSource() == xMax || e.getSource() == yMin || e.getSource() == yMax) {
 				xView.setText(numbers.format((Double.parseDouble(xMin.getText()) + Double.parseDouble(xMax.getText())) / 2));
 				widthView.setText(numbers.format(Double.parseDouble(xMax.getText()) - Double.parseDouble(xMin.getText())));
@@ -501,9 +501,9 @@ public class Main {
 		relationPropertiesPanel = relationList.getSelectedValue().getPanel();
 		sidebar.add(relationPropertiesPanel);
 
-		windowPanel.setPreferredSize(new Dimension(190, 160));
+		windowPanel.setPreferredSize(new Dimension(190, 180));
 		
-		minMax.setPreferredSize(new Dimension(185, 50));
+		minMax.setPreferredSize(new Dimension(185, 40));
 		minMax.add(xMinLabel);
 		minMax.add(xMin);
 		minMax.add(xMaxLabel);
@@ -513,7 +513,7 @@ public class Main {
 		minMax.add(yMaxLabel);
 		minMax.add(yMax);
 		
-		xy.setPreferredSize(new Dimension(185, 50));
+		xy.setPreferredSize(new Dimension(185, 40));
 		xy.add(xLabel);
 		xy.add(xView);
 		xy.add(widthLabel);
