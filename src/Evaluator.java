@@ -121,7 +121,10 @@ public final class Evaluator {
 				expr = expr.substring(1);
 
 				lastFunction = false;
+				continue;
 			}
+			
+			throw new IllegalArgumentException("Unknown token in expression (" + infix + ")");
 		}
 
 		while (!oper.isEmpty()) {

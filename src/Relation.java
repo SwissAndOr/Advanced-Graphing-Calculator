@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import javax.swing.Icon;
@@ -11,7 +12,17 @@ public abstract class Relation {
 	private boolean polar;
 	private BufferedImage image;
 	private JPanel panel;
+	private Color color;
+	private int thickness = 2;
 
+	public Relation() {}
+	
+	public Relation(Relation relation) {
+		this.name = relation.name;
+		this.color = relation.color;
+		this.thickness = relation.thickness;
+	}
+	
 	public abstract void applyValues();
 
 	public abstract void createImage();
@@ -64,6 +75,26 @@ public abstract class Relation {
 
 	public void setPanel(JPanel panel) {
 		this.panel = panel;
+	}
+
+	
+	public Color getColor() {
+		return color;
+	}
+
+	
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
+	
+	public int getThickness() {
+		return thickness;
+	}
+
+	
+	public void setThickness(int thickness) {
+		this.thickness = thickness;
 	}
 
 	@Override

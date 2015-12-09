@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -37,6 +38,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
@@ -74,9 +76,9 @@ public class Main {
 	private static JPanel relationPropertiesPanel;
 
 	private static JPanel windowPanel = new JPanel();
-	
+
 	private static JTabbedPane viewSettings = new JTabbedPane();
-	
+
 	private static JPanel minMax = new JPanel();
 	private static JLabel xMinLabel = new JLabel("X Min");
 	private static JFormattedTextField xMin = new JFormattedTextField(numbers);
@@ -86,7 +88,7 @@ public class Main {
 	private static JFormattedTextField yMin = new JFormattedTextField(numbers);
 	private static JLabel yMaxLabel = new JLabel("Y Max");
 	private static JFormattedTextField yMax = new JFormattedTextField(numbers);
-	
+
 	private static JPanel xy = new JPanel();
 	private static JLabel xLabel = new JLabel("X");
 	private static JFormattedTextField xView = new JFormattedTextField(numbers);
@@ -110,7 +112,7 @@ public class Main {
 			});
 		}
 	};
-	
+
 	private static final FocusListener formattedFocusListener = new FocusAdapter() {
 		
 		public void focusGained(FocusEvent e) {
@@ -119,24 +121,86 @@ public class Main {
 		
 		public void focusLost(FocusEvent e) {
 			if (e.getSource() == xMin || e.getSource() == xMax || e.getSource() == yMin || e.getSource() == yMax) {
-				xView.setText(numbers.format((Double.parseDouble(xMin.getText()) + Double.parseDouble(xMax.getText())) / 2));
-				widthView.setText(numbers.format(Double.parseDouble(xMax.getText()) - Double.parseDouble(xMin.getText())));
-				yView.setText(numbers.format((Double.parseDouble(yMin.getText()) + Double.parseDouble(yMax.getText())) / 2));
-				heightView.setText(numbers.format(Double.parseDouble(yMax.getText()) - Double.parseDouble(yMin.getText())));
+				try {
+					xView.setText(numbers.format((Double.parseDouble(xMin.getText()) + Double.parseDouble(xMax.getText())) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					widthView.setText(numbers.format(Double.parseDouble(xMax.getText()) - Double.parseDouble(xMin.getText())));
+				} catch (NumberFormatException exception) {}
+				try {
+					yView.setText(numbers.format((Double.parseDouble(yMin.getText()) + Double.parseDouble(yMax.getText())) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					heightView.setText(numbers.format(Double.parseDouble(yMax.getText()) - Double.parseDouble(yMin.getText())));
+				} catch (NumberFormatException exception) {}
 			} else {
-				xMin.setText(numbers.format(Double.parseDouble(xView.getText()) - Double.parseDouble(widthView.getText()) / 2));
-				xMax.setText(numbers.format(Double.parseDouble(xView.getText()) + Double.parseDouble(widthView.getText()) / 2));
-				yMin.setText(numbers.format(Double.parseDouble(yView.getText()) - Double.parseDouble(heightView.getText()) / 2));
-				yMax.setText(numbers.format(Double.parseDouble(yView.getText()) + Double.parseDouble(heightView.getText()) / 2));
+				try {
+					xMin.setText(numbers.format(Double.parseDouble(xView.getText()) - Double.parseDouble(widthView.getText()) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					xMax.setText(numbers.format(Double.parseDouble(xView.getText()) + Double.parseDouble(widthView.getText()) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					yMin.setText(numbers.format(Double.parseDouble(yView.getText()) - Double.parseDouble(heightView.getText()) / 2));
+				} catch (NumberFormatException exception) {}
+				try {
+					yMax.setText(numbers.format(Double.parseDouble(yView.getText()) + Double.parseDouble(heightView.getText()) / 2));
+				} catch (NumberFormatException exception) {}
 			}
 		}
 	};
 
+	private static JCheckBox cartesianGrid = new JCheckBox("Cartesian Grid", true);
+	private static JCheckBox polarGrid = new JCheckBox("Polar Grid", false);
 
+	private static final ItemListener gridChangeListener = new ItemListener() {
+		
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			if (e.getSource() == cartesianGrid) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					windowPanel.remove(gridLineIntervalXLabel);
+					windowPanel.remove(gridLineIntervalX);
+					windowPanel.remove(gridLineIntervalYLabel);
+					windowPanel.remove(gridLineIntervalY);
+				} else {
+					windowPanel.add(gridLineIntervalXLabel, 3);
+					windowPanel.add(gridLineIntervalX, 4);
+					windowPanel.add(gridLineIntervalYLabel, 5);
+					windowPanel.add(gridLineIntervalY, 6);
+				}
+			} else if (e.getSource() == polarGrid) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					windowPanel.remove(gridLineIntervalThetaLabel);
+					windowPanel.remove(gridLineIntervalTheta);
+					windowPanel.remove(gridLineIntervalRLabel);
+					windowPanel.remove(gridLineIntervalR);
+				} else {
+					windowPanel.remove(axisX);
+					windowPanel.remove(axisY);
+					windowPanel.add(gridLineIntervalThetaLabel);
+					windowPanel.add(gridLineIntervalTheta);
+					windowPanel.add(gridLineIntervalRLabel);
+					windowPanel.add(gridLineIntervalR);
+					windowPanel.add(axisX);
+					windowPanel.add(axisY);
+				}
+			}
+			
+			windowPanel.setPreferredSize(new Dimension(210, 160 + (cartesianGrid.isSelected() ? 50 : 0) + (polarGrid.isSelected() ? 50 : 0)));
+			sidebar.revalidate();
+			sidebar.repaint();
+		}
+	};
+	
 	private static JLabel gridLineIntervalXLabel = new JLabel("Grid Line Interval X");
 	private static JFormattedTextField gridLineIntervalX = new JFormattedTextField(numbers);
 	private static JLabel gridLineIntervalYLabel = new JLabel("Grid Line Interval Y");
 	private static JFormattedTextField gridLineIntervalY = new JFormattedTextField(numbers);
+	private static JLabel gridLineIntervalThetaLabel = new JLabel("Grid Line Interval \u03B8");
+	private static JFormattedTextField gridLineIntervalTheta = new JFormattedTextField(numbers);
+	private static JLabel gridLineIntervalRLabel = new JLabel("Grid Line Interval R");
+	private static JFormattedTextField gridLineIntervalR = new JFormattedTextField(numbers);
 
 	private static JCheckBox axisX = new JCheckBox("Axis X", true);
 	private static JCheckBox axisY = new JCheckBox("Axis Y", true);
@@ -349,13 +413,13 @@ public class Main {
 		window.setJMenuBar(menuBar);
 
 		xMin.setValue(-5);
-		xMin.setColumns(4);
+		xMin.setColumns(5);
 		xMax.setValue(5);
-		xMax.setColumns(4);
+		xMax.setColumns(5);
 		yMin.setValue(-5);
-		yMin.setColumns(4);
+		yMin.setColumns(5);
 		yMax.setValue(5);
-		yMax.setColumns(4);
+		yMax.setColumns(5);
 
 		xMin.addMouseListener(formattedListener);
 		xMax.addMouseListener(formattedListener);
@@ -374,7 +438,7 @@ public class Main {
 		yView.setColumns(5);
 		heightView.setValue(20);
 		heightView.setColumns(5);
-		
+
 		xView.addMouseListener(formattedListener);
 		widthView.addMouseListener(formattedListener);
 		yView.addMouseListener(formattedListener);
@@ -383,8 +447,8 @@ public class Main {
 		widthView.addFocusListener(formattedFocusListener);
 		yView.addFocusListener(formattedFocusListener);
 		heightView.addFocusListener(formattedFocusListener);
-		
-		GraphTabbedPane.pane.addGraph(new Graph("Graph", -5, 5, -5, 5, 1, 1, true, true));
+
+		GraphTabbedPane.pane.addGraph(new Graph("Graph"));
 		GraphTabbedPane.pane.getSelectedGraph().relations.add(new Function("Function"));
 
 		relationList = new JList<>(GraphTabbedPane.pane.getSelectedGraph().relations);
@@ -392,16 +456,16 @@ public class Main {
 
 			public void valueChanged(ListSelectionEvent e) {
 				if (!relationList.getValueIsAdjusting()) {
-					if (relationList.getSelectedIndex() != -1 && relationPropertiesPanel != null) {			
+					if (relationList.getSelectedIndex() != -1 && relationPropertiesPanel != null) {
 						sidebar.remove(4);
 						relationPropertiesPanel = relationList.getSelectedValue().getPanel();
 						sidebar.add(relationPropertiesPanel, 4);
 						relationPropertiesPanel.add(relationPropertiesType, 0);
 						relationPropertiesPanel.revalidate();
 						relationPropertiesPanel.repaint();
-						
+
 						relationPropertiesType.setSelectedIndex(Arrays.asList(relationTypes).indexOf(relationList.getSelectedValue().getClass().getSimpleName()));
-						
+
 						if (relationList.getSelectedIndex() == 0)
 							relationUp.setEnabled(false);
 						else
@@ -431,14 +495,18 @@ public class Main {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getX() > 140) {
+				int index = e.getY() / (MAX_THICKNESS * 2 + 4);
+				System.out.println(e.getY());
+				System.out.println(e.getY() / 42);
+				System.out.println(index);
+				if (index < GraphTabbedPane.pane.getSelectedGraph().relations.size() && e.getX() > 160 && Math.abs(index * (MAX_THICKNESS * 2 + 4) + MAX_THICKNESS + 2 - e.getY()) < 9) {
 					e.consume();
-					GraphTabbedPane.pane.getSelectedGraph().relations.get(e.getY() / 30).enabled ^= true;
+					GraphTabbedPane.pane.getSelectedGraph().relations.get(index).enabled ^= true;
 					relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
 				}
 			}
 		});
-		relationList.setFixedCellWidth(160);
+		relationList.setFixedCellWidth(178);
 		relationList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		relationList.setVisibleRowCount(4);
 		relationList.setSelectedIndex(0);
@@ -447,9 +515,12 @@ public class Main {
 		c.gridheight = 2;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
-		relationPanel.add(new JScrollPane(relationList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), c);
+		JScrollPane relListScrollPane = new JScrollPane(relationList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollBar bar = relListScrollPane.getVerticalScrollBar();
+		bar.setPreferredSize(new Dimension(12, bar.getPreferredSize().height));
+		relationPanel.add(relListScrollPane, c);
 
-		relationUp.setMargin(new Insets(relationUp.getMargin().top, 5, relationUp.getMargin().bottom, 5));
+		relationUp.setMargin(new Insets(relationUp.getMargin().top, 4, relationUp.getMargin().bottom, 4));
 		c.gridheight = 1;
 		c.weightx = 0;
 		c.weighty = 0.5;
@@ -457,7 +528,7 @@ public class Main {
 		relationUp.addActionListener(actionListeners);
 		relationPanel.add(relationUp, c);
 
-		relationDown.setMargin(new Insets(relationDown.getMargin().top, 5, relationDown.getMargin().bottom, 5));
+		relationDown.setMargin(new Insets(relationDown.getMargin().top, 4, relationDown.getMargin().bottom, 4));
 		c.gridy = 1;
 		relationDown.addActionListener(actionListeners);
 		relationPanel.add(relationDown, c);
@@ -475,21 +546,24 @@ public class Main {
 		relationRename.addActionListener(actionListeners);
 		sidebar.add(relationRename);
 
+		relationPropertiesType.setPreferredSize(new Dimension(relationPropertiesType.getPreferredSize().width + 20, relationPropertiesType.getPreferredSize().height));
+
 		relationPropertiesType.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {	
+
+			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					int index = relationList.getSelectedIndex();
-					
+
 					switch ((String) relationPropertiesType.getSelectedItem()) {
-					case "Function":
-						GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Function(relationList.getSelectedValue().getName()));
-						break;
-					case "Parametric":
-						GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Parametric(relationList.getSelectedValue().getName()));
-						break;
-					case "Scatterplot":
-						GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Scatterplot(relationList.getSelectedValue().getName()));
-						break;
+						case "Function":
+							GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Function(relationList.getSelectedValue()));
+							break;
+						case "Parametric":
+							GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Parametric(relationList.getSelectedValue()));
+							break;
+						case "Scatterplot":
+							GraphTabbedPane.pane.getSelectedGraph().relations.set(relationList.getSelectedIndex(), new Scatterplot(relationList.getSelectedValue()));
+							break;
 					}
 
 					relationList.setListData(GraphTabbedPane.pane.getSelectedGraph().relations);
@@ -501,9 +575,9 @@ public class Main {
 		relationPropertiesPanel = relationList.getSelectedValue().getPanel();
 		sidebar.add(relationPropertiesPanel);
 
-		windowPanel.setPreferredSize(new Dimension(190, 180));
-		
-		minMax.setPreferredSize(new Dimension(185, 40));
+		windowPanel.setPreferredSize(new Dimension(210, 210));
+
+		minMax.setPreferredSize(new Dimension(205, 50));
 		minMax.add(xMinLabel);
 		minMax.add(xMin);
 		minMax.add(xMaxLabel);
@@ -512,8 +586,9 @@ public class Main {
 		minMax.add(yMin);
 		minMax.add(yMaxLabel);
 		minMax.add(yMax);
-		
-		xy.setPreferredSize(new Dimension(185, 40));
+
+		xy.setPreferredSize(new Dimension(205, 50));
+		xy.setLayout(new FlowLayout(FlowLayout.CENTER, 8, 5));
 		xy.add(xLabel);
 		xy.add(xView);
 		xy.add(widthLabel);
@@ -522,15 +597,25 @@ public class Main {
 		xy.add(yView);
 		xy.add(heightLabel);
 		xy.add(heightView);
-		
+
 		viewSettings.addTab(" Min and Max  ", minMax);
-		viewSettings.addTab("   X and Y   ", xy);
+		viewSettings.addTab("      X and Y      ", xy);
 		windowPanel.add(viewSettings);
 
+		cartesianGrid.addItemListener(gridChangeListener);
+		polarGrid.addItemListener(gridChangeListener);
+		
+		windowPanel.add(cartesianGrid);
+		windowPanel.add(polarGrid);
+		
 		gridLineIntervalX.setValue(1);
-		gridLineIntervalX.setColumns(6);
+		gridLineIntervalX.setColumns(8);
 		gridLineIntervalY.setValue(1);
-		gridLineIntervalY.setColumns(6);
+		gridLineIntervalY.setColumns(8);
+		gridLineIntervalTheta.setValue(.392699081698724139499745433568);
+		gridLineIntervalTheta.setColumns(8);
+		gridLineIntervalR.setValue(1);
+		gridLineIntervalR.setColumns(8);
 
 		windowPanel.add(gridLineIntervalXLabel);
 		windowPanel.add(gridLineIntervalX);
@@ -545,7 +630,7 @@ public class Main {
 		applyButton.addActionListener(actionListeners);
 		sidebar.add(applyButton);
 
-		sidebar.setPreferredSize(new Dimension(200, Integer.MAX_VALUE));
+		sidebar.setPreferredSize(new Dimension(220, Integer.MAX_VALUE));
 		window.add(sidebar, BorderLayout.LINE_START);
 
 		window.add(GraphTabbedPane.pane, BorderLayout.CENTER);
@@ -559,7 +644,7 @@ public class Main {
 			double newXMax = GraphTabbedPane.pane.getSelectedGraph().xMax;
 			double newYMin = GraphTabbedPane.pane.getSelectedGraph().yMin;
 			double newYMax = GraphTabbedPane.pane.getSelectedGraph().yMax;
-			
+
 			xMin.setText(numbers.format(newXMin));
 			xMax.setText(numbers.format(newXMax));
 			yMin.setText(numbers.format(newYMin));
@@ -605,7 +690,7 @@ public class Main {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == newGraph) {
-				GraphTabbedPane.pane.addGraph(new Graph(GraphTabbedPane.pane.getNameForNewGraph(), -5, 5, -5, 5, 1, 1, true, true));
+				GraphTabbedPane.pane.addGraph(new Graph(GraphTabbedPane.pane.getNameForNewGraph()));
 			} else if (e.getSource() == openGraph) {
 				File dir = graphOpen.getCurrentDirectory();
 				graphOpen.setSelectedFile(new File(""));
@@ -632,7 +717,7 @@ public class Main {
 				}
 
 				Graph graph = GraphTabbedPane.pane.getSelectedGraph();
-				
+
 				File cur = graphSave.getCurrentDirectory();
 				graphSave.setSelectedFile(graph.currentSaveLocation == null ? new File(cur.getAbsolutePath() + fs + graph.name + "." + ((FileNameExtensionFilter) graphSave.getFileFilter()).getExtensions()[0]) : graph.currentSaveLocation.toFile());
 				if (graphSave.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
@@ -641,7 +726,7 @@ public class Main {
 					if (!graphSave.getFileFilter().accept(file)) {
 						file = new File(file.getAbsolutePath() + "." + ((FileNameExtensionFilter) graphSave.getFileFilter()).getExtensions()[0]);
 					}
-					
+
 					graph.save(file.toPath(), (FileNameExtensionFilter) graphSave.getFileFilter());
 				}
 			} else if (e.getSource() == saveAllGraphs) {
@@ -935,8 +1020,12 @@ public class Main {
 				GraphTabbedPane.pane.getSelectedGraph().xMax = Double.parseDouble(xMax.getText());
 				GraphTabbedPane.pane.getSelectedGraph().yMin = Double.parseDouble(yMin.getText());
 				GraphTabbedPane.pane.getSelectedGraph().yMax = Double.parseDouble(yMax.getText());
+				GraphTabbedPane.pane.getSelectedGraph().cartesian = cartesianGrid.isSelected();
+				GraphTabbedPane.pane.getSelectedGraph().polar = polarGrid.isSelected();
 				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalX = Double.parseDouble(gridLineIntervalX.getText());
 				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalY = Double.parseDouble(gridLineIntervalY.getText());
+				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalTheta = Double.parseDouble(gridLineIntervalTheta.getText());
+				GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalR = Double.parseDouble(gridLineIntervalR.getText());
 				GraphTabbedPane.pane.getSelectedGraph().axisX = axisX.isSelected();
 				GraphTabbedPane.pane.getSelectedGraph().axisY = axisY.isSelected();
 

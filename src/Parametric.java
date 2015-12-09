@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
+import java.util.Map;
 import java.util.Stack;
 
 import javax.swing.BorderFactory;
@@ -25,32 +26,30 @@ import javax.swing.JTextField;
 
 public class Parametric extends Relation {
 
-	private JCheckBox polarCB = new JCheckBox("Polar   ", false);
+	private JCheckBox polarCB = new JCheckBox("Polar  ", false);
 	private JLabel xLabel = new JLabel("x = ");
-	private JTextField xTextField = new JTextField(13);
+	private JTextField xTextField = new JTextField(14);
 	private JLabel yLabel = new JLabel("y = ");
-	private JTextField yTextField = new JTextField(13);
+	private JTextField yTextField = new JTextField(14);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
 	private Color selectedColor = Color.BLUE;
 	private JLabel thicknessLabel = new JLabel("Line Thickness");
 	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, Main.MAX_THICKNESS, 2);
-	private JLabel tMinLabel = new JLabel("\u0398 Min");
+	private JLabel tMinLabel = new JLabel("t Min");
 	private JFormattedTextField tMinTextField = new JFormattedTextField(Main.numbers);
-	private JLabel tMaxLabel = new JLabel("\u0398 Max");
+	private JLabel tMaxLabel = new JLabel("t Max");
 	private JFormattedTextField tMaxTextField = new JFormattedTextField(Main.numbers);
 
 	private double tMin = 0, tMax = 6.28318530717958623199592693709;
 
 	private Stack<Object> xRpn, yRpn;
 	private String xEquation, yEquation;
-	public Color color;
-	public int thickness = 2;
 
 	public Parametric(String name, boolean polar) {
 		setName(name);
-		color = new Color((int) (Math.random() * 16777216));
-		selectedColor = color;
+		setColor(new Color((int) (Math.random() * 16777216)));
+		selectedColor = getColor();
 		setPolar(polar);
 
 		tMinTextField.setColumns(4);
@@ -59,9 +58,11 @@ public class Parametric extends Relation {
 		tMaxTextField.setText(Double.toString(tMax));
 
 		setPanel(new JPanel());
-		getPanel().setPreferredSize(new Dimension(190, 190));
+		getPanel().setPreferredSize(new Dimension(210, 190));
 		getPanel().setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		getPanel().add(Main.relationPropertiesType);
+
+		polarCB.setSelected(polar);
 		polarCB.addItemListener(new ItemListener() {
 
 			public void itemStateChanged(ItemEvent e) {
@@ -78,9 +79,9 @@ public class Parametric extends Relation {
 		colorChooserButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				selectedColor = JColorChooser.showDialog(null, "Color Chooser", color);
+				selectedColor = JColorChooser.showDialog(null, "Color Chooser", getColor());
 				if (selectedColor == null)
-					selectedColor = color;
+					selectedColor = getColor();
 				else
 					colorChooserButton.setBackground(new Color(selectedColor.getRGB() & 16777215));
 			}
@@ -90,7 +91,7 @@ public class Parametric extends Relation {
 		getPanel().add(thicknessLabel);
 		thicknessSlider.setPaintTicks(true);
 		thicknessSlider.setMinorTickSpacing(1);
-		thicknessSlider.setPreferredSize(new Dimension(180, thicknessSlider.getPreferredSize().height));
+		thicknessSlider.setPreferredSize(new Dimension(200, thicknessSlider.getPreferredSize().height));
 		getPanel().add(thicknessSlider);
 
 		getPanel().add(tMinLabel);
@@ -103,8 +104,38 @@ public class Parametric extends Relation {
 		this(name, false);
 	}
 
+	public Parametric(Relation relation) {
+		this(relation.getName(), relation.isPolar());
+		setColor(relation.getColor());
+		selectedColor = getColor();
+		colorChooserButton.setBackground(selectedColor);
+		setThickness(relation.getThickness());
+	}
+
+	public Parametric(Map<?, ?> map) {
+		setName(map.get("name") == null ? "Untitled Parametric" : map.get("name").toString());
+		setXEquation(map.get("xequation") == null ? "" : map.get("xequation").toString());
+		setYEquation(map.get("yequation") == null ? "" : map.get("yequation").toString());
+		setPolar(map.get("polar") instanceof Boolean ? (Boolean) map.get("polar") : false);
+		polarCB.setSelected(isPolar());
+		setColor(new Color(map.get("color") instanceof Number ? ((Number) map.get("color")).intValue() : (int) (Math.random() * 16777216)));
+		selectedColor = getColor();
+		setThickness(map.get("thickness") instanceof Number ? ((Number) map.get("thickness")).intValue() : 2);
+		thicknessSlider.setValue(getThickness());
+		this.tMin = map.get("tmin") instanceof Number ? ((Number) map.get("tmin")).doubleValue() : 0;
+		tMinTextField.setValue(this.tMin);
+		this.tMax = map.get("tmax") instanceof Number ? ((Number) map.get("tmax")).doubleValue() : Math.PI * 2;
+		tMaxTextField.setValue(this.tMax);
+		setEnabled(map.get("enabled") instanceof Boolean ? (Boolean) map.get("enabled") : true);
+	}
+
 	@Override
 	public void setPolar(boolean polar) {
+		if (getPanel() == null) {
+			super.setPolar(polar);
+			return;
+		}
+
 		if (polar && !isPolar()) {
 			xLabel.setText("\u03B8 = ");
 			yLabel.setText("r = ");
@@ -169,8 +200,8 @@ public class Parametric extends Relation {
 			Graph graph = GraphTabbedPane.pane.getSelectedGraph();
 			Graphics2D g = getImage().createGraphics();
 
-			g.setColor(color);
-			g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g.setColor(getColor());
+			g.setStroke(new BasicStroke(getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
 			double[] previousValues = evaluate(tMin), currentValues;
 			double previousX, previousY, currentX, currentY;
@@ -202,8 +233,8 @@ public class Parametric extends Relation {
 	public void applyValues() {
 		setXEquation(xTextField.getText());
 		setYEquation(yTextField.getText());
-		color = selectedColor;
-		thickness = thicknessSlider.getValue();
+		setColor(selectedColor);
+		setThickness(thicknessSlider.getValue());
 		tMin = Double.parseDouble(tMinTextField.getText());
 		tMax = Double.parseDouble(tMaxTextField.getText());
 	}
@@ -214,9 +245,9 @@ public class Parametric extends Relation {
 
 		Graphics2D g = image.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g.setColor(color);
-		g.setStroke(new BasicStroke(thickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		g.draw(new Polygon(new int[] {Main.MAX_THICKNESS, thickness / 2, Main.MAX_THICKNESS * 2 + 1 - thickness / 2}, new int[] {Main.MAX_THICKNESS * 2 + 1 - thickness / 2, thickness / 2, thickness / 2}, 3));
+		g.setColor(getColor());
+		g.setStroke(new BasicStroke(getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		g.draw(new Polygon(new int[] {Main.MAX_THICKNESS, getThickness() / 2, Main.MAX_THICKNESS * 2 + 1 - getThickness() / 2}, new int[] {Main.MAX_THICKNESS * 2 + 1 - getThickness() / 2, getThickness() / 2, getThickness() / 2}, 3));
 
 		g.dispose();
 
@@ -225,7 +256,7 @@ public class Parametric extends Relation {
 
 	@Override
 	public String writeJSON() {
-		return String.format("\"type\":\"parametric\",\"polar\":%b,\"name\":\"%s\",\"xEquation\":\"%s\",\"yEquation\":\"%s\",\"color\":%d,\"thickness\":%d,\"tMin\":%f,\"tMax\":%f,\"enabled\":%b", isPolar(), getName().replaceAll("[\"\\\\]", "\\\\$0"), xEquation.replaceAll("[\"\\\\]", "\\\\$0"), yEquation.replaceAll("[\"\\\\]", "\\\\$0"), color.getRGB(), thickness, tMin, tMax, enabled);
+		return String.format("\"type\":\"parametric\",\"polar\":%b,\"name\":\"%s\",\"xEquation\":\"%s\",\"yEquation\":\"%s\",\"color\":%d,\"thickness\":%d,\"tMin\":%f,\"tMax\":%f,\"enabled\":%b", isPolar(), getName().replaceAll("[\"\\\\]", "\\\\$0"), xEquation.replaceAll("[\"\\\\]", "\\\\$0"), yEquation.replaceAll("[\"\\\\]", "\\\\$0"), getColor().getRGB(), getThickness(), tMin, tMax, enabled);
 	}
 
 }
