@@ -17,7 +17,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -26,7 +25,7 @@ import javax.swing.JTextField;
 public class Function extends Relation {
 
 	private JCheckBox polarCB = new JCheckBox("Polar  ", false);
-	private JLabel equals = new JLabel("y = ");
+	private JLabel equals = new JLabel(" y = ");
 	private JTextField functionTextField = new JTextField(14);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
@@ -34,14 +33,13 @@ public class Function extends Relation {
 	private JLabel thicknessLabel = new JLabel("Line Thickness");
 	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, Main.MAX_THICKNESS, 2);
 	private JLabel tMinLabel = new JLabel("\u03B8 Min");
-	private JFormattedTextField tMinTextField = new JFormattedTextField(Main.numbers);
+	private NumberTextField tMinTextField = new NumberTextField(0, 5);
 	private JLabel tMaxLabel = new JLabel("\u03B8 Max");
-	private JFormattedTextField tMaxTextField = new JFormattedTextField(Main.numbers);
-
-	private double tMin = 0, tMax = 6.28318530717958623199592693709;
+	private NumberTextField tMaxTextField = new NumberTextField(6.28318530717958623199592693709, 5);
 
 	private Stack<Object> rpn;
 	private String function;
+	private double tMin = 0, tMax = 6.28318530717958623199592693709;
 
 	public double getTMin() {
 		return tMin;
@@ -87,6 +85,7 @@ public class Function extends Relation {
 			getPanel().remove(tMinTextField);
 			getPanel().remove(tMaxLabel);
 			getPanel().remove(tMaxTextField);
+			equals.setText(" y = ");
 			getPanel().revalidate();
 			getPanel().repaint();
 			Main.relationList.repaint();
@@ -97,6 +96,7 @@ public class Function extends Relation {
 			getPanel().add(tMinTextField);
 			getPanel().add(tMaxLabel);
 			getPanel().add(tMaxTextField);
+			equals.setText(" r = ");
 			getPanel().revalidate();
 			getPanel().repaint();
 			Main.relationList.repaint();
@@ -109,11 +109,6 @@ public class Function extends Relation {
 		setColor(new Color((int) (Math.random() * 16777216)));
 		selectedColor = getColor();
 		setPolar(polar);
-
-		tMinTextField.setColumns(4);
-		tMinTextField.setText(Double.toString(tMin));
-		tMaxTextField.setColumns(4);
-		tMaxTextField.setText(Double.toString(tMax));
 
 		setPanel(new JPanel());
 		getPanel().setPreferredSize(new Dimension(210, 150));

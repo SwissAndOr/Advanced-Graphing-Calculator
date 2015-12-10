@@ -18,7 +18,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -27,9 +26,9 @@ import javax.swing.JTextField;
 public class Parametric extends Relation {
 
 	private JCheckBox polarCB = new JCheckBox("Polar  ", false);
-	private JLabel xLabel = new JLabel("x = ");
+	private JLabel xLabel = new JLabel(" x = ");
 	private JTextField xTextField = new JTextField(14);
-	private JLabel yLabel = new JLabel("y = ");
+	private JLabel yLabel = new JLabel(" y = ");
 	private JTextField yTextField = new JTextField(14);
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
@@ -37,9 +36,9 @@ public class Parametric extends Relation {
 	private JLabel thicknessLabel = new JLabel("Line Thickness");
 	private JSlider thicknessSlider = new JSlider(JSlider.HORIZONTAL, 0, Main.MAX_THICKNESS, 2);
 	private JLabel tMinLabel = new JLabel("t Min");
-	private JFormattedTextField tMinTextField = new JFormattedTextField(Main.numbers);
+	private NumberTextField tMinTextField = new NumberTextField(0, 5);
 	private JLabel tMaxLabel = new JLabel("t Max");
-	private JFormattedTextField tMaxTextField = new JFormattedTextField(Main.numbers);
+	private NumberTextField tMaxTextField = new NumberTextField(6.28318530717958623199592693709, 5);
 
 	private double tMin = 0, tMax = 6.28318530717958623199592693709;
 
@@ -51,11 +50,6 @@ public class Parametric extends Relation {
 		setColor(new Color((int) (Math.random() * 16777216)));
 		selectedColor = getColor();
 		setPolar(polar);
-
-		tMinTextField.setColumns(4);
-		tMinTextField.setText(Double.toString(tMin));
-		tMaxTextField.setColumns(4);
-		tMaxTextField.setText(Double.toString(tMax));
 
 		setPanel(new JPanel());
 		getPanel().setPreferredSize(new Dimension(210, 190));
@@ -137,15 +131,15 @@ public class Parametric extends Relation {
 		}
 
 		if (polar && !isPolar()) {
-			xLabel.setText("\u03B8 = ");
-			yLabel.setText("r = ");
+			xLabel.setText(" \u03B8 = ");
+			yLabel.setText(" r = ");
 			getPanel().revalidate();
 			getPanel().repaint();
 			Main.relationList.repaint();
 			super.setPolar(polar);
 		} else if (!polar && isPolar()) {
-			xLabel.setText("x = ");
-			yLabel.setText("y = ");
+			xLabel.setText(" x = ");
+			yLabel.setText(" y = ");
 			getPanel().revalidate();
 			getPanel().repaint();
 			Main.relationList.repaint();
