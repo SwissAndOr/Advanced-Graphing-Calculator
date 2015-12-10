@@ -15,7 +15,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,7 +28,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -45,7 +43,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -81,66 +78,52 @@ public class Main {
 
 	private static JPanel minMax = new JPanel();
 	private static JLabel xMinLabel = new JLabel("X Min");
-	private static JFormattedTextField xMin = new JFormattedTextField(numbers);
+	private static NumberTextField xMin = new NumberTextField(-5, 5);
 	private static JLabel xMaxLabel = new JLabel("X Max");
-	private static JFormattedTextField xMax = new JFormattedTextField(numbers);
+	private static NumberTextField xMax = new NumberTextField(5, 5);
 	private static JLabel yMinLabel = new JLabel("Y Min");
-	private static JFormattedTextField yMin = new JFormattedTextField(numbers);
+	private static NumberTextField yMin = new NumberTextField(-5, 5);
 	private static JLabel yMaxLabel = new JLabel("Y Max");
-	private static JFormattedTextField yMax = new JFormattedTextField(numbers);
+	private static NumberTextField yMax = new NumberTextField(5, 5);
 
 	private static JPanel xy = new JPanel();
 	private static JLabel xLabel = new JLabel("X");
-	private static JFormattedTextField xView = new JFormattedTextField(numbers);
+	private static NumberTextField xView = new NumberTextField(0, 5);
 	private static JLabel widthLabel = new JLabel("Width");
-	private static JFormattedTextField widthView = new JFormattedTextField(numbers);
+	private static NumberTextField widthView = new NumberTextField(10, 5);
 	private static JLabel yLabel = new JLabel("Y");
-	private static JFormattedTextField yView = new JFormattedTextField(numbers);
+	private static NumberTextField yView = new NumberTextField(0, 5);
 	private static JLabel heightLabel = new JLabel("Height");
-	private static JFormattedTextField heightView = new JFormattedTextField(numbers);
+	private static NumberTextField heightView = new NumberTextField(10, 5);
 
-	private static final MouseListener formattedListener = new MouseAdapter() {
-
-		public void mousePressed(MouseEvent e) {
-			SwingUtilities.invokeLater(new Runnable() {
-
-				public void run() {
-					JTextField tf = (JTextField) e.getSource();
-					int offset = tf.viewToModel(e.getPoint());
-					tf.setCaretPosition(offset);
-				}
-			});
-		}
-	};
-
-	private static final FocusListener formattedFocusListener = new FocusAdapter() {
+	private static final FocusListener windowSettingsFocusListener = new FocusAdapter() {
 
 		public void focusLost(FocusEvent e) {
 			if (e.getSource() == xMin || e.getSource() == xMax || e.getSource() == yMin || e.getSource() == yMax) {
 				try {
-					xView.setText(numbers.format((Double.parseDouble(xMin.getText()) + Double.parseDouble(xMax.getText())) / 2));
+					xView.setValue((Double.parseDouble(xMin.getText()) + Double.parseDouble(xMax.getText())) / 2);
 				} catch (NumberFormatException exception) {}
 				try {
-					widthView.setText(numbers.format(Double.parseDouble(xMax.getText()) - Double.parseDouble(xMin.getText())));
+					widthView.setValue(Double.parseDouble(xMax.getText()) - Double.parseDouble(xMin.getText()));
 				} catch (NumberFormatException exception) {}
 				try {
-					yView.setText(numbers.format((Double.parseDouble(yMin.getText()) + Double.parseDouble(yMax.getText())) / 2));
+					yView.setValue((Double.parseDouble(yMin.getText()) + Double.parseDouble(yMax.getText())) / 2);
 				} catch (NumberFormatException exception) {}
 				try {
-					heightView.setText(numbers.format(Double.parseDouble(yMax.getText()) - Double.parseDouble(yMin.getText())));
+					heightView.setValue(Double.parseDouble(yMax.getText()) - Double.parseDouble(yMin.getText()));
 				} catch (NumberFormatException exception) {}
 			} else {
 				try {
-					xMin.setText(numbers.format(Double.parseDouble(xView.getText()) - Double.parseDouble(widthView.getText()) / 2));
+					xMin.setValue(Double.parseDouble(xView.getText()) - Double.parseDouble(widthView.getText()) / 2);
 				} catch (NumberFormatException exception) {}
 				try {
-					xMax.setText(numbers.format(Double.parseDouble(xView.getText()) + Double.parseDouble(widthView.getText()) / 2));
+					xMax.setValue(Double.parseDouble(xView.getText()) + Double.parseDouble(widthView.getText()) / 2);
 				} catch (NumberFormatException exception) {}
 				try {
-					yMin.setText(numbers.format(Double.parseDouble(yView.getText()) - Double.parseDouble(heightView.getText()) / 2));
+					yMin.setValue(Double.parseDouble(yView.getText()) - Double.parseDouble(heightView.getText()) / 2);
 				} catch (NumberFormatException exception) {}
 				try {
-					yMax.setText(numbers.format(Double.parseDouble(yView.getText()) + Double.parseDouble(heightView.getText()) / 2));
+					yMax.setValue(Double.parseDouble(yView.getText()) + Double.parseDouble(heightView.getText()) / 2);
 				} catch (NumberFormatException exception) {}
 			}
 		}
@@ -190,13 +173,13 @@ public class Main {
 	};
 	
 	private static JLabel gridLineIntervalXLabel = new JLabel("Grid Line Interval X");
-	private static JFormattedTextField gridLineIntervalX = new JFormattedTextField(numbers);
+	private static NumberTextField gridLineIntervalX = new NumberTextField(1, 8);
 	private static JLabel gridLineIntervalYLabel = new JLabel("Grid Line Interval Y");
-	private static JFormattedTextField gridLineIntervalY = new JFormattedTextField(numbers);
+	private static NumberTextField gridLineIntervalY = new NumberTextField(1, 8);
 	private static JLabel gridLineIntervalThetaLabel = new JLabel("Grid Line Interval \u03B8");
-	private static JFormattedTextField gridLineIntervalTheta = new JFormattedTextField(numbers);
+	private static NumberTextField gridLineIntervalTheta = new NumberTextField(.392699081698724139499745433568, 8);
 	private static JLabel gridLineIntervalRLabel = new JLabel("Grid Line Interval R");
-	private static JFormattedTextField gridLineIntervalR = new JFormattedTextField(numbers);
+	private static NumberTextField gridLineIntervalR = new NumberTextField(1, 8);
 
 	private static JCheckBox axisX = new JCheckBox("Axis X", true);
 	private static JCheckBox axisY = new JCheckBox("Axis Y", true);
@@ -270,8 +253,7 @@ public class Main {
 		workspaceOpen.setFileFilter(workspaceFilter);
 		workspaceSave.setFileFilter(workspaceFilter);
 
-		// This can be set to something else if 340 is too many. Do not go over 340. Do not build the seventh row.
-		numbers.setMaximumFractionDigits(340);
+		numbers.setMaximumFractionDigits(15);
 
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 
@@ -408,23 +390,10 @@ public class Main {
 
 		window.setJMenuBar(menuBar);
 
-		xMin.setValue(-5);
-		xMin.setColumns(5);
-		xMax.setValue(5);
-		xMax.setColumns(5);
-		yMin.setValue(-5);
-		yMin.setColumns(5);
-		yMax.setValue(5);
-		yMax.setColumns(5);
-
-		xMin.addMouseListener(formattedListener);
-		xMax.addMouseListener(formattedListener);
-		yMin.addMouseListener(formattedListener);
-		yMax.addMouseListener(formattedListener);
-		xMin.addFocusListener(formattedFocusListener);
-		xMax.addFocusListener(formattedFocusListener);
-		yMin.addFocusListener(formattedFocusListener);
-		yMax.addFocusListener(formattedFocusListener);
+		xMin.addFocusListener(windowSettingsFocusListener);
+		xMax.addFocusListener(windowSettingsFocusListener);
+		yMin.addFocusListener(windowSettingsFocusListener);
+		yMax.addFocusListener(windowSettingsFocusListener);
 
 		xView.setValue(0);
 		xView.setColumns(5);
@@ -435,14 +404,10 @@ public class Main {
 		heightView.setValue(20);
 		heightView.setColumns(5);
 
-		xView.addMouseListener(formattedListener);
-		widthView.addMouseListener(formattedListener);
-		yView.addMouseListener(formattedListener);
-		heightView.addMouseListener(formattedListener);
-		xView.addFocusListener(formattedFocusListener);
-		widthView.addFocusListener(formattedFocusListener);
-		yView.addFocusListener(formattedFocusListener);
-		heightView.addFocusListener(formattedFocusListener);
+		xView.addFocusListener(windowSettingsFocusListener);
+		widthView.addFocusListener(windowSettingsFocusListener);
+		yView.addFocusListener(windowSettingsFocusListener);
+		heightView.addFocusListener(windowSettingsFocusListener);
 
 		GraphTabbedPane.pane.addGraph(new Graph("Graph"));
 		GraphTabbedPane.pane.getSelectedGraph().relations.add(new Function("Function"));
@@ -604,15 +569,6 @@ public class Main {
 		windowPanel.add(cartesianGrid);
 		windowPanel.add(polarGrid);
 		
-		gridLineIntervalX.setValue(1);
-		gridLineIntervalX.setColumns(8);
-		gridLineIntervalY.setValue(1);
-		gridLineIntervalY.setColumns(8);
-		gridLineIntervalTheta.setValue(.392699081698724139499745433568);
-		gridLineIntervalTheta.setColumns(8);
-		gridLineIntervalR.setValue(1);
-		gridLineIntervalR.setColumns(8);
-
 		windowPanel.add(gridLineIntervalXLabel);
 		windowPanel.add(gridLineIntervalX);
 		windowPanel.add(gridLineIntervalYLabel);
@@ -641,16 +597,16 @@ public class Main {
 			double newYMin = GraphTabbedPane.pane.getSelectedGraph().yMin;
 			double newYMax = GraphTabbedPane.pane.getSelectedGraph().yMax;
 
-			xMin.setText(numbers.format(newXMin));
-			xMax.setText(numbers.format(newXMax));
-			yMin.setText(numbers.format(newYMin));
-			yMax.setText(numbers.format(newYMax));
-			xView.setText(numbers.format((newXMin + newXMax) / 2));
-			widthView.setText(numbers.format(newXMax - newXMin));
-			yView.setText(numbers.format((newYMin + newYMax) / 2));
-			heightView.setText(numbers.format(newYMax - newYMin));
-			gridLineIntervalX.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalX));
-			gridLineIntervalY.setText(numbers.format(GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalY));
+			xMin.setValue(newXMin);
+			xMax.setValue(newXMax);
+			yMin.setValue(newYMin);
+			yMax.setValue(newYMax);
+			xView.setValue((newXMin + newXMax) / 2);
+			widthView.setValue(newXMax - newXMin);
+			yView.setValue((newYMin + newYMax) / 2);
+			heightView.setValue(newYMax - newYMin);
+			gridLineIntervalX.setValue(GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalX);
+			gridLineIntervalY.setValue(GraphTabbedPane.pane.getSelectedGraph().gridLineIntervalY);
 			axisX.setSelected(GraphTabbedPane.pane.getSelectedGraph().axisX);
 			axisY.setSelected(GraphTabbedPane.pane.getSelectedGraph().axisY);
 
@@ -662,12 +618,12 @@ public class Main {
 			relationRename.setEnabled(true);
 			applyButton.setEnabled(true);
 		} catch (IndexOutOfBoundsException e) {
-			xMin.setText(null);
-			xMax.setText(null);
-			yMin.setText(null);
-			yMax.setText(null);
-			gridLineIntervalX.setText(null);
-			gridLineIntervalY.setText(null);
+			xMin.setText("");
+			xMax.setText("");
+			yMin.setText("");
+			yMax.setText("");
+			gridLineIntervalX.setText("");
+			gridLineIntervalY.setText("");
 			axisX.setSelected(true);
 			axisY.setSelected(true);
 
@@ -1004,8 +960,8 @@ public class Main {
 					}
 				}
 			} else if (e.getSource() == applyButton) {
-				gridLineIntervalX.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalX.getText()))));
-				gridLineIntervalY.setText(numbers.format(Math.abs(Double.parseDouble(gridLineIntervalY.getText()))));
+				gridLineIntervalX.setValue(Math.abs(Double.parseDouble(gridLineIntervalX.getText())));
+				gridLineIntervalY.setValue(Math.abs(Double.parseDouble(gridLineIntervalY.getText())));
 
 				relationList.repaint();
 
