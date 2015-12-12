@@ -20,13 +20,12 @@ import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
 
 public class Function extends Relation {
 
 	private JCheckBox polarCB = new JCheckBox("Polar  ", false);
 	private JLabel equals = new JLabel(" y = ");
-	private JTextField functionTextField = new JTextField(14);
+	private AutoCompleteTextField functionTextField = new AutoCompleteTextField(14, "x");
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
 	private Color selectedColor = Color.BLUE;
@@ -81,6 +80,7 @@ public class Function extends Relation {
 
 		if (!polar && isPolar()) {
 			getPanel().setPreferredSize(new Dimension(210, 150));
+			functionTextField.setVars("x");
 			getPanel().remove(tMinLabel);
 			getPanel().remove(tMinTextField);
 			getPanel().remove(tMaxLabel);
@@ -92,6 +92,7 @@ public class Function extends Relation {
 			super.setPolar(polar);
 		} else if (polar && !isPolar()) {
 			getPanel().setPreferredSize(new Dimension(210, 170));
+			functionTextField.setVars("t", "\u03B8");
 			getPanel().add(tMinLabel);
 			getPanel().add(tMinTextField);
 			getPanel().add(tMaxLabel);

@@ -13,7 +13,7 @@ public final class Evaluator {
 
 	private static final Pattern numbers = Pattern.compile("^([\\+\\-]?)([0-9\\.]+(?:E[\\-\\+]?[0-9]+)?|[xte]|pi)");
 	private static final Pattern ops = Pattern.compile("^(?:\\^|~|\\*|\\/|%|\\+|-|>>|<<|>>>|&&|\\^\\^|\\|\\|)");
-	private static final Pattern functions = Pattern.compile("^(?:abs|acos|asin|atan|ceil|cos|cosh|cot|csc|deg|floor|fpart|ln|log|max|min|rad|round|rt|sec|sin|sinh|sqrt|tan|tanh)");
+	protected static final Pattern functions = Pattern.compile("^(?:abs|acos|asin|atan|ceil|cos|cosh|cot|csc|deg|floor|fpart|ln|log|max|min|rad|round|rt|sec|sin|sinh|sqrt|tan|tanh)");
 
 	private static final Map<String, Integer> opPrec = createOpPrec();
 

@@ -21,15 +21,14 @@ import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
 
 public class Parametric extends Relation {
 
 	private JCheckBox polarCB = new JCheckBox("Polar  ", false);
 	private JLabel xLabel = new JLabel(" x = ");
-	private JTextField xTextField = new JTextField(14);
+	private AutoCompleteTextField xTextField = new AutoCompleteTextField(14, "t");
 	private JLabel yLabel = new JLabel(" y = ");
-	private JTextField yTextField = new JTextField(14);
+	private AutoCompleteTextField yTextField = new AutoCompleteTextField(14, "t");
 	private JLabel colorChooserLabel = new JLabel("Color Chooser");
 	private JButton colorChooserButton = new JButton();
 	private Color selectedColor = Color.BLUE;

@@ -2,26 +2,20 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
-import javax.swing.JTextField;
-
-public class NumberTextField extends JTextField {
+public class NumberTextField extends AutoCompleteTextField {
 
 	private static final long serialVersionUID = -7092435382692447120L;
 	private static final FocusListener focusListener = new FocusAdapter() {
 
 		public void focusLost(FocusEvent e) {
 			NumberTextField tf = (NumberTextField) e.getSource();
-			try {
-				tf.setValue(Evaluator.evaluate(Evaluator.toRPN(tf.getText()), Double.NaN));
-			} catch (Exception exception) {
-				tf.setText(tf.lastText);
-			}
+			tf.evaluate();
 			tf.setCaretPosition(0);
 		};
 
 	};
 
-	private String lastText;
+	private String lastText = "";
 
 	public NumberTextField() {
 		this("", 0);
@@ -83,6 +77,14 @@ public class NumberTextField extends JTextField {
 		}
 		super.setText(Main.numbers.format(d));
 		lastText = getText();
+	}
+	
+	public void evaluate() {
+		try {
+			this.setValue(Evaluator.evaluate(Evaluator.toRPN(this.getText()), Double.NaN));
+		} catch (Exception exception) {
+			this.setText(this.lastText);
+		}
 	}
 
 }
