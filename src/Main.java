@@ -45,6 +45,8 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Main {
@@ -133,7 +135,7 @@ public class Main {
 	private static JCheckBox polarGrid = new JCheckBox("Polar Grid", false);
 
 	private static final ItemListener gridChangeListener = new ItemListener() {
-		
+
 		@Override
 		public void itemStateChanged(ItemEvent e) {
 			if (e.getSource() == cartesianGrid) {
@@ -165,13 +167,13 @@ public class Main {
 					windowPanel.add(axisY);
 				}
 			}
-			
+
 			windowPanel.setPreferredSize(new Dimension(210, 160 + (cartesianGrid.isSelected() ? 50 : 0) + (polarGrid.isSelected() ? 50 : 0)));
 			sidebar.revalidate();
 			sidebar.repaint();
 		}
 	};
-	
+
 	private static JLabel gridLineIntervalXLabel = new JLabel("Grid Line Interval X");
 	private static NumberTextField gridLineIntervalX = new NumberTextField(1, 8);
 	private static JLabel gridLineIntervalYLabel = new JLabel("Grid Line Interval Y");
@@ -189,9 +191,12 @@ public class Main {
 	private static JPanel sidebar = new JPanel();
 
 	private static JMenuBar menuBar = new JMenuBar();
+
 	private static JMenu fileMenu = new JMenu("File");
+	private static JMenu viewMenu = new JMenu("View");
 	private static JMenu calculateMenu = new JMenu("Calculate");
 	private static JMenu helpMenu = new JMenu("Help");
+
 	private static JMenuItem newGraph = new JMenuItem("New Graph");
 	private static JMenuItem openGraph = new JMenuItem("Open Graph...");
 	private static JMenuItem saveGraph = new JMenuItem("Save Graph");
@@ -207,6 +212,16 @@ public class Main {
 	private static JMenuItem saveWorkspaceAs = new JMenuItem("Save Workspace As");
 	private static JMenuItem importWorkspace = new JMenuItem("Import Workspace");
 	private static JMenuItem exit = new JMenuItem("Exit");
+
+	private static JMenuItem equalAxes = new JMenuItem("Equalize Axes");
+	private static JMenuItem centerOrigin = new JMenuItem("Center Origin");
+	private static JMenuItem defaultZoom = new JMenuItem("Default Window Settings");
+	private static JMenuItem zoomIn = new JMenuItem("Zoom In");
+	private static JMenuItem zoomOut = new JMenuItem("Zoom Out");
+	private static JMenu fit = new JMenu("Fit...");
+	private static JMenuItem fitAll = new JMenuItem("All Relations");
+	private static JMenuItem trig = new JMenuItem("Trigonometry Window");
+
 	private static JMenuItem calculateY = new JMenuItem("Calculate Y...");
 	private static JMenuItem trace = new JMenuItem("Trace Function");
 	private static JMenuItem minimum = new JMenuItem("Find Minimum...");
@@ -215,6 +230,7 @@ public class Main {
 	private static JMenuItem zeroes = new JMenuItem("Find Zeroes...");
 	private static JMenuItem derivative = new JMenuItem("Find Derivative...");
 	private static JMenuItem integral = new JMenuItem("Find Integral...");
+
 	private static JMenuItem help = new JMenuItem("Help");
 	private static JMenuItem about = new JMenuItem("About");
 
@@ -237,6 +253,8 @@ public class Main {
 	private static final ActionListeners actionListeners = new ActionListeners();
 
 	public static void main(String[] a) {
+		numbers.setMaximumFractionDigits(15);
+
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setMinimumSize(new Dimension(400, 530));
 		window.setSize(677, 530);
@@ -252,8 +270,6 @@ public class Main {
 		}
 		workspaceOpen.setFileFilter(workspaceFilter);
 		workspaceSave.setFileFilter(workspaceFilter);
-
-		numbers.setMaximumFractionDigits(15);
 
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 
@@ -334,6 +350,70 @@ public class Main {
 		fileMenu.add(exit);
 
 		menuBar.add(fileMenu);
+
+		viewMenu.setMnemonic(KeyEvent.VK_V);
+
+		equalAxes.setMnemonic(KeyEvent.VK_E);
+		equalAxes.addActionListener(menuListener);
+		viewMenu.add(equalAxes);
+
+		centerOrigin.setMnemonic(KeyEvent.VK_C);
+		centerOrigin.addActionListener(menuListener);
+		viewMenu.add(centerOrigin);
+
+		defaultZoom.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0, KeyEvent.CTRL_DOWN_MASK));
+		defaultZoom.setMnemonic(KeyEvent.VK_D);
+		defaultZoom.addActionListener(menuListener);
+		viewMenu.add(defaultZoom);
+
+		zoomIn.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, KeyEvent.CTRL_DOWN_MASK));
+		zoomIn.setMnemonic(KeyEvent.VK_I);
+		zoomIn.addActionListener(menuListener);
+		viewMenu.add(zoomIn);
+
+		zoomOut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, KeyEvent.CTRL_DOWN_MASK));
+		zoomOut.setMnemonic(KeyEvent.VK_O);
+		zoomOut.setDisplayedMnemonicIndex(5);
+		zoomOut.addActionListener(menuListener);
+		viewMenu.add(zoomOut);
+
+		fit.setMnemonic(KeyEvent.VK_F);
+		fit.setAutoscrolls(true);
+		fit.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuSelected(MenuEvent e) {
+				fit.removeAll();
+				fit.add(fitAll);
+
+				fit.addSeparator();
+				
+				for (Relation rel : GraphTabbedPane.pane.getSelectedGraph().relations) {
+					fit.add(new JMenuItem(rel.getName()));
+					// TODO Add action listener
+				}
+			}
+			
+			@Override
+			public void menuDeselected(MenuEvent e) {}
+			
+			@Override
+			public void menuCanceled(MenuEvent e) {}
+		});
+
+		fitAll.setMnemonic(KeyEvent.VK_A);
+		fitAll.addActionListener(menuListener);
+		fit.add(fitAll);
+
+		fit.addSeparator();
+
+		viewMenu.add(fit);
+
+		trig.setMnemonic(KeyEvent.VK_T);
+		trig.addActionListener(menuListener);
+		viewMenu.add(trig);
+
+		menuBar.add(viewMenu);
 
 		calculateMenu.setMnemonic(KeyEvent.VK_C);
 
@@ -457,9 +537,6 @@ public class Main {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				int index = e.getY() / (MAX_THICKNESS * 2 + 4);
-				System.out.println(e.getY());
-				System.out.println(e.getY() / 42);
-				System.out.println(index);
 				if (index < GraphTabbedPane.pane.getSelectedGraph().relations.size() && e.getX() > 160 && Math.abs(index * (MAX_THICKNESS * 2 + 4) + MAX_THICKNESS + 2 - e.getY()) < 9) {
 					e.consume();
 					GraphTabbedPane.pane.getSelectedGraph().relations.get(index).enabled ^= true;
@@ -565,10 +642,10 @@ public class Main {
 
 		cartesianGrid.addItemListener(gridChangeListener);
 		polarGrid.addItemListener(gridChangeListener);
-		
+
 		windowPanel.add(cartesianGrid);
 		windowPanel.add(polarGrid);
-		
+
 		windowPanel.add(gridLineIntervalXLabel);
 		windowPanel.add(gridLineIntervalX);
 		windowPanel.add(gridLineIntervalYLabel);
@@ -794,6 +871,86 @@ public class Main {
 				if (JOptionPane.showConfirmDialog(window, "Are you sure you want to quit?", "Exit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					System.exit(0);
 				}
+			} else if (e.getSource() == equalAxes) {
+				Dimension dim = GraphTabbedPane.pane.getGraphSize();
+				Graph graph = GraphTabbedPane.pane.getSelectedGraph();
+				double sx = (double) dim.width / (graph.xMax - graph.xMin);
+				double sy = (double) dim.height / (graph.yMax - graph.yMin);
+
+				if (sx > sy) {
+					double inc = (double) dim.width / sy - (graph.xMax - graph.xMin);
+
+					xMax.setValue(graph.xMax + inc / 2);
+					xMin.setValue(graph.xMin - inc / 2);
+					widthView.setValue(inc + graph.xMax - graph.xMin);
+				} else {
+					double inc = (double) dim.height / sx - (graph.yMax - graph.yMin);
+
+					yMax.setValue(graph.yMax + inc / 2);
+					yMin.setValue(graph.yMin - inc / 2);
+					heightView.setValue(inc + graph.yMax - graph.yMin);
+				}
+				
+				applyButton.doClick();
+			} else if (e.getSource() == centerOrigin) {
+				Graph graph = GraphTabbedPane.pane.getSelectedGraph();
+
+				xView.setValue(0);
+				yView.setValue(0);
+
+				double mx = 0.5 * (graph.xMax - graph.xMin);
+				double my = 0.5 * (graph.yMax - graph.yMin);
+
+				xMin.setValue(-mx);
+				xMax.setValue(mx);
+				yMin.setValue(-my);
+				yMax.setValue(my);
+			} else if (e.getSource() == defaultZoom) {
+				xMin.setValue(-5);
+				xMax.setValue(5);
+				yMin.setValue(-5);
+				yMax.setValue(5);
+
+				xView.setValue(0);
+				yView.setValue(0);
+				widthView.setValue(10);
+				heightView.setValue(10);
+			} else if (e.getSource() == zoomIn) {
+				Graph graph = GraphTabbedPane.pane.getSelectedGraph();
+
+				xMin.setValue(graph.xMin / 1.5);
+				xMax.setValue(graph.xMax / 1.5);
+				yMin.setValue(graph.yMin / 1.5);
+				yMax.setValue(graph.yMax / 1.5);
+
+				widthView.setValue((graph.xMax - graph.xMin) / 1.5);
+				heightView.setValue((graph.yMax - graph.yMin) / 1.5);
+				
+				applyButton.doClick();
+			} else if (e.getSource() == zoomOut) {
+				Graph graph = GraphTabbedPane.pane.getSelectedGraph();
+
+				xMin.setValue(graph.xMin * 1.5);
+				xMax.setValue(graph.xMax * 1.5);
+				yMin.setValue(graph.yMin * 1.5);
+				yMax.setValue(graph.yMax * 1.5);
+
+				widthView.setValue((graph.xMax - graph.xMin) * 1.5);
+				heightView.setValue((graph.yMax - graph.yMin) * 1.5);
+				
+				applyButton.doClick();
+			} else if (e.getSource() == fitAll) {
+				// TODO
+			} else if (e.getSource() == trig) {
+				xMin.setValue(-2 * Math.PI);
+				xMax.setValue(2 * Math.PI);
+				yMin.setValue(-4);
+				yMax.setValue(4);
+
+				xView.setValue(0);
+				yView.setValue(0);
+				widthView.setValue(4 * Math.PI);
+				heightView.setValue(8);
 			} else if (e.getSource() == calculateY) {
 				if (relationList.getSelectedIndex() < 0) {
 					JOptionPane.showMessageDialog(Main.window, "There is no currently selected relation.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -903,6 +1060,8 @@ public class Main {
 						relationDown.setEnabled(true);
 					else
 						relationUp.setEnabled(false);
+					
+					relationList.ensureIndexIsVisible(relationList.getSelectedIndex());
 				}
 			} else if (e.getSource() == relationDown) {
 				int i = relationList.getSelectedIndex();
@@ -918,6 +1077,8 @@ public class Main {
 						relationUp.setEnabled(true);
 					else
 						relationDown.setEnabled(false);
+					
+					relationList.ensureIndexIsVisible(relationList.getSelectedIndex());
 				}
 			} else if (e.getSource() == relationNew) {
 				int high = 0;
@@ -939,6 +1100,8 @@ public class Main {
 				relationList.setValueIsAdjusting(false);
 
 				relationList.getListSelectionListeners()[0].valueChanged(null);
+				
+				relationList.ensureIndexIsVisible(relationList.getSelectedIndex());
 			} else if (e.getSource() == relationDelete) {
 				if (relationList.getSelectedIndex() >= 0 && JOptionPane.showConfirmDialog(window, "Are you sure you want to delete \"" + relationList.getSelectedValue().getName() + "\"?", "Delete Relation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 					relationList.setValueIsAdjusting(true);
@@ -949,6 +1112,8 @@ public class Main {
 					relationList.setValueIsAdjusting(false);
 
 					relationList.getListSelectionListeners()[0].valueChanged(null);
+					
+					relationList.ensureIndexIsVisible(relationList.getSelectedIndex());
 				}
 			} else if (e.getSource() == relationRename) {
 				if (relationList.getSelectedIndex() >= 0) {
@@ -956,6 +1121,7 @@ public class Main {
 					if (newRelationName != null && !newRelationName.isEmpty()) {
 						newRelationName = newRelationName.replaceAll("\\<\\/?html\\>", "");
 						relationList.getSelectedValue().setName(newRelationName);
+						
 						relationList.repaint();
 					}
 				}

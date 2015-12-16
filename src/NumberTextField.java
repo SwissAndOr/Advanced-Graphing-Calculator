@@ -77,6 +77,8 @@ public class NumberTextField extends AutoCompleteTextField {
 		}
 		super.setText(Main.numbers.format(d));
 		lastText = getText();
+		
+		this.setCaretPosition(0);
 	}
 	
 	public void evaluate() {
